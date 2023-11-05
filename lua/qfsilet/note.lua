@@ -86,6 +86,32 @@ local function __get_current_list(items, isGlobal)
 	return cur_list
 end
 
+local function __capturelink()
+	-- return string.format("[[file:%s +%s]]", Util.current_file_path(), vim.api.nvim_win_get_cursor(0)[1])
+	return string.format(
+		"[[File:%s+%s:%s]]",
+		Util.current_file_path(),
+		vim.api.nvim_win_get_cursor(0)[1],
+		vim.api.nvim_win_get_cursor(0)[2]
+	)
+end
+
+local function __gotolink()
+	local str_file = vim.fn.expand("<cWORD>")
+
+	if not str_file:match("File:") then
+		return
+	end
+
+	local filename = str_file:match("File.(.*)+")
+	local lnum_lcol = vim.fn.split(string.gsub(str_file:match("File.*+(.*)]"), "]", ""), ":")
+	local row = tonumber(lnum_lcol[1])
+	local col = tonumber(lnum_lcol[2])
+
+	vim.cmd("e " .. filename)
+	vim.api.nvim_win_set_cursor(0, { row, col })
+end
+
 local function saveqflist(isGlobal)
 	isGlobal = isGlobal or false
 
@@ -173,6 +199,16 @@ function M.loadqflist_local()
 end
 function M.loadqflist_global()
 	loadqflist(true)
+end
+
+function M.todo_with_capture_link()
+	Util.info("Copied to system clipboard", "Link capture")
+	vim.fn.setreg("+", __capturelink(), "c")
+	todo()
+end
+
+function M.todo_goto_capture_link()
+	__gotolink()
 end
 
 return M

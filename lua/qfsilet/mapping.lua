@@ -115,6 +115,18 @@ function M.setup_keymaps_and_autocmds()
 			keys = config.keymap.quickfix.add_todo_global,
 			mode = { "n", "v" },
 		},
+		{
+			desc = "Add todo link capture",
+			func = "add_todo_capture_link",
+			keys = config.keymap.quickfix.add_link_capture,
+			mode = { "n", "v" },
+		},
+		{
+			desc = "Goto link capture",
+			func = "goto_link_capture",
+			keys = config.keymap.quickfix.goto_link_capture,
+			mode = { "n", "v" },
+		},
 	}
 
 	for _, cmd in ipairs(commands) do

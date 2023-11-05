@@ -84,6 +84,10 @@ function M.is_file(filename)
 	return M.exists(filename) == "file"
 end
 
+function M.current_file_path()
+	return vim.api.nvim_buf_get_name(0)
+end
+
 --         ┌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┐
 --         ╎                           LIST                           ╎
 --         └╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘

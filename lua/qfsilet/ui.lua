@@ -95,8 +95,8 @@ function M.popup(fname_path, IsGlobal, base_path)
 			col = col,
 		},
 		size = {
-			width = 80,
-			height = 10,
+			width = 120,
+			height = 15,
 		},
 		relative = "cursor",
 		enter = true,

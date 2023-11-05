@@ -40,6 +40,8 @@ local default_settings = {
 			toggle_open = "<leader>q",
 			on_cursor = "<localleader>qq",
 			add_todo = "<localleader>qt",
+			add_link_capture = "<localleader>qc",
+			goto_link_capture = "g<cr>",
 			add_todo_global = "<localleader>qT",
 		},
 		loclist = {

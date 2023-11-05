@@ -174,6 +174,14 @@ function qf.add_todo_global()
 	Note.todo_global()
 end
 
+function qf.add_todo_capture_link()
+	Note.todo_with_capture_link()
+end
+
+function qf.goto_link_capture()
+	Note.todo_goto_capture_link()
+end
+
 function qf.add_item_toqf()
 	if __note_insertqf_allowed() then
 		return Util.warn("Cannot insert...\n(Do not do this inside qf)", "QFSilet")
