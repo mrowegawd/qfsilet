@@ -8,22 +8,39 @@ local fmt, cmd = string.format, vim.cmd
 
 local M = {}
 
-local function __get_ui_size()
+local function __get_cur_size()
 	local height = vim.o.lines - vim.o.cmdheight
 	if vim.o.laststatus ~= 0 then
 		height = height - 1
 	end
+
 	local vim_width = vim.o.columns
 	local vim_height = height
 
+	return vim_width, vim_height
+end
+
+local function __get_ui_size()
 	local total_width = 0.95 -- from 0 to 1, total width of popup
 	local total_height = 0.4 -- from 0 to 1, total height of popup ui
+
+	local vim_width, vim_height = __get_cur_size()
 
 	total_width = math.floor(vim_width * total_width + 0.3)
 	total_height = math.floor(vim_height * total_height + 0.3)
 	local initial_col = math.floor((vim_width - total_width) / 2 + 0.3) + 8
 	local initial_row = math.floor((vim_height - total_height) / 2 + 0.3) - 5
+
 	return initial_col, initial_row
+end
+
+local function __get_popup_size()
+	local vim_width, vim_height = __get_cur_size()
+
+	local widthc = math.floor(vim_width / 2 + 4)
+	local heightc = math.floor(vim_height / 2 - 5)
+
+	return widthc, heightc
 end
 
 function M.input(func, text_top_msg)
@@ -88,6 +105,7 @@ function M.popup(fname_path, IsGlobal, base_path)
 	end
 
 	local col, row = __get_ui_size()
+	local width, height = __get_popup_size()
 
 	local pop_opts = {
 		position = {
@@ -95,8 +113,8 @@ function M.popup(fname_path, IsGlobal, base_path)
 			col = col,
 		},
 		size = {
-			width = 120,
-			height = 15,
+			width = width,
+			height = height,
 		},
 		relative = "cursor",
 		enter = true,

@@ -90,7 +90,7 @@ function M.update_settings(opts)
 			pattern = { "qf" },
 			group = augroup,
 			callback = function()
-				require("qfsilet.qf").addjustWindowHWQf(settings.maxheight, settings.minheight)
+				require("qfsilet.qf").addjustWindowHWQf(settings.theme_list.maxheight, settings.theme_list.minheight)
 			end,
 		})
 	end
