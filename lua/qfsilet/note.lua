@@ -141,6 +141,7 @@ local function saveqflist(isGlobal)
 		end
 
 		title = title:gsub("%s", "_")
+		title = title:gsub("%.", "_")
 
 		for _, tbl in ipairs(lists_qf) do
 			local jbl = {
