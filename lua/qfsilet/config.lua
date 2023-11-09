@@ -95,18 +95,6 @@ function M.update_settings(opts)
 		})
 	end
 
-	settings.auto_del = settings.auto_del or true
-	if settings.auto_del then
-		local augroup = vim.api.nvim_create_augroup("QFSiletAuDel", { clear = true })
-		vim.api.nvim_create_autocmd("ExitPre", {
-			pattern = { "*" },
-			group = augroup,
-			callback = function()
-				require("qfsilet.qf").clean_up()
-			end,
-		})
-	end
-
 	visual.extmarks.set_extmarks = settings.extmarks
 	visual.extmarks.set_signs = true
 	visual.extmarks.qf_sigil = settings.signs.qflist
