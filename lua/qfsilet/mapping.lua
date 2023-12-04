@@ -5,15 +5,17 @@ local M = {}
 
 local function set_keymaps(keys_tbl, is_set_bufnr)
 	for _, cmd in ipairs(keys_tbl) do
-		if is_set_bufnr then
-			vim.keymap.set(
-				cmd.mode,
-				cmd.keys,
-				qfsilet_qf[cmd.func],
-				{ desc = cmd.desc, buffer = vim.api.nvim_get_current_buf() }
-			)
-		else
-			vim.keymap.set(cmd.mode, cmd.keys, qfsilet_qf[cmd.func], { desc = cmd.desc })
+		if #cmd.keys > 0 then
+			if is_set_bufnr then
+				vim.keymap.set(
+					cmd.mode,
+					cmd.keys,
+					qfsilet_qf[cmd.func],
+					{ desc = cmd.desc, buffer = vim.api.nvim_get_current_buf() }
+				)
+			else
+				vim.keymap.set(cmd.mode, cmd.keys, qfsilet_qf[cmd.func], { desc = cmd.desc })
+			end
 		end
 	end
 end
