@@ -231,6 +231,7 @@ end
 
 function qf.toggle_qf()
 	__toggle_list("quickfix")
+	vim.cmd([[wincmd p]])
 end
 function qf.toggle_loclist()
 	__toggle_list("location")
