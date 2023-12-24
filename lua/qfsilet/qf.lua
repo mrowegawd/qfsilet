@@ -27,7 +27,7 @@ function _G.qftf(info)
 	else
 		items = fn.getloclist(info.winid, { id = info.id, items = 0 }).items
 	end
-	local limit = 40
+	local limit = 60
 	local fname_fmt1, fname_fmt2 = "%-" .. limit .. "s", "…%." .. (limit - 1) .. "s"
 	local valid_fmt = "%s │%5d:%-3d│%s %s"
 	for i = info.start_idx, info.end_idx do
