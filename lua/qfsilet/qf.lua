@@ -2,7 +2,7 @@ local fn, fmt, api, cmd = vim.fn, string.format, vim.api, vim.cmd
 
 local Util = require("qfsilet.utils")
 local Visual = require("qfsilet.visual")
-local plenary_path = require("plenary.path")
+local Plenary_path = require("plenary.path")
 local Note = require("qfsilet.note")
 -- local Ui = require("qfsilet.ui")
 -- local Config = require("qfsilet.config").current_configs
@@ -267,7 +267,7 @@ function qf.del_itemqf()
 		if cur_list[item].text:match("qfsilet") then
 			local item_text = cur_list[item].text
 			local note_fpath = item_text:sub(5)
-			local p = plenary_path:new(fn.expand(tostring(note_fpath)))
+			local p = Plenary_path:new(fn.expand(tostring(note_fpath)))
 			if p:exists() then
 				p:rm()
 			end
@@ -331,7 +331,7 @@ local function __filter_qfsilet_items(cur_list)
 			-- Delete note item
 			if item.text:match("qfsilet") then
 				local note_fpath = item.text:sub(5)
-				local p = plenary_path:new(fn.expand(note_fpath))
+				local p = Plenary_path:new(fn.expand(note_fpath))
 				if p:exists() then
 					p:rm()
 				end

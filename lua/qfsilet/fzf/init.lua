@@ -6,7 +6,7 @@ if not fzf_ok then
 	return
 end
 
-local fzf_mappings = require("qfsilet.fzf.mappings")
+local Fzf_mappings = require("qfsilet.fzf.mappings")
 local Path = require("qfsilet.path")
 
 local M = {}
@@ -65,8 +65,8 @@ function M.load(opts, isGlobal)
 
 		actions = vim.tbl_extend(
 			"keep",
-			fzf_mappings.edit_or_merge_qf(opts, Path.defaults.base_path),
-			fzf_mappings.delete_item(Path.defaults.base_path)
+			Fzf_mappings.edit_or_merge_qf(opts, Path.defaults.base_path),
+			Fzf_mappings.delete_item(Path.defaults.base_path)
 		),
 	}
 

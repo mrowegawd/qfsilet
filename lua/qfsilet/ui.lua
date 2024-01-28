@@ -1,8 +1,8 @@
 local Input = require("nui.input")
 local Popup = require("nui.popup")
 local Util = require("qfsilet.utils")
-local event = require("nui.utils.autocmd").event
-local config = require("qfsilet.config").current_configs
+local Event = require("nui.utils.autocmd").event
+local Config = require("qfsilet.config").current_configs
 
 local fmt, cmd = string.format, vim.cmd
 
@@ -63,12 +63,12 @@ function M.input(func, text_top_msg)
 				right = 1,
 			},
 			text = {
-				top = fmt(" [%s %s: %s] ", config.popup.icon_note, config.prefix_title, text_top_msg),
+				top = fmt(" [%s %s: %s] ", Config.popup.icon_note, Config.prefix_title, text_top_msg),
 				top_align = "center",
 			},
 		},
 		win_options = {
-			winhighlight = config.popup.winhighlight,
+			winhighlight = Config.popup.winhighlight,
 		},
 	}
 
@@ -85,7 +85,7 @@ function M.input(func, text_top_msg)
 	input:mount()
 
 	-- unmount component when cursor leaves buffer
-	input:on(event.BufLeave, function()
+	input:on(Event.BufLeave, function()
 		input:unmount()
 	end)
 	input:map("n", "<Esc>", function()
@@ -121,11 +121,11 @@ function M.popup(fname_path, IsGlobal, base_path)
 		focusable = true,
 		zindex = 50,
 		win_options = {
-			winhighlight = config.popup.winhighlight,
+			winhighlight = Config.popup.winhighlight,
 			scrolloff = 0,
 		},
 		buf_options = {
-			filetype = config.popup.filetype,
+			filetype = Config.popup.filetype,
 		},
 		border = {
 			padding = {
@@ -136,7 +136,7 @@ function M.popup(fname_path, IsGlobal, base_path)
 			},
 			style = "rounded",
 			text = {
-				top = fmt(" [%s %s: %s] ", config.popup.icon_note, config.prefix_title, top_ext_msg),
+				top = fmt(" [%s %s: %s] ", Config.popup.icon_note, Config.prefix_title, top_ext_msg),
 				top_align = "center",
 			},
 		},
@@ -144,7 +144,7 @@ function M.popup(fname_path, IsGlobal, base_path)
 
 	local popup = Popup(pop_opts)
 	popup:mount()
-	popup:on(event.BufLeave, function()
+	popup:on(Event.BufLeave, function()
 		vim.cmd("silent! wq! " .. fname_path)
 
 		-- No file todos or no file json, remove it
@@ -166,6 +166,7 @@ function M.popup(fname_path, IsGlobal, base_path)
 	popup:map("n", { "<Esc>", "q" }, function()
 		trim([[%s/\($\n\s*\)\+\%$//]])
 		trim([[%s/\s\+$//e]])
+
 		popup:unmount()
 	end, { noremap = true })
 end

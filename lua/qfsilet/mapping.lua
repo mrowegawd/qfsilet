@@ -1,5 +1,5 @@
-local qfsilet_qf = require("qfsilet.qf")
-local config = require("qfsilet.config").current_configs
+local Qfsilet_qf = require("qfsilet.qf")
+local Config = require("qfsilet.config").current_configs
 
 local M = {}
 
@@ -10,11 +10,11 @@ local function set_keymaps(keys_tbl, is_set_bufnr)
 				vim.keymap.set(
 					cmd.mode,
 					cmd.keys,
-					qfsilet_qf[cmd.func],
+					Qfsilet_qf[cmd.func],
 					{ desc = cmd.desc, buffer = vim.api.nvim_get_current_buf() }
 				)
 			else
-				vim.keymap.set(cmd.mode, cmd.keys, qfsilet_qf[cmd.func], { desc = cmd.desc })
+				vim.keymap.set(cmd.mode, cmd.keys, Qfsilet_qf[cmd.func], { desc = cmd.desc })
 			end
 		end
 	end
@@ -68,19 +68,19 @@ function M.setup_keymaps_and_autocmds()
 		{
 			desc = "Delete item qf",
 			func = "del_itemqf",
-			keys = config.keymap.del_item,
+			keys = Config.keymap.del_item,
 			mode = "n",
 		},
 		{
 			desc = "Clear list of notes on current qf",
 			func = "clear_notes",
-			keys = config.keymap.quickfix.clear_notes,
+			keys = Config.keymap.quickfix.clear_notes,
 			mode = "n",
 		},
 		{
 			desc = "Clear all items qf",
 			func = "clear_qf_list",
-			keys = config.keymap.quickfix.clear_all,
+			keys = Config.keymap.quickfix.clear_all,
 			mode = "n",
 		},
 	}
@@ -88,7 +88,7 @@ function M.setup_keymaps_and_autocmds()
 		{
 			desc = "Toggle loclist",
 			func = "toggle_loclist",
-			keys = config.keymap.loclist.toggle_open,
+			keys = Config.keymap.loclist.toggle_open,
 			mode = "n",
 		},
 	}
@@ -96,43 +96,43 @@ function M.setup_keymaps_and_autocmds()
 		{
 			desc = "Toggle qflist",
 			func = "toggle_qf",
-			keys = config.keymap.quickfix.toggle_open,
+			keys = Config.keymap.quickfix.toggle_open,
 			mode = "n",
 		},
 		{
 			desc = "Insert line to qflist (on cursor)",
 			func = "add_item_toqf",
-			keys = config.keymap.quickfix.on_cursor,
+			keys = Config.keymap.quickfix.on_cursor,
 			mode = "n",
 		},
 		{
 			desc = "Add todo",
 			func = "add_todo",
-			keys = config.keymap.quickfix.add_todo,
+			keys = Config.keymap.quickfix.add_todo,
 			mode = { "n", "v" },
 		},
 		{
 			desc = "Add global todo",
 			func = "add_todo_global",
-			keys = config.keymap.quickfix.add_todo_global,
+			keys = Config.keymap.quickfix.add_todo_global,
 			mode = { "n", "v" },
 		},
 		{
 			desc = "Add todo link capture",
 			func = "add_todo_capture_link",
-			keys = config.keymap.quickfix.add_link_capture,
+			keys = Config.keymap.quickfix.add_link_capture,
 			mode = { "n", "v" },
 		},
 		{
 			desc = "Goto link capture",
 			func = "goto_link_capture",
-			keys = config.keymap.quickfix.goto_link_capture,
+			keys = Config.keymap.quickfix.goto_link_capture,
 			mode = { "n", "v" },
 		},
 	}
 
 	for _, cmd in ipairs(commands) do
-		vim.api.nvim_create_user_command(cmd.name, qfsilet_qf[cmd.func], { desc = cmd.desc })
+		vim.api.nvim_create_user_command(cmd.name, Qfsilet_qf[cmd.func], { desc = cmd.desc })
 	end
 
 	set_ft_keymaps("QFSiletAuMappings", { "qf" }, ft_keymaps)

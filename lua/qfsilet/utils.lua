@@ -1,8 +1,8 @@
 local uv, fn, L = vim.loop, vim.fn, vim.log
 
 -- local async = require("plenary.async")
-local sha = require("qfsilet.sha")
-local plenary_path = require("plenary.path")
+local SHA = require("qfsilet.sha")
+local Plenary_path = require("plenary.path")
 local Visual = require("qfsilet.visual")
 
 local M = {}
@@ -31,26 +31,30 @@ local function __get_cwd_root()
 	return root_path
 end
 
+function M.root_path_basename()
+	return __get_cwd_root()
+end
+
 function M.get_hash_note(filePath)
-	return sha.sha1(filePath)
+	return SHA.sha1(filePath)
 end
 
 function M.rmdir(path)
-	local p = plenary_path.new(path)
+	local p = Plenary_path.new(path)
 	if p:exists() then
 		vim.fn.delete(path, "rf")
 	end
 end
 
 function M.create_dir(path)
-	local p = plenary_path.new(path)
+	local p = Plenary_path.new(path)
 	if not p:exists() then
 		p:mkdir()
 	end
 end
 
 function M.create_file(path)
-	local p = plenary_path.new(path)
+	local p = Plenary_path.new(path)
 	if not p:exists() then
 		p:touch()
 	end
@@ -123,7 +127,7 @@ function M.clean_up_items(items)
 		local ttmatch = x.text:match("qfsilet")
 		if x.type == Visual.extmarks.unique_id and ttmatch ~= nil and #ttmatch > 0 then
 			local ttpath = x.text:sub(5)
-			local p = plenary_path:new(fn.expand(ttpath))
+			local p = Plenary_path:new(fn.expand(ttpath))
 			if p:exists() then
 				table.insert(tbl_stay, _tbl[i])
 			end

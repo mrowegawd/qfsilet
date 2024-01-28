@@ -4,6 +4,7 @@ local Util = require("qfsilet.utils")
 local Ui = require("qfsilet.ui")
 local Path = require("qfsilet.path")
 local Config = require("qfsilet.config").current_configs
+local Constant = require("qfsilet.constant")
 
 local M = {}
 
@@ -34,14 +35,14 @@ local function todo(isGlobal)
 		Path.init_local()
 	end
 
-	if not Util.is_file(Path.defaults.note_path) then
-		Util.create_file(Path.defaults.note_path)
+	if not Util.is_file(Constant.defaults.note_path) then
+		Util.create_file(Constant.defaults.note_path)
 	end
 
-	Ui.popup(Path.defaults.note_path, isGlobal, Path.defaults.base_path)
+	Ui.popup(Constant.defaults.note_path, isGlobal, Constant.defaults.base_path)
 
-	if Util.is_file(Path.defaults.note_path) then
-		cmd("0r! cat " .. Path.defaults.note_path)
+	if Util.is_file(Constant.defaults.note_path) then
+		cmd("0r! cat " .. Constant.defaults.note_path)
 		cmd("0") -- Go to top of document
 	end
 end
@@ -158,9 +159,9 @@ local function saveqflist(isGlobal)
 		stat_fname_todo.qf.idx = "$"
 		stat_fname_todo.qf.title = title
 
-		stat_fname_todo.cwd_root = Path.defaults.base_path
+		stat_fname_todo.cwd_root = Constant.defaults.base_path
 
-		__save_list_to_file(Path.defaults.base_path, stat_fname_todo, title, true)
+		__save_list_to_file(Constant.defaults.base_path, stat_fname_todo, title, true)
 	end, input_msg .. " Save")
 
 	for _, fname in pairs(stat_fname_todo.deleted) do

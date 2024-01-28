@@ -1,7 +1,7 @@
 local fn = vim.fn
 
-local visual = require("qfsilet.visual")
-local utils = require("qfsilet.utils")
+local Visual = require("qfsilet.visual")
+local Utils = require("qfsilet.utils")
 
 local M = {}
 
@@ -22,6 +22,11 @@ local default_settings = {
 	notify = {
 		enabled = true,
 		notif_plugin = "noice",
+	},
+	file_spec = {
+		name = "todo",
+		filetype = "org",
+		ext_file = "org",
 	},
 	popup = {
 		winhighlight = "Normal:NormalFloat,FloatBorder:FloatBorder",
@@ -59,8 +64,8 @@ end
 
 local function setup_highlight_groups()
 	local names = {
-		qf_sign_hl = visual.extmarks.qf_sign_hl_group,
-		qf_ext_hl = visual.extmarks.qf_ext_hl_group,
+		qf_sign_hl = Visual.extmarks.qf_sign_hl_group,
+		qf_ext_hl = Visual.extmarks.qf_ext_hl_group,
 		-- local_sign_hl = visual.extmarks.local_sign_hl_group,
 		-- local_ext_hl = visual.extmarks.local_ext_hl_group,
 	}
@@ -69,11 +74,11 @@ local function setup_highlight_groups()
 		local ok = pcall(vim.api.nvim_get_hl_by_name, name, true)
 		if not ok then
 			vim.validate({
-				opt = { visual.extmarks[id], "t" },
+				opt = { Visual.extmarks[id], "t" },
 			})
 
 			---@diagnostic disable-next-line: param-type-mismatch
-			vim.api.nvim_set_hl(0, name, visual.extmarks[id])
+			vim.api.nvim_set_hl(0, name, Visual.extmarks[id])
 		end
 	end
 end
@@ -94,25 +99,25 @@ function M.update_settings(opts)
 		})
 	end
 
-	visual.extmarks.set_extmarks = settings.extmarks
-	visual.extmarks.set_signs = true
-	visual.extmarks.qf_sigil = settings.signs.qflist
-	visual.extmarks.priority = settings.signs.priority
+	Visual.extmarks.set_extmarks = settings.extmarks
+	Visual.extmarks.set_signs = true
+	Visual.extmarks.qf_sigil = settings.signs.qflist
+	Visual.extmarks.priority = settings.signs.priority
 
 	-- Set highlight first before define sign function
 	setup_highlight_groups()
 	vim.fn.sign_define(
-		visual.extmarks.qf_sigil,
-		{ text = visual.extmarks.qf_sigil, texthl = visual.extmarks.qf_sign_hl_group }
+		Visual.extmarks.qf_sigil,
+		{ text = Visual.extmarks.qf_sigil, texthl = Visual.extmarks.qf_sign_hl_group }
 	)
 
 	return settings
 end
 
 function M.init()
-	if not utils.is_dir(M.current_configs.save_dir) then
+	if not Utils.is_dir(M.current_configs.save_dir) then
 		print(M.current_configs.save_dir)
-		utils.create_dir(M.current_configs.save_dir)
+		Utils.create_dir(M.current_configs.save_dir)
 	end
 end
 
