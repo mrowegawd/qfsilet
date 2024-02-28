@@ -1,14 +1,14 @@
 local fn = vim.fn
 
-local Path = require("qfsilet.path")
+local Constant = require("qfsilet.constant")
 local Util = require("qfsilet.utils")
 local Visual = require("qfsilet.visual")
 
 local M = {}
 
-local nbsp = "\xe2\x80\x82" -- "\u{2002}"
+local nbsp = "\xe2\x80\x82" -- Non-breaking space unicode character "\u{2002}"
 
-local function __lastIndexOf(haystack, needle)
+local function lastIndexOf(haystack, needle)
 	local i = haystack:match(".*" .. needle .. "()")
 	if i == nil then
 		return nil
@@ -17,45 +17,44 @@ local function __lastIndexOf(haystack, needle)
 	end
 end
 
-local function __stripBeforeLastOccurrenceOf(str, sep)
-	local idx = __lastIndexOf(str, sep) or 0
+local function stripBeforeLastOccurrenceOf(str, sep)
+	local idx = lastIndexOf(str, sep) or 0
 	return str:sub(idx + 1), idx
 end
 
-local function __strip_ansi_coloring(str)
+local function stripAnsiColoring(str)
 	if not str then
 		return str
 	end
-
-	-- remove escape sequences of the following formats:
+	-- Remove escape sequences of the following formats:
 	-- 1. ^[[34m
 	-- 2. ^[[0;34m
 	-- 3. ^[[m
 	return str:gsub("%[[%d;]-m", "")
 end
 
-local function __strip_str(selected)
-	local pth = __strip_ansi_coloring(selected)
+local function stripString(selected)
+	local pth = stripAnsiColoring(selected)
 	if pth == nil then
 		return
 	end
-	return __stripBeforeLastOccurrenceOf(pth, nbsp)
+	return stripBeforeLastOccurrenceOf(pth, nbsp)
 end
 
-local function __merge_qf(selected, opts, base_path)
-	local _tbl = {}
+local function mergeQuickFix(selected, opts, basePath)
+	local tbl = {}
 
 	if type(selected) == "table" then
 		for _, sel in pairs(selected) do
-			local pth = __strip_str(sel)
-			local file_path = base_path .. "/" .. pth .. ".json"
+			local pth = stripString(sel)
+			local filePath = basePath .. "/" .. pth .. ".json"
 
-			local file_read = Util.get_file_read(file_path)
-			local json_tbl = fn.json_decode(file_read)
-			if json_tbl ~= nil then
-				if #json_tbl.qf.items > 0 then
-					for _, tbl_val in pairs(json_tbl.qf.items) do
-						table.insert(_tbl, tbl_val)
+			local fileRead = Util.getFileRead(filePath)
+			local jsonTbl = fn.json_decode(fileRead)
+			if jsonTbl ~= nil then
+				if #jsonTbl.qf.items > 0 then
+					for _, tblVal in pairs(jsonTbl.qf.items) do
+						table.insert(tbl, tblVal)
 					end
 				end
 			end
@@ -66,98 +65,103 @@ local function __merge_qf(selected, opts, base_path)
 	end
 
 	local action = " " -- (a) append, (r) replace, " "
-	local tryidx = "$"
+	local tryIdx = "$"
 
 	local what = {
-		idx = tryidx,
-		items = Util.rm_duplicates_tbl(_tbl),
-		title = opts.prefix_title .. ":Merged",
+		idx = tryIdx,
+		items = Util.removeDuplicates(tbl),
+		title = opts.prefixTitle .. ":Merged",
 	}
 
 	fn.setqflist({}, action, what)
 	vim.cmd("copen")
 
 	Util.info("Import successful (merged)", "QFSilet")
-
-	if Visual.extmarks.set_extmarks then
-		Visual.update_extmarks()
-	end
-	if Visual.extmarks.set_signs then
-		Visual.update_signs()
-	end
 end
 
-local function __edit_qf(selected, base_path)
-	local pth = __strip_str(selected)
+local function editQuickFix(selected, basePath)
+	local pth = stripString(selected)
 	if pth == nil then
 		return
 	end
 
-	local file_path = base_path .. "/" .. pth .. ".json"
+	local filePath = basePath .. "/" .. pth .. ".json"
 
-	local file_read = Util.get_file_read(file_path)
-	local _tbl = fn.json_decode(file_read)
+	local fileRead = Util.getFileRead(filePath)
+	local tbl = fn.json_decode(fileRead)
 
-	if _tbl == nil then
+	if tbl == nil then
 		return
 	end
 
-	---@diagnostic disable-next-line: redefined-local
-	local _tbl, title = Util.clean_up_items(_tbl)
+	local cleanedTbl, title = Util.cleanupItems(tbl)
 
-	if #_tbl.qf.items == 0 then
+	if #cleanedTbl.qf.items == 0 then
 		return
 	end
 
-	Util.write_to_file(_tbl, Path.defaults.base_path .. "/" .. title .. ".json")
+	Util.writeToFile(cleanedTbl, Constant.defaults.base_path .. "/" .. title .. ".json")
 
-	fn.setqflist({}, " ", _tbl.qf)
+	fn.setqflist({}, " ", cleanedTbl.qf)
 	vim.cmd("copen")
 
 	Util.info("Import successful", "QFSilet")
-
-	if Visual.extmarks.set_extmarks then
-		Visual.update_extmarks()
-	end
-	if Visual.extmarks.set_signs then
-		Visual.update_signs()
-	end
 end
 
-function M.edit_or_merge_qf(opts, base_path)
+function M.editOrMergeQuickFix(opts, basePath)
 	return {
 		["default"] = function(selected, _)
 			if #selected > 1 then
-				__merge_qf(selected, opts, base_path)
+				mergeQuickFix(selected, opts, basePath)
 			else
-				__edit_qf(selected[1], base_path)
+				editQuickFix(selected[1], basePath)
+			end
+
+			-- if Visual.extmarks.set_extmarks then
+			-- 	Visual.update_extmarks()
+			-- end
+			if Visual.extmarks.set_signs then
+				Visual.update_signs()
 			end
 		end,
 		["ctrl-q"] = function(selected, _)
 			if #selected > 1 then
-				__merge_qf(selected, opts, base_path)
+				mergeQuickFix(selected, opts, basePath)
 			else
-				__edit_qf(selected[1], base_path)
+				editQuickFix(selected[1], basePath)
 			end
 		end,
 	}
 end
 
-function M.delete_item(base_path)
+function M.deleteItem(basePath)
 	return {
 		["ctrl-x"] = function(selected, _)
-			local pth = __strip_str(selected[1])
-			if pth == nil then
+			local sel = stripString(selected[1])
+			if sel == nil then
 				return
 			end
 
-			local file_path = base_path .. "/" .. pth .. ".json"
+			local filePath = basePath .. "/" .. sel .. ".json"
 
-			if Util.is_file(file_path) then
+			if Util.isFile(filePath) then
 				local cmd = "!rm"
-				vim.api.nvim_exec2(cmd .. " " .. file_path, { output = true })
+				vim.api.nvim_exec(cmd .. " " .. filePath, { output = true })
 				vim.cmd("lua require'fzf-lua'.resume()")
 			end
+		end,
+	}
+end
+
+function M.mark_defaults(mark_opts)
+	return {
+		["default"] = function(selected, _)
+			local sel = stripString(selected[1])
+			if sel == nil then
+				return
+			end
+
+			vim.api.nvim_win_set_cursor(0, { mark_opts[sel].line, 1 })
 		end,
 	}
 end

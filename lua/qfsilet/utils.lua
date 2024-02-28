@@ -60,7 +60,7 @@ function M.create_file(path)
 	end
 end
 
-function M.get_file_read(fname)
+function M.getFileRead(fname)
 	local file_read = fn.readfile(fname)
 	return file_read
 end
@@ -80,11 +80,11 @@ function M.exists(filename)
 	return stat and stat.type or false
 end
 
-function M.is_dir(filename)
+function M.isDir(filename)
 	return M.exists(filename) == "directory"
 end
 
-function M.is_file(filename)
+function M.isFile(filename)
 	return M.exists(filename) == "file"
 end
 
@@ -96,7 +96,7 @@ end
 --         ╎                           LIST                           ╎
 --         └╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘
 
-function M.get_current_lists(items, isLocationlist)
+function M.getCurrentList(items, isLocationlist)
 	local cur_list
 	if isLocationlist then
 		cur_list = fn.getloclist(0)
@@ -111,14 +111,14 @@ function M.get_current_lists(items, isLocationlist)
 	return cur_list
 end
 
-function M.is_loc_list()
+function M.isLocList()
 	-- This func will check if current buffer is loclist
 	-- if loclist, filewinid will return more than zero (true)
 	local location_list = fn.getloclist(0, { filewinid = 0 })
 	return location_list.filewinid > 0
 end
 
-function M.clean_up_items(items)
+function M.cleanupItems(items)
 	local _tbl = items.qf.items
 
 	local tbl_stay = {}
@@ -154,12 +154,12 @@ end
 -- 	return fn.json_decode(tbl)
 -- end
 
-function M.write_to_file(tbl, path_fname)
+function M.writeToFile(tbl, path_fname)
 	local tbl_json = M.jsonEncode(tbl)
 	fn.writefile({ tbl_json }, path_fname)
 end
 
-function M.checkjson_onpath(path)
+function M.checkJSONPath(path)
 	local scripts = vim.api.nvim_exec2(string.format([[!find %s -type f -name "*.json"]], path), { output = true })
 	if scripts.output ~= nil then
 		local res = vim.split(scripts.output, "\n")
@@ -192,7 +192,7 @@ function M.warn(msg, name)
 	vim.notify(msg, L.levels.WARN, { title = name or "QFSilet" })
 end
 
-function M.rm_duplicates_tbl(arr)
+function M.removeDuplicates(arr)
 	local newArray = {}
 	local checkerTbl = {}
 	for _, element in ipairs(arr) do
@@ -202,6 +202,16 @@ function M.rm_duplicates_tbl(arr)
 		end
 	end
 	return newArray
+end
+
+function M.key_to_tbl(marks_opts)
+	local keyset = {}
+	local n = 0
+	for k, _ in pairs(marks_opts) do
+		n = n + 1
+		keyset[n] = k
+	end
+	return keyset
 end
 
 return M

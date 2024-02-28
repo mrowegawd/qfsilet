@@ -3,7 +3,7 @@ local config = require("qfsilet.config")
 local function setup(opts)
 	config.current_configs = config.update_settings(opts)
 
-	if not config.current_configs.loaded then
+	if (config.current_configs.loaded == nil) or not config.current_configs.loaded then
 		config.current_configs.loaded = true
 
 		config.init()
