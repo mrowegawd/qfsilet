@@ -24,13 +24,13 @@ local function todo(isGlobal)
 		Path.init_local()
 	end
 
-	if not Util.isFile(Constant.defaults.note_path) then
-		Util.create_file(Constant.defaults.note_path)
+	if not QfUtil.isFile(Constant.defaults.note_path) then
+		QfUtil.create_file(Constant.defaults.note_path)
 	end
 
 	Ui.popup(Constant.defaults.note_path, isGlobal, Constant.defaults.base_path)
 
-	if Util.isFile(Constant.defaults.note_path) then
+	if QfUtil.isFile(Constant.defaults.note_path) then
 		-- cmd("set foldtext=")
 
 		cmd("0r! cat " .. Constant.defaults.note_path)
