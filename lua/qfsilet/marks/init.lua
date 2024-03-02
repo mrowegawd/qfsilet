@@ -6,6 +6,8 @@ local buffers = {
 	opt = Config.marks,
 }
 
+local display_signs = true
+
 local function register_mark(mark, line, col, bufnr)
 	col = col or 1
 	bufnr = bufnr or vim.api.nvim_get_current_buf()
@@ -28,12 +30,14 @@ local function register_mark(mark, line, col, bufnr)
 	end
 	buffer.placed_marks[mark] = { line = line, col = col, id = -1 }
 
-	-- local display_signs = Util.option_nil(buffers[bufnr].opt.buf_signs[bufnr], buffers[bufnr].opt.signs)
-	-- if display_signs then
-	-- 	local id = mark:byte() * 100
-	-- 	buffer.placed_marks[mark].id = id
-	-- 	Util.add_sign(bufnr, mark, line, id)
-	-- end
+	-- print(vim.inspect(Config))
+	-- local display_signs = Util.option_nil(buffers[bufnr].buf_signs, Config.marks.signs.enabled)
+	-- print(display_signs)
+	if display_signs then
+		local id = mark:byte() * 100
+		buffer.placed_marks[mark].id = id
+		M.add_sign(bufnr, mark, line, id)
+	end
 
 	if not Util.is_lower(mark) or mark:byte() > buffer.lowest_available_mark:byte() then
 		return
@@ -294,13 +298,15 @@ end
 
 function M.add_sign(bufnr, text, line, id)
 	local priority
-	if Util.is_lower(text) then
-		priority = Config.marks.priority[1]
-	elseif Util.is_upper(text) then
-		priority = Config.marks.priority[2]
-	else -- builtin
-		priority = Config.marks.priority[3]
-	end
+	-- if Util.is_lower(text) then
+	-- print("yes")
+	-- 	priority = Config.marks.priority[1]
+	-- elseif Util.is_upper(text) then
+	-- 	priority = Config.marks.priority[2]
+	-- else -- builtin
+	-- 	priority = Config.marks.priority[3]
+	-- end
+
 	Util.add_sign(bufnr, text, line, id, "MarkSigns", priority)
 end
 

@@ -19,7 +19,7 @@ local default_settings = {
 		force_write_shada = false,
 		refresh_interval = 250,
 		signs = {
-			enabled = false,
+			enabled = true,
 			icon = "",
 		},
 		sign_priority = { lower = 10, upper = 15, builtin = 8, bookmark = 20 },
@@ -71,13 +71,13 @@ local default_settings = {
 			toggle_open = "<leader>Q",
 		},
 		marks = {
-			toggle_mark = "m``",
+			toggle_mark = "m`",
 			show_config = "mr",
 			next_mark = "sn",
 			prev_mark = "sp",
 			del_buf_mark = "dM",
 			del_mark = "dm",
-			fzf_marks = "mff",
+			fzf_marks = "mf",
 		},
 	},
 }
