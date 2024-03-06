@@ -7,7 +7,6 @@ local M = {}
 
 local default_settings = {
 	save_dir = fn.stdpath("data") .. "/qfsilet",
-	prefix_title = "QFSilet",
 	hl_group = "Comment",
 	extmarks = false,
 	set_signs = true,

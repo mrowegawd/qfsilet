@@ -62,7 +62,7 @@ function M.input(func, text_top_msg)
 			style = "single",
 			padding = { top = 1, bottom = 1, left = 1, right = 1 },
 			text = {
-				top = fmt(" [%s %s: %s] ", Config.popup.icon_note, Config.prefix_title, text_top_msg),
+				top = fmt(" [%s %s] ", Config.popup.icon_note, text_top_msg),
 				top_align = "center",
 			},
 		},
@@ -126,7 +126,7 @@ function M.popup(fname_path, IsGlobal, base_path)
 			padding = { top = 2, bottom = 2, left = 3, right = 3 },
 			style = "rounded",
 			text = {
-				top = fmt(" [%s %s: %s] ", Config.popup.icon_note, Config.prefix_title, top_ext_msg),
+				top = fmt(" [%s %s] ", Config.popup.icon_note, top_ext_msg),
 				top_align = "center",
 			},
 		},
