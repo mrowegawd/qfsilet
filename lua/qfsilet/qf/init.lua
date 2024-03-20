@@ -161,11 +161,11 @@ local function toggle_list(list_type, kill)
 	if fn.winnr() ~= winnr then
 		cmd.wincmd("p")
 	end
+	vim.cmd([[wincmd p]])
 end
 
 function qf.toggle_qf()
 	toggle_list("quickfix")
-	vim.cmd([[wincmd p]])
 end
 
 function qf.toggle_loclist()

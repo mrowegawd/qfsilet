@@ -31,8 +31,8 @@ end
 
 function M.setup_keymaps_and_autocmds()
 	local qf_autocmds = {
-		{ name = "SaveQfLocal", desc = "Save qflist local", func = "saveqf", mode = "n" },
-		{ name = "LoadQfLocal", desc = "Load qflist local", func = "loadqf", mode = "n" },
+		{ name = "SaveQf", desc = "Save qflist local", func = "saveqf", mode = "n" },
+		{ name = "LoadQf", desc = "Load qflist local", func = "loadqf", mode = "n" },
 	}
 
 	local ft_keymaps = {
@@ -107,13 +107,13 @@ function M.setup_keymaps_and_autocmds()
 			mode = { "n", "v" },
 		},
 		{
-			desc = "Save to file qf items",
+			desc = "Save qf items",
 			func = "saveqf",
 			keys = Config.keymap.quickfix.save_local,
 			mode = { "n", "v" },
 		},
 		{
-			desc = "Load qf file (local)",
+			desc = "Load qf item lists",
 			func = "loadqf",
 			keys = Config.keymap.quickfix.load_local,
 			mode = { "n", "v" },
@@ -145,9 +145,15 @@ function M.setup_keymaps_and_autocmds()
 			keys = Config.keymap.marks.del_buf_mark,
 			mode = "n",
 		},
+		-- {
+		-- 	desc = "Open fzf marks",
+		-- 	func = "fzf_marks",
+		-- 	keys = Config.keymap.marks.fzf_marks,
+		-- 	mode = "n",
+		-- },
 		{
 			desc = "Open fzf marks",
-			func = "fzf_marks",
+			func = "marks_send_to_ll",
 			keys = Config.keymap.marks.fzf_marks,
 			mode = "n",
 		},

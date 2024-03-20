@@ -2,7 +2,7 @@ local Util = require("qfsilet.marks.utils")
 local Config = require("qfsilet.config").current_configs
 local M = {}
 
-local buffers = {
+M.buffers = {
 	opt = Config.marks,
 }
 
@@ -11,13 +11,13 @@ local display_signs = true
 local function register_mark(mark, line, col, bufnr)
 	col = col or 1
 	bufnr = bufnr or vim.api.nvim_get_current_buf()
-	local buffer = buffers[bufnr]
+	local buffer = M.buffers[bufnr]
 
 	if not buffer then
 		return
 	end
 
-	-- print(vim.inspect(buffers))
+	-- print(vim.inspect(M.buffers))
 	if buffer.placed_marks[mark] then
 		-- mark already exists: remove it first
 		M.delete_mark(mark, false)
@@ -31,7 +31,7 @@ local function register_mark(mark, line, col, bufnr)
 	buffer.placed_marks[mark] = { line = line, col = col, id = -1 }
 
 	-- print(vim.inspect(Config))
-	-- local display_signs = Util.option_nil(buffers[bufnr].buf_signs, Config.marks.signs.enabled)
+	-- local display_signs = Util.option_nil(M.buffers[bufnr].buf_signs, Config.marks.signs.enabled)
 	-- print(display_signs)
 	if display_signs then
 		local id = mark:byte() * 100
@@ -43,20 +43,20 @@ local function register_mark(mark, line, col, bufnr)
 		return
 	end
 
-	while buffers[bufnr].placed_marks[mark] do
+	while buffer.placed_marks[mark] do
 		mark = string.char(mark:byte() + 1)
 	end
-	buffers[bufnr].lowest_available_mark = mark
+	buffer.lowest_available_mark = mark
 end
 
 function M.show_config()
-	vim.print(vim.inspect(buffers))
+	vim.print(vim.inspect(M.buffers))
 end
 
 function M.delete_mark(mark, clear)
 	clear = Util.option_nil(clear, true)
 	local bufnr = vim.api.nvim_get_current_buf()
-	local buffer = buffers[bufnr]
+	local buffer = M.buffers[bufnr]
 
 	if (not buffer) or not buffer.placed_marks[mark] then
 		return
@@ -101,24 +101,34 @@ end
 function M.delete_buf_marks(clear)
 	clear = Util.option_nil(clear, true)
 	local bufnr = vim.api.nvim_get_current_buf()
-	buffers[bufnr] = { placed_marks = {}, marks_by_line = {}, lowest_available_mark = "a" }
+	M.buffers[bufnr] = { placed_marks = {}, marks_by_line = {}, lowest_available_mark = "a" }
 
 	Util.remove_buf_signs(bufnr)
 	if clear then
 		vim.cmd("delmarks!")
 	end
+
+	vim.fn.setqflist({})
+
+	vim.cmd.cclose()
+
+	-- if require("qfsilet.trouble").open then
+	-- 	require("qfsilet.trouble").open = false
+	-- 	vim.fn.setloclist(vim.fn.win_getid(), {})
+	-- 	vim.cmd([[TroubleToggle]])
+	-- end
 end
 
 function M.next_mark()
 	local bufnr = vim.api.nvim_get_current_buf()
 
-	if not buffers[bufnr] then
+	if not M.buffers[bufnr] then
 		return
 	end
 
 	local line = vim.api.nvim_win_get_cursor(0)[1]
 	local marks = {}
-	for mark, data in pairs(buffers[bufnr].placed_marks) do
+	for mark, data in pairs(M.buffers[bufnr].placed_marks) do
 		if Util.is_letter(mark) then
 			marks[mark] = data
 		end
@@ -142,13 +152,13 @@ end
 function M.prev_mark()
 	local bufnr = vim.api.nvim_get_current_buf()
 
-	if not buffers[bufnr] then
+	if not M.buffers[bufnr] then
 		return
 	end
 
 	local line = vim.api.nvim_win_get_cursor(0)[1]
 	local marks = {}
-	for mark, data in pairs(buffers[bufnr].placed_marks) do
+	for mark, data in pairs(M.buffers[bufnr].placed_marks) do
 		if Util.is_letter(mark) then
 			marks[mark] = data
 		end
@@ -172,12 +182,12 @@ function M.delete_line_marks()
 	local bufnr = vim.api.nvim_get_current_buf()
 	local pos = vim.api.nvim_win_get_cursor(0)
 
-	if not buffers[bufnr].marks_by_line[pos[1]] then
+	if not M.buffers[bufnr].marks_by_line[pos[1]] then
 		return
 	end
 
 	-- delete_mark modifies the table, so make a copy
-	local copy = vim.tbl_values(buffers[bufnr].marks_by_line[pos[1]])
+	local copy = vim.tbl_values(M.buffers[bufnr].marks_by_line[pos[1]])
 	for _, mark in pairs(copy) do
 		M.delete_mark(mark)
 	end
@@ -201,7 +211,7 @@ function M.fzf_marks(col, bufnr)
 	local path = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(0), ":.")
 	col = col or 1
 	bufnr = bufnr or vim.api.nvim_get_current_buf()
-	local buffer = buffers[bufnr]
+	local buffer = M.buffers[bufnr]
 
 	if not buffer then
 		return
@@ -212,13 +222,28 @@ function M.fzf_marks(col, bufnr)
 	end
 end
 
-function M.place_next_mark(line, col)
-	local bufnr = vim.api.nvim_get_current_buf()
-	if not buffers[bufnr] then
-		buffers[bufnr] = { placed_marks = {}, marks_by_line = {}, lowest_available_mark = "a" }
+function M.marks_send_to_ll(col, bufnr)
+	local path = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(0), ":.")
+	col = col or 1
+	bufnr = bufnr or vim.api.nvim_get_current_buf()
+	local buffer = M.buffers[bufnr]
+
+	if not buffer then
+		return
 	end
 
-	local mark = buffers[bufnr].lowest_available_mark
+	if Util.tablelength(buffer.placed_marks) > 0 then
+		require("qfsilet.trouble").qfmarks(buffer, path)
+	end
+end
+
+function M.place_next_mark(line, col)
+	local bufnr = vim.api.nvim_get_current_buf()
+	if not M.buffers[bufnr] then
+		M.buffers[bufnr] = { placed_marks = {}, marks_by_line = {}, lowest_available_mark = "a" }
+	end
+
+	local mark = M.buffers[bufnr].lowest_available_mark
 	register_mark(mark, line, col, bufnr)
 
 	vim.cmd("normal! m" .. mark)
@@ -228,11 +253,9 @@ function M.toggle_mark_cursor()
 	local bufnr = vim.api.nvim_get_current_buf()
 	local pos = vim.api.nvim_win_get_cursor(0)
 
-	if buffers[bufnr].marks_by_line[pos[1]] then
-		-- print("yes delete line marks")
+	if M.buffers[bufnr].marks_by_line[pos[1]] then
 		M.delete_line_marks()
 	else
-		-- print("yes place next marks")
 		M.place_next_mark(pos[1], pos[2])
 	end
 end
@@ -241,12 +264,12 @@ function M.refresh_deforce(bufnr, force)
 	force = force or false
 	bufnr = bufnr or vim.api.nvim_get_current_buf()
 
-	if not buffers[bufnr] then
-		buffers[bufnr] = { placed_marks = {}, marks_by_line = {}, lowest_available_mark = "a" }
+	if not M.buffers[bufnr] then
+		M.buffers[bufnr] = { placed_marks = {}, marks_by_line = {}, lowest_available_mark = "a" }
 	end
 
 	-- first, remove all marks that were deleted
-	for mark, _ in pairs(buffers[bufnr].placed_marks) do
+	for mark, _ in pairs(M.buffers[bufnr].placed_marks) do
 		if vim.api.nvim_buf_get_mark(bufnr, mark)[1] == 0 then
 			M.delete_mark(mark, false)
 		end
@@ -260,7 +283,7 @@ function M.refresh_deforce(bufnr, force)
 	for _, data in ipairs(vim.fn.getmarklist()) do
 		mark = data.mark:sub(2, 3)
 		pos = data.pos
-		cached_mark = buffers[bufnr].placed_marks[mark]
+		cached_mark = M.buffers[bufnr].placed_marks[mark]
 
 		if Util.is_upper(mark) and pos[1] == bufnr and (force or not cached_mark or pos[2] ~= cached_mark.line) then
 			register_mark(mark, pos[2], pos[3], bufnr)
@@ -271,7 +294,7 @@ function M.refresh_deforce(bufnr, force)
 	for _, data in ipairs(vim.fn.getmarklist("%")) do
 		mark = data.mark:sub(2, 3)
 		pos = data.pos
-		cached_mark = buffers[bufnr].placed_marks[mark]
+		cached_mark = M.buffers[bufnr].placed_marks[mark]
 
 		if Util.is_lower(mark) and (force or not cached_mark or pos[2] ~= cached_mark.line) then
 			register_mark(mark, pos[2], pos[3], bufnr)
@@ -279,9 +302,9 @@ function M.refresh_deforce(bufnr, force)
 	end
 
 	-- builtin marks
-	-- for _, char in pairs(buffers[bufnr].opt.builtin_marks) do
+	-- for _, char in pairs(M.buffers[bufnr].opt.builtin_marks) do
 	-- 	pos = vim.fn.getpos("'" .. char)
-	-- 	cached_mark = buffers[bufnr].placed_marks[char]
+	-- 	cached_mark = M.buffers[bufnr].placed_marks[char]
 	-- 	-- check:
 	-- 	-- mark located in current buffer? (0-9 marks return absolute bufnr instead of 0)
 	-- 	-- valid (lnum != 0)
