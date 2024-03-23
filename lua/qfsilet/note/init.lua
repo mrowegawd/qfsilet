@@ -33,13 +33,11 @@ local function todo(isGlobal)
 	if QfUtil.isFile(Constant.defaults.note_path) then
 		-- cmd("set foldtext=")
 
-		vim.schedule(function()
-			-- require("orgmode.colors.highlights").define_highlights()
-			-- require("orgmode.config"):setup_ts_predicates()
-			cmd("0r! cat " .. Constant.defaults.note_path)
-			-- cmd(":e " .. Constant.defaults.note_path)
-			cmd("0") -- Go to top of document
-		end)
+		-- vim.schedule(function()
+		cmd("0r! cat " .. Constant.defaults.note_path)
+		-- cmd(":edit " .. Constant.defaults.note_path)
+		cmd("0") -- Go to top of document
+		-- end)
 	end
 end
 

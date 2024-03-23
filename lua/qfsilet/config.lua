@@ -46,7 +46,7 @@ local default_settings = {
 		winhighlight = "Normal:NormalFloat,FloatBorder:FloatBorder",
 		icon_note = " ",
 		border = "",
-		filetype = "norg",
+		filetype = "org",
 	},
 	keymap = {
 		del_item = "dd",

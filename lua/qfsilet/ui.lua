@@ -111,16 +111,18 @@ function M.popup(fname_path, IsGlobal, base_path)
 		zindex = 50,
 		win_options = {
 			winhighlight = Config.popup.winhighlight,
-			-- scrolloff = 0,
+			foldmethod = "manual",
+			foldcolumn = "0",
+			foldtext = "",
 		},
-		-- buf_options = {
 		buf_options = {
-			bufhidden = "hide",
+			-- bufhidden = "hide",
 			buflisted = false,
 			buftype = "nofile",
 			swapfile = false,
-			undolevels = 0,
 			filetype = Config.popup.filetype,
+			modeline = false,
+			formatexpr = 'v:lua.require("orgmode.org.format")()',
 		},
 		border = {
 			padding = { top = 2, bottom = 2, left = 3, right = 3 },
@@ -133,11 +135,10 @@ function M.popup(fname_path, IsGlobal, base_path)
 	}
 
 	local popup = Popup(pop_opts)
-	popup:mount()
+
 	popup:on(Event.BufLeave, function()
 		vim.cmd("silent! wq! " .. fname_path)
 
-		-- Jika file todo kosong atau tidak ada file json, hapus
 		if vim.fn.getfsize(fname_path) <= 1 then
 			Util.rmdir(base_path)
 		end
@@ -154,9 +155,10 @@ function M.popup(fname_path, IsGlobal, base_path)
 	popup:map("n", { "<Esc>", "q" }, function()
 		trim([[%s/\($\n\s*\)\+\%$//]])
 		trim([[%s/\s\+$//e]])
-
 		popup:unmount()
 	end, { noremap = true })
+
+	popup:mount()
 end
 
 return M
