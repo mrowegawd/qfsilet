@@ -8,7 +8,6 @@ local fmt, cmd = string.format, vim.cmd
 
 local M = {}
 
--- Fungsi untuk mendapatkan ukuran layar saat ini
 local function get_current_screen_size()
 	local height = vim.o.lines - vim.o.cmdheight
 	if vim.o.laststatus ~= 0 then
@@ -21,7 +20,6 @@ local function get_current_screen_size()
 	return vim_width, vim_height
 end
 
--- Fungsi untuk mendapatkan ukuran UI yang diinginkan
 local function get_desired_ui_size()
 	local total_width_ratio = 0.95 -- Total lebar popup relatif terhadap lebar layar
 	local total_height_ratio = 0.4 -- Total tinggi popup relatif terhadap tinggi layar
@@ -36,7 +34,6 @@ local function get_desired_ui_size()
 	return initial_col, initial_row
 end
 
--- Fungsi untuk mendapatkan ukuran popup yang diinginkan
 local function get_desired_popup_size()
 	local vim_width, vim_height = get_current_screen_size()
 
@@ -46,7 +43,6 @@ local function get_desired_popup_size()
 	return width, height
 end
 
--- Fungsi untuk menampilkan input
 function M.input(func, text_top_msg)
 	if vim.bo.filetype == "qf" then
 		cmd.wincmd("p")
@@ -93,7 +89,11 @@ function M.input(func, text_top_msg)
 	end, { noremap = true })
 end
 
--- Fungsi untuk menampilkan popup
+local function refresh_orgmode(fname_path)
+	local Headline = require("orgmode")
+	Headline:reload(fname_path)
+end
+
 function M.popup(fname_path, IsGlobal, base_path)
 	IsGlobal = IsGlobal or false
 
@@ -147,6 +147,8 @@ function M.popup(fname_path, IsGlobal, base_path)
 
 		if vim.fn.getfsize(fname_path) <= 1 then
 			Util.rmdir(base_path)
+		else
+			refresh_orgmode(fname_path)
 		end
 
 		popup:unmount()
@@ -159,8 +161,17 @@ function M.popup(fname_path, IsGlobal, base_path)
 	end
 
 	popup:map("n", { "<Esc>", "q" }, function()
+		vim.cmd("silent! wq! " .. fname_path)
+
 		trim([[%s/\($\n\s*\)\+\%$//]])
 		trim([[%s/\s\+$//e]])
+
+		if vim.fn.getfsize(fname_path) <= 1 then
+			Util.rmdir(base_path)
+		else
+			refresh_orgmode(fname_path)
+		end
+
 		popup:unmount()
 	end, { noremap = true })
 
