@@ -97,7 +97,7 @@ end
 function M.popup(fname_path, IsGlobal, base_path)
 	IsGlobal = IsGlobal or false
 
-	local top_ext_msg = IsGlobal and "Todo global" or "Todo"
+	local top_ext_msg = IsGlobal and "Todo Global" or "Todo Current Project"
 
 	local col, row = get_desired_ui_size()
 	local width, height = get_desired_popup_size()
@@ -128,11 +128,17 @@ function M.popup(fname_path, IsGlobal, base_path)
 			padding = { top = 2, bottom = 2, left = 3, right = 3 },
 			style = "rounded",
 			text = {
-				top = fmt(" [%s %s] ", Config.popup.icon_note, top_ext_msg),
+				top = fmt(" [ %s %s ] ", Config.popup.icon_note, top_ext_msg),
 				top_align = "center",
 			},
 		},
 	}
+
+	if not IsGlobal then
+		pop_opts.relative = "editor"
+		pop_opts.position = "50%"
+		pop_opts.size = "70%"
+	end
 
 	local popup = Popup(pop_opts)
 

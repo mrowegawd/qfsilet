@@ -44,7 +44,7 @@ local default_settings = {
 	},
 	popup = {
 		winhighlight = "Normal:NormalFloat,FloatBorder:FloatBorder",
-		icon_note = " ",
+		icon_note = " ", -- " ",
 		border = "",
 		filetype = "org",
 	},
