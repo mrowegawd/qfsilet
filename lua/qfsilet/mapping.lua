@@ -31,25 +31,25 @@ end
 
 function M.setup_keymaps_and_autocmds()
 	local qf_autocmds = {
-		{ name = "SaveQf", desc = "Save qflist local", func = "saveqf", mode = "n" },
-		{ name = "LoadQf", desc = "Load qflist local", func = "loadqf", mode = "n" },
+		{ name = "SaveQf", desc = "Marks: save qflist local", func = "saveqf", mode = "n" },
+		{ name = "LoadQf", desc = "Marks: load qflist local", func = "loadqf", mode = "n" },
 	}
 
 	local ft_keymaps = {
 		{
-			desc = "Delete item qf",
+			desc = "Marks: delete item quickfix",
 			func = "del_itemqf",
 			keys = Config.keymap.del_item,
 			mode = "n",
 		},
 		{
-			desc = "Clear list of notes on current qf",
+			desc = "Marks: clear list of notes on current quickfix",
 			func = "clear_notes",
 			keys = Config.keymap.quickfix.clear_notes,
 			mode = "n",
 		},
 		{
-			desc = "Clear all items qf",
+			desc = "Marks: clear all items quickfix",
 			func = "clear_qf_list",
 			keys = Config.keymap.quickfix.clear_all,
 			mode = "n",
@@ -57,7 +57,7 @@ function M.setup_keymaps_and_autocmds()
 	}
 	local loc_keymaps = {
 		{
-			desc = "Toggle loclist",
+			desc = "Marks: toggle location list",
 			func = "toggle_loclist",
 			keys = Config.keymap.loclist.toggle_open,
 			mode = "n",
@@ -65,106 +65,106 @@ function M.setup_keymaps_and_autocmds()
 	}
 	local qf_keymaps = {
 		{
-			desc = "Toggle qflist",
+			desc = "Marks: toggle quickfix list",
 			func = "toggle_qf",
 			keys = Config.keymap.quickfix.toggle_open,
 			mode = "n",
 		},
 		{
-			desc = "Insert line to qflist (on cursor)",
+			desc = "Marks: insert sign mark (on cursor)",
 			func = "add_item_toqf",
 			keys = Config.keymap.quickfix.on_cursor,
-			mode = { "n", "v" },
+			mode = "n",
 		},
 		{
-			desc = "Add todo",
+			desc = "Marks: open local todo window",
 			func = "add_todo",
 			keys = Config.keymap.quickfix.add_todo,
 			mode = { "n", "v" },
 		},
 		{
-			desc = "Add global todo",
+			desc = "Marks: open global todo window",
 			func = "add_todo_global",
 			keys = Config.keymap.quickfix.add_todo_global,
 			mode = { "n", "v" },
 		},
 		{
-			desc = "Add todo link capture",
+			desc = "Marks: set cursor link capture todo",
 			func = "add_todo_capture_link",
 			keys = Config.keymap.quickfix.add_link_capture,
-			mode = { "n", "v" },
+			mode = "n",
 		},
 		{
-			desc = "Open fzf qf",
+			desc = "Marks: open todo cursor and collect with quickfix",
 			func = "fzf_qf",
 			keys = Config.keymap.quickfix.fzf_qf,
-			mode = { "n", "v" },
+			mode = "n",
 		},
 		{
-			desc = "Goto link capture",
+			desc = "Marks: goto link capture",
 			func = "goto_link_capture",
 			keys = Config.keymap.quickfix.goto_link_capture,
 			mode = { "n", "v" },
 		},
 		{
-			desc = "Save qf items",
+			desc = "Marks: save quickfix items",
 			func = "saveqf",
 			keys = Config.keymap.quickfix.save_local,
-			mode = { "n", "v" },
+			mode = "n",
 		},
 		{
-			desc = "Load qf item lists",
+			desc = "Marks: load quickfix items",
 			func = "loadqf",
 			keys = Config.keymap.quickfix.load_local,
-			mode = { "n", "v" },
+			mode = "n",
 		},
 	}
 
 	local marks_keymaps = {
 		{
-			desc = "Toggle marks",
+			desc = "Marks: toggle marks",
 			func = "toggle_mark_cursor",
 			keys = Config.keymap.marks.toggle_mark,
 			mode = "n",
 		},
 		{
-			desc = "Next target marks",
+			desc = "Marks: jump to next",
 			func = "next_mark",
 			keys = Config.keymap.marks.next_mark,
 			mode = "n",
 		},
 		{
-			desc = "Prev target marks",
+			desc = "Marks: jump to prev",
 			func = "prev_mark",
 			keys = Config.keymap.marks.prev_mark,
 			mode = "n",
 		},
 		{
-			desc = "Delete all current marks",
+			desc = "Marks: delete all current marks",
 			func = "delete_buf_marks",
 			keys = Config.keymap.marks.del_buf_mark,
 			mode = "n",
 		},
-		-- {
-		-- 	desc = "Open fzf marks",
-		-- 	func = "fzf_marks",
-		-- 	keys = Config.keymap.marks.fzf_marks,
-		-- 	mode = "n",
-		-- },
 		{
-			desc = "Open fzf marks",
-			func = "marks_send_to_ll",
+			desc = "Marks: open marks with fzf",
+			func = "fzf_marks",
 			keys = Config.keymap.marks.fzf_marks,
 			mode = "n",
 		},
 		{
-			desc = "Delete mark",
+			desc = "Marks: collect marks and send to quickfix list",
+			func = "marks_send_to_ll",
+			keys = Config.keymap.marks.fzf_send_qf_marks,
+			mode = "n",
+		},
+		{
+			desc = "Marks: delete mark",
 			func = "delete",
 			keys = Config.keymap.marks.del_mark,
 			mode = "n",
 		},
 		{
-			desc = "Show config marks",
+			desc = "Marks: show config marks",
 			func = "show_config",
 			keys = Config.keymap.marks.show_config,
 			mode = "n",

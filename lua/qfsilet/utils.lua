@@ -46,6 +46,10 @@ function M.rmdir(path)
 	end
 end
 
+function M.get_option(name_opt)
+	return vim.api.nvim_get_option_value(name_opt, { scope = "local" })
+end
+
 function M.create_dir(path)
 	local p = Plenary_path.new(path)
 	if not p:exists() then

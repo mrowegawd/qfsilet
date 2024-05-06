@@ -75,8 +75,8 @@ function M.load(opts, isGlobal)
 			local cols = vim.o.columns - 50
 			local collss = cols > 80 and cols - 80 or cols / 2
 
-			local win_height = math.ceil(vim.api.nvim_get_option("lines") * 0.5 - 10)
-			local win_width = math.ceil(vim.api.nvim_get_option("columns") * 0.5 - 20)
+			local win_height = math.ceil(Util.get_option("lines") * 0.5 - 10)
+			local win_width = math.ceil(Util.get_option("columns") * 0.5 - 20)
 			return { width = win_width, height = win_height, row = 20, col = collss }
 		end,
 		actions = vim.tbl_extend(
@@ -90,8 +90,13 @@ end
 function M.sel_qf(opts, isLoad)
 	isLoad = isLoad or false
 
+	local prompt_prefix = "Save"
+	if isLoad then
+		prompt_prefix = "Load"
+	end
+
 	require("fzf-lua").fzf_exec({ "global", "local" }, {
-		prompt = "Select global or local? ",
+		prompt = prompt_prefix .. " quickfix items? ",
 		winopts = {
 			hl = { normal = "Normal" },
 			border = "rounded",
@@ -106,8 +111,8 @@ function M.sel_qf(opts, isLoad)
 			local cols = vim.o.columns - 50
 			local collss = cols > 80 and cols - 80 or cols / 2
 
-			local win_height = math.ceil(vim.api.nvim_get_option("lines") * 0.5 - 10)
-			local win_width = math.ceil(vim.api.nvim_get_option("columns") * 0.5 - 20)
+			local win_height = math.ceil(Util.get_option("lines") * 0.5 - 10)
+			local win_width = math.ceil(Util.get_option("columns") * 0.5 - 20)
 			return { width = win_width, height = win_height, row = 20, col = collss }
 		end,
 
@@ -201,10 +206,10 @@ function M.grep_marks(marks_opts, path)
 			local cols = vim.o.columns - 50
 			local collss = cols > 80 and cols - 80 or cols / 2
 
-			local win_height = math.ceil(vim.api.nvim_get_option("lines") * 0.5)
-			local win_width = math.ceil(vim.api.nvim_get_option("columns") * 1)
+			local win_height = math.ceil(Util.get_option("lines") * 0.5)
+			local win_width = math.ceil(Util.get_option("columns") * 1)
 
-			local row = math.ceil((vim.api.nvim_get_option("lines") - win_height) * 1 + 5)
+			local row = math.ceil((Util.get_option("lines") - win_height) * 1 + 5)
 			return { width = win_width, height = win_height, row = row, col = collss }
 		end,
 	})
