@@ -9,7 +9,7 @@ end
 local FzfMappings = require("qfsilet.fzf.mappings")
 local Constant = require("qfsilet.constant")
 local Ui = require("qfsilet.ui")
-local NoteUtil = require("qfsilet.note.util")
+local UtilsNote = require("qfsilet.note.utils")
 
 local M = {}
 
@@ -126,7 +126,7 @@ function M.sel_qf(opts, isLoad)
 						end
 						M.load(opts, checkGlobal)
 					else
-						local lists_qf = NoteUtil.get_current_list()
+						local lists_qf = UtilsNote.get_current_list()
 
 						Ui.input(function(inputMsg)
 							-- If `value` contains spaces, concat it them with underscore
@@ -154,7 +154,7 @@ function M.sel_qf(opts, isLoad)
 
 							stat_fname_todo.cwd_root = Constant.defaults.base_path
 
-							NoteUtil.save_list_to_file(Constant.defaults.base_path, stat_fname_todo, inputMsg, true)
+							UtilsNote.save_list_to_file(Constant.defaults.base_path, stat_fname_todo, inputMsg, true)
 						end, selected[1] .. " Save")
 
 						for _, fname in pairs(stat_fname_todo.deleted) do
@@ -195,11 +195,11 @@ function M.grep_marks(marks_opts, path)
 		actions = FzfMappings.mark_defaults(marks_opts),
 		winopts = {
 			hl = { normal = "Normal" },
-			title = formatTitle("Marks ", "X", "Boolean"),
+			title = formatTitle("Marks ", "X", "GitSignsAdd"),
 			border = "rounded",
 			preview = {
 				vertical = "up:45%", -- up|down:size
-				horizontal = "left:60%", -- right|left:size
+				horizontal = "right:60%", -- right|left:size
 			},
 		},
 		winopts_fn = function()

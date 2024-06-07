@@ -1,4 +1,4 @@
-local Util = require("qfsilet.utils")
+local Utils = require("qfsilet.utils")
 local Ui = require("qfsilet.ui")
 
 local fn = vim.fn
@@ -15,21 +15,21 @@ function M.save_list_to_file(base_path, tbl, title, is_notify)
 	local success_msg = "Success saving"
 
 	if is_notify then
-		if Util.isFile(fname_path) then
+		if Utils.isFile(fname_path) then
 			Ui.input(function(input)
 				if input ~= nil and input == "y" or #input < 1 then
-					Util.writeToFile(tbl, fname_path)
+					Utils.writeToFile(tbl, fname_path)
 				else
 					success_msg = "Cancel save"
 				end
 
-				Util.info(fmt("%s file %s.json", success_msg, title))
+				Utils.info(fmt("%s file %s.json", success_msg, title))
 			end, fmt("File %s exists, rewrite it? [y/n]", title))
 		else
-			Util.writeToFile(tbl, fname_path)
+			Utils.writeToFile(tbl, fname_path)
 		end
 	else
-		Util.writeToFile(tbl, fname_path)
+		Utils.writeToFile(tbl, fname_path)
 	end
 end
 
@@ -51,10 +51,10 @@ end
 
 function M.capturelink()
 	return string.format(
-		"[[File:%s+%s:%s]]",
-		Util.current_file_path(),
-		api.nvim_win_get_cursor(0)[1],
-		api.nvim_win_get_cursor(0)[2]
+		"[[file:%s::%s]]",
+		Utils.current_file_path(),
+		api.nvim_win_get_cursor(0)[1]
+		-- api.nvim_win_get_cursor(0)[2]
 	)
 end
 

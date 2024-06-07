@@ -142,7 +142,8 @@ function M.popup(fname_path, IsGlobal, base_path)
 
 	local popup = Popup(pop_opts)
 
-	popup:on(Event.BufLeave, function()
+	-- popup:on(Event.QuitPre, function()
+	popup:on({ Event.BufLeave, Event.QuitPre }, function()
 		vim.cmd("silent! wq! " .. fname_path)
 
 		if vim.fn.getfsize(fname_path) <= 1 then
@@ -174,6 +175,12 @@ function M.popup(fname_path, IsGlobal, base_path)
 
 		popup:unmount()
 	end, { noremap = true })
+
+	-- vim.api.nvim_buf_call(popup.bufnr, function()
+	-- 	if vim.fn.mode() ~= "n" then
+	-- 		vim.api.nvim_input("<Esc>")
+	-- 	end
+	-- end)
 
 	popup:mount()
 end

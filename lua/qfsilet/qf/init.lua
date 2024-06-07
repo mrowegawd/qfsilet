@@ -2,7 +2,7 @@ local fn = vim.fn
 local api = vim.api
 local cmd = vim.cmd
 
-local Util = require("qfsilet.utils")
+local Utils = require("qfsilet.utils")
 local Visual = require("qfsilet.visual")
 local Plenary_path = require("plenary.path")
 local Note = require("qfsilet.note")
@@ -38,7 +38,7 @@ end
 
 local function note_insertqf_allowed()
 	local ft = vim.bo[0].filetype
-	local is_loclist = Util.isLocList()
+	local is_loclist = Utils.isLocList()
 	local is_floatwin = api.nvim_win_get_config(0).relative ~= ""
 
 	if is_loclist or ft == "qf" or is_floatwin then
@@ -48,7 +48,7 @@ local function note_insertqf_allowed()
 end
 
 local function insert_list(items, is_local)
-	local cur_list = Util.getCurrentList(items, is_local)
+	local cur_list = Utils.getCurrentList(items, is_local)
 
 	set_current_list(cur_list, is_local)
 
@@ -115,7 +115,7 @@ end
 
 function qf.add_item_toqf()
 	if note_insertqf_allowed() then
-		return Util.warn("Cannot insert...\n(Do not do this inside qf)", "QFSilet")
+		return Utils.warn("Cannot insert...\n(Do not do this inside qf)", "QFSilet")
 	end
 
 	local location = api.nvim_win_get_cursor(0)
@@ -131,7 +131,7 @@ end
 local function is_vim_list_open()
 	for _, win in ipairs(api.nvim_list_wins()) do
 		local buf = api.nvim_win_get_buf(win)
-		local location_list = Util.isLocList()
+		local location_list = Utils.isLocList()
 		if vim.bo[buf].filetype == "qf" or location_list then
 			return true
 		end
@@ -180,7 +180,7 @@ function qf.del_itemqf()
 	local win_id = fn.win_getid()
 	local is_loc = fn.getwininfo(win_id)[1].loclist == 1
 
-	cur_list = Util.getCurrentList({}, is_loc)
+	cur_list = Utils.getCurrentList({}, is_loc)
 
 	if is_loc then
 		close_cmd = "lclose"
@@ -213,7 +213,7 @@ function qf.del_itemqf()
 		if #cur_list == 0 then
 			api.nvim_command(close_cmd)
 		elseif item ~= 1 then
-			Util.feedkey("n", ("%dj"):format(item - 1))
+			Utils.feedkey("n", ("%dj"):format(item - 1))
 			api.nvim_command(close_cmd)
 		end
 
@@ -236,7 +236,7 @@ function qf.del_itemqf()
 end
 
 function qf.clear_qf_list()
-	Util.info("Item lists cleared", "QFSilet")
+	Utils.info("Item lists cleared", "QFSilet")
 
 	fn.setqflist({})
 	cmd.cclose()
@@ -250,7 +250,7 @@ function qf.clear_qf_list()
 end
 
 function qf.clear_loc_list()
-	Util.info("Item lists cleared", "QFSilet")
+	Utils.info("Item lists cleared", "QFSilet")
 
 	fn.setloclist(0, {})
 	cmd.lclose()
@@ -284,7 +284,7 @@ local function filter_qfsilet_items(cur_list)
 end
 
 function qf.clear_notes()
-	Util.info("All notes cleared", "QFSilet")
+	Utils.info("All notes cleared", "QFSilet")
 	local new_list = filter_qfsilet_items(fn.getloclist(0))
 	fn.setloclist(0, new_list)
 

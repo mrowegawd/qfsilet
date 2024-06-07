@@ -1,7 +1,7 @@
 local fn = vim.fn
 
 local Constant = require("qfsilet.constant")
-local Util = require("qfsilet.utils")
+local Utils = require("qfsilet.utils")
 local Visual = require("qfsilet.visual")
 
 local M = {}
@@ -49,7 +49,7 @@ local function mergeQuickFix(selected, opts, basePath)
 			local pth = stripString(sel)
 			local filePath = basePath .. "/" .. pth .. ".json"
 
-			local fileRead = Util.getFileRead(filePath)
+			local fileRead = Utils.getFileRead(filePath)
 			local jsonTbl = fn.json_decode(fileRead)
 			if jsonTbl ~= nil then
 				if #jsonTbl.qf.items > 0 then
@@ -60,7 +60,7 @@ local function mergeQuickFix(selected, opts, basePath)
 			end
 		end
 	else
-		Util.warn("Not implemented yet, abort it", "QFSilet")
+		Utils.warn("Not implemented yet, abort it", "QFSilet")
 		return
 	end
 
@@ -69,14 +69,14 @@ local function mergeQuickFix(selected, opts, basePath)
 
 	local what = {
 		idx = tryIdx,
-		items = Util.removeDuplicates(tbl),
+		items = Utils.removeDuplicates(tbl),
 		title = opts.prefixTitle .. ":Merged",
 	}
 
 	fn.setqflist({}, action, what)
 	vim.cmd("copen")
 
-	Util.info("Import successful (merged)", "QFSilet")
+	Utils.info("Import successful (merged)", "QFSilet")
 end
 
 local function editQuickFix(selected, basePath)
@@ -87,25 +87,25 @@ local function editQuickFix(selected, basePath)
 
 	local filePath = basePath .. "/" .. pth .. ".json"
 
-	local fileRead = Util.getFileRead(filePath)
+	local fileRead = Utils.getFileRead(filePath)
 	local tbl = fn.json_decode(fileRead)
 
 	if tbl == nil then
 		return
 	end
 
-	local cleanedTbl, title = Util.cleanupItems(tbl)
+	local cleanedTbl, title = Utils.cleanupItems(tbl)
 
 	if #cleanedTbl.qf.items == 0 then
 		return
 	end
 
-	Util.writeToFile(cleanedTbl, Constant.defaults.base_path .. "/" .. title .. ".json")
+	Utils.writeToFile(cleanedTbl, Constant.defaults.base_path .. "/" .. title .. ".json")
 
 	fn.setqflist({}, " ", cleanedTbl.qf)
 	vim.cmd("copen")
 
-	Util.info("Import successful", "QFSilet")
+	Utils.info("Import successful", "QFSilet")
 end
 
 function M.editOrMergeQuickFix(opts, basePath)
@@ -144,7 +144,7 @@ function M.deleteItem(basePath)
 
 			local filePath = basePath .. "/" .. sel .. ".json"
 
-			if Util.isFile(filePath) then
+			if Utils.isFile(filePath) then
 				local cmd = "!rm"
 				vim.api.nvim_exec(cmd .. " " .. filePath, { output = true })
 				vim.cmd("lua require'fzf-lua'.resume()")

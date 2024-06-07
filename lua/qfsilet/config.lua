@@ -54,20 +54,20 @@ local default_settings = {
 		quickfix = {
 			clear_all = "C",
 			clear_notes = "cc",
-			toggle_open = "<leader>q",
+			toggle_open = "<leader>l",
 			on_cursor = "mq",
 			add_todo = "mt",
 			add_link_capture = "mc",
 			goto_link_capture = "g<cr>",
 			add_todo_global = "mT",
-			fzf_qf = "mfq",
+			fzf_qf = "mx",
 			save_local = "ms",
 			save_global = "mS",
 			load_local = "ml",
 			load_global = "mL",
 		},
 		loclist = {
-			toggle_open = "<leader>Q",
+			toggle_open = "<localleader>l",
 		},
 		marks = {
 			toggle_mark = "m`",
@@ -76,8 +76,8 @@ local default_settings = {
 			prev_mark = "sp",
 			del_buf_mark = "dM",
 			del_mark = "dm",
-			fzf_marks = "mff",
-			fzf_send_qf_marks = "mfQ",
+			fzf_marks = "mf",
+			fzf_send_qf_marks = "mX",
 		},
 	},
 }
@@ -96,7 +96,7 @@ local function setup_highlight_groups()
 		qf_ext_hl = Visual.extmarks.qf_ext_hl_group,
 	}
 	for id, name in pairs(names) do
-		local ok = pcall(vim.api.nvim_get_hl_by_name, name, true)
+		local ok = vim.api.nvim_get_hl(0, { name = name, link = false })
 		if not ok then
 			vim.validate({
 				opt = { Visual.extmarks[id], "t" },

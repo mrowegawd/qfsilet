@@ -1,8 +1,8 @@
 local fn = vim.fn
 local cmd = vim.cmd
 
-local QfUtil = require("qfsilet.utils")
-local Util = require("qfsilet.note.util")
+local Utils = require("qfsilet.utils")
+local UtilsNote = require("qfsilet.note.utils")
 
 local Path = require("qfsilet.path")
 local Config = require("qfsilet.config").current_configs
@@ -24,13 +24,13 @@ local function todo(isGlobal)
 		Path.init_local()
 	end
 
-	if not QfUtil.isFile(Constant.defaults.note_path) then
-		QfUtil.create_file(Constant.defaults.note_path)
+	if not Utils.isFile(Constant.defaults.note_path) then
+		Utils.create_file(Constant.defaults.note_path)
 	end
 
 	Ui.popup(Constant.defaults.note_path, isGlobal, Constant.defaults.base_path)
 
-	if QfUtil.isFile(Constant.defaults.note_path) then
+	if Utils.isFile(Constant.defaults.note_path) then
 		-- cmd("set foldtext=")
 
 		-- vim.schedule(function()
@@ -44,9 +44,9 @@ end
 local function saveqflist(isGlobal)
 	isGlobal = isGlobal or false
 
-	local lists_qf = Util.get_current_list()
+	local lists_qf = UtilsNote.get_current_list()
 	if #lists_qf == 0 then
-		QfUtil.warn("Current quickfix list is empty\nWe abort it..", "QFSilet")
+		Utils.warn("Current quickfix list is empty\nWe abort it..", "QFSilet")
 		return
 	end
 
@@ -124,13 +124,13 @@ function M.loadqf_list()
 end
 
 function M.todo_with_capture_link()
-	QfUtil.info("Copied to system clipboard", "Link capture")
-	fn.setreg("+", Util.capturelink(), "c")
+	Utils.info("Copied to system clipboard", "Link capture")
+	fn.setreg("+", UtilsNote.capturelink(), "c")
 	todo()
 end
 
 function M.todo_goto_capture_link()
-	Util.gotolink()
+	UtilsNote.gotolink()
 end
 
 return M

@@ -1,4 +1,5 @@
-local Util = require("qfsilet.marks.utils")
+local UtilsMark = require("qfsilet.marks.utils")
+local Utils = require("qfsilet.utils")
 local Config = require("qfsilet.config").current_configs
 local M = {}
 
@@ -39,7 +40,7 @@ local function register_mark(mark, line, col, bufnr)
 		M.add_sign(bufnr, mark, line, id)
 	end
 
-	if not Util.is_lower(mark) or mark:byte() > buffer.lowest_available_mark:byte() then
+	if not UtilsMark.is_lower(mark) or mark:byte() > buffer.lowest_available_mark:byte() then
 		return
 	end
 
@@ -54,7 +55,7 @@ function M.show_config()
 end
 
 function M.delete_mark(mark, clear)
-	clear = Util.option_nil(clear, true)
+	clear = UtilsMark.option_nil(clear, true)
 	local bufnr = vim.api.nvim_get_current_buf()
 	local buffer = M.buffers[bufnr]
 
@@ -63,7 +64,7 @@ function M.delete_mark(mark, clear)
 	end
 
 	if buffer.placed_marks[mark].id ~= -1 then
-		Util.remove_sign(bufnr, buffer.placed_marks[mark].id)
+		UtilsMark.remove_sign(bufnr, buffer.placed_marks[mark].id)
 	end
 
 	local line = buffer.placed_marks[mark].line
@@ -89,7 +90,7 @@ function M.delete_mark(mark, clear)
 	end
 
 	-- only adjust lowest_available_mark if it is lowercase
-	if not Util.is_lower(mark) then
+	if not UtilsMark.is_lower(mark) then
 		return
 	end
 
@@ -99,11 +100,11 @@ function M.delete_mark(mark, clear)
 end
 
 function M.delete_buf_marks(clear)
-	clear = Util.option_nil(clear, true)
+	clear = UtilsMark.option_nil(clear, true)
 	local bufnr = vim.api.nvim_get_current_buf()
 	M.buffers[bufnr] = { placed_marks = {}, marks_by_line = {}, lowest_available_mark = "a" }
 
-	Util.remove_buf_signs(bufnr)
+	UtilsMark.remove_buf_signs(bufnr)
 	if clear then
 		vim.cmd("delmarks!")
 	end
@@ -129,7 +130,7 @@ function M.next_mark()
 	local line = vim.api.nvim_win_get_cursor(0)[1]
 	local marks = {}
 	for mark, data in pairs(M.buffers[bufnr].placed_marks) do
-		if Util.is_letter(mark) then
+		if UtilsMark.is_letter(mark) then
 			marks[mark] = data
 		end
 	end
@@ -142,7 +143,7 @@ function M.next_mark()
 		return x.line > y.line
 	end
 
-	local next = Util.search(marks, { line = line }, { line = math.huge }, comparator, true)
+	local next = UtilsMark.search(marks, { line = line }, { line = math.huge }, comparator, true)
 
 	if next then
 		vim.api.nvim_win_set_cursor(0, { next.line, next.col })
@@ -159,7 +160,7 @@ function M.prev_mark()
 	local line = vim.api.nvim_win_get_cursor(0)[1]
 	local marks = {}
 	for mark, data in pairs(M.buffers[bufnr].placed_marks) do
-		if Util.is_letter(mark) then
+		if UtilsMark.is_letter(mark) then
 			marks[mark] = data
 		end
 	end
@@ -171,7 +172,7 @@ function M.prev_mark()
 	local function comparator(x, y, _)
 		return x.line < y.line
 	end
-	local prev = Util.search(marks, { line = line }, { line = -1 }, comparator, true)
+	local prev = UtilsMark.search(marks, { line = line }, { line = -1 }, comparator, true)
 
 	if prev then
 		vim.api.nvim_win_set_cursor(0, { prev.line, prev.col })
@@ -201,7 +202,7 @@ function M.delete()
 		return
 	end
 
-	if Util.is_valid_mark(input) then
+	if UtilsMark.is_valid_mark(input) then
 		M.delete_mark(input)
 		return
 	end
@@ -217,8 +218,10 @@ function M.fzf_marks(col, bufnr)
 		return
 	end
 
-	if Util.tablelength(buffer.marks_by_line) then
+	if UtilsMark.tablelength(buffer.marks_by_line) > 0 then
 		require("qfsilet.fzf").grep_marks(buffer.placed_marks, path)
+	else
+		Utils.info("No marks on projects")
 	end
 end
 
@@ -232,7 +235,7 @@ function M.marks_send_to_ll(col, bufnr)
 		return
 	end
 
-	if Util.tablelength(buffer.placed_marks) > 0 then
+	if UtilsMark.tablelength(buffer.placed_marks) > 0 then
 		require("qfsilet.trouble").qfmarks(buffer, path)
 	end
 end
@@ -285,7 +288,11 @@ function M.refresh_deforce(bufnr, force)
 		pos = data.pos
 		cached_mark = M.buffers[bufnr].placed_marks[mark]
 
-		if Util.is_upper(mark) and pos[1] == bufnr and (force or not cached_mark or pos[2] ~= cached_mark.line) then
+		if
+			UtilsMark.is_upper(mark)
+			and pos[1] == bufnr
+			and (force or not cached_mark or pos[2] ~= cached_mark.line)
+		then
 			register_mark(mark, pos[2], pos[3], bufnr)
 		end
 	end
@@ -296,7 +303,7 @@ function M.refresh_deforce(bufnr, force)
 		pos = data.pos
 		cached_mark = M.buffers[bufnr].placed_marks[mark]
 
-		if Util.is_lower(mark) and (force or not cached_mark or pos[2] ~= cached_mark.line) then
+		if UtilsMark.is_lower(mark) and (force or not cached_mark or pos[2] ~= cached_mark.line) then
 			register_mark(mark, pos[2], pos[3], bufnr)
 		end
 	end
@@ -330,7 +337,7 @@ function M.add_sign(bufnr, text, line, id)
 	-- 	priority = Config.marks.priority[3]
 	-- end
 
-	Util.add_sign(bufnr, text, line, id, "MarkSigns", priority)
+	UtilsMark.add_sign(bufnr, text, line, id, "MarkSigns", priority)
 end
 
 function M.refresh(force_reregister)
@@ -358,7 +365,7 @@ function M.setup(timer_setup)
 	-- how often (in ms) to redraw signs/recompute mark positions.
 	-- higher values will have better performance but may cause visual lag,
 	-- while lower values may cause performance penalties. default 150.
-	local refresh_interval = Util.option_nil(timer_setup, 150)
+	local refresh_interval = UtilsMark.option_nil(timer_setup, 150)
 
 	local timer = vim.loop.new_timer()
 	timer:start(0, refresh_interval, vim.schedule_wrap(M.refresh))
