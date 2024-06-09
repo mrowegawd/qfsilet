@@ -2,51 +2,17 @@ local fn = vim.fn
 
 local Constant = require("qfsilet.constant")
 local Utils = require("qfsilet.utils")
-local Visual = require("qfsilet.visual")
+local Visual = require("qfsilet.marks.visual")
+local UtilsFzf = require("qfsilet.fzf.utils")
 
 local M = {}
-
-local nbsp = "\xe2\x80\x82" -- Non-breaking space unicode character "\u{2002}"
-
-local function lastIndexOf(haystack, needle)
-	local i = haystack:match(".*" .. needle .. "()")
-	if i == nil then
-		return nil
-	else
-		return i - 1
-	end
-end
-
-local function stripBeforeLastOccurrenceOf(str, sep)
-	local idx = lastIndexOf(str, sep) or 0
-	return str:sub(idx + 1), idx
-end
-
-local function stripAnsiColoring(str)
-	if not str then
-		return str
-	end
-	-- Remove escape sequences of the following formats:
-	-- 1. ^[[34m
-	-- 2. ^[[0;34m
-	-- 3. ^[[m
-	return str:gsub("%[[%d;]-m", "")
-end
-
-local function stripString(selected)
-	local pth = stripAnsiColoring(selected)
-	if pth == nil then
-		return
-	end
-	return stripBeforeLastOccurrenceOf(pth, nbsp)
-end
 
 local function mergeQuickFix(selected, opts, basePath)
 	local tbl = {}
 
 	if type(selected) == "table" then
 		for _, sel in pairs(selected) do
-			local pth = stripString(sel)
+			local pth = UtilsFzf.stripString(sel)
 			local filePath = basePath .. "/" .. pth .. ".json"
 
 			local fileRead = Utils.getFileRead(filePath)
@@ -80,7 +46,7 @@ local function mergeQuickFix(selected, opts, basePath)
 end
 
 local function editQuickFix(selected, basePath)
-	local pth = stripString(selected)
+	local pth = UtilsFzf.stripString(selected)
 	if pth == nil then
 		return
 	end
@@ -116,13 +82,6 @@ function M.editOrMergeQuickFix(opts, basePath)
 			else
 				editQuickFix(selected[1], basePath)
 			end
-
-			-- if Visual.extmarks.set_extmarks then
-			-- 	Visual.update_extmarks()
-			-- end
-			if Visual.extmarks.set_signs then
-				Visual.update_signs()
-			end
 		end,
 		["ctrl-q"] = function(selected, _)
 			if #selected > 1 then
@@ -137,7 +96,7 @@ end
 function M.deleteItem(basePath)
 	return {
 		["ctrl-x"] = function(selected, _)
-			local sel = stripString(selected[1])
+			local sel = UtilsFzf.stripString(selected[1])
 			if sel == nil then
 				return
 			end
@@ -153,15 +112,75 @@ function M.deleteItem(basePath)
 	}
 end
 
-function M.mark_defaults(mark_opts)
+function M.mark_defaults(buffer)
 	return {
 		["default"] = function(selected, _)
-			local sel = stripString(selected[1])
+			local sel = UtilsFzf.stripString(selected[1])
 			if sel == nil then
 				return
 			end
 
-			vim.api.nvim_win_set_cursor(0, { mark_opts[sel].line, 1 })
+			local sel_text = UtilsFzf.stripString(sel)
+			if sel_text then
+				local text = sel_text:gsub(Visual.extmarks.qf_sigil .. " ", "")
+				local bufnr = string.match(text, "%[(%d*)%]")
+				local mark = string.match(text, "^(%w*)%s")
+				local nr = tonumber(bufnr)
+				for k, x in pairs(buffer) do
+					if k == nr then
+						local locate = x.placed_marks[mark]
+						vim.cmd("e " .. locate.filename)
+						vim.api.nvim_win_set_cursor(0, { locate.line, locate.col })
+						vim.cmd("normal! zz")
+					end
+				end
+			end
+		end,
+
+		["ctrl-v"] = function(selected, _)
+			local sel = UtilsFzf.stripString(selected[1])
+			if sel == nil then
+				return
+			end
+
+			local sel_text = UtilsFzf.stripString(sel)
+			if sel_text then
+				local text = sel_text:gsub(Visual.extmarks.qf_sigil .. " ", "")
+				local bufnr = string.match(text, "%[(%d*)%]")
+				local mark = string.match(text, "^(%w*)%s")
+				local nr = tonumber(bufnr)
+				for k, x in pairs(buffer) do
+					if k == nr then
+						local locate = x.placed_marks[mark]
+						vim.cmd("vsplit " .. locate.filename)
+						vim.api.nvim_win_set_cursor(0, { locate.line, locate.col })
+						vim.cmd("normal! zz")
+					end
+				end
+			end
+		end,
+
+		["ctrl-s"] = function(selected, _)
+			local sel = UtilsFzf.stripString(selected[1])
+			if sel == nil then
+				return
+			end
+
+			local sel_text = UtilsFzf.stripString(sel)
+			if sel_text then
+				local text = sel_text:gsub(Visual.extmarks.qf_sigil .. " ", "")
+				local bufnr = string.match(text, "%[(%d*)%]")
+				local mark = string.match(text, "^(%w*)%s")
+				local nr = tonumber(bufnr)
+				for k, x in pairs(buffer) do
+					if k == nr then
+						local locate = x.placed_marks[mark]
+						vim.cmd("split " .. locate.filename)
+						vim.api.nvim_win_set_cursor(0, { locate.line, locate.col })
+						vim.cmd("normal! zz")
+					end
+				end
+			end
 		end,
 	}
 end

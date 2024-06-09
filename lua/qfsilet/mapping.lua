@@ -1,14 +1,27 @@
 local Qfsilet_qf = require("qfsilet.qf")
 local Qfsilet_marks = require("qfsilet.marks")
+local Qfsilet_note = require("qfsilet.note")
 local Config = require("qfsilet.config").current_configs
 
 local M = {}
 
-local function set_keymaps(keys_tbl, is_bufnr, is_marks)
+local function set_keymaps(keys_tbl, is_bufnr, is_marks, is_todo_note)
+	is_bufnr = is_bufnr or false
 	is_marks = is_marks or false
+	is_todo_note = is_todo_note or false
+
+	vim.validate({
+		keys_tbl = { keys_tbl, "table" },
+		is_bufnr = { is_bufnr, "boolean" },
+		is_marks = { is_bufnr, "boolean" },
+		is_todo_note = { is_todo_note, "boolean" },
+	})
+
 	for _, cmd in ipairs(keys_tbl) do
 		if #cmd.keys > 0 then
-			local keymap_func = is_marks and Qfsilet_marks[cmd.func] or Qfsilet_qf[cmd.func]
+			local keymap_func = is_marks and Qfsilet_marks[cmd.func]
+				or is_todo_note and Qfsilet_note[cmd.func]
+				or Qfsilet_qf[cmd.func]
 			local keymap_args = { desc = cmd.desc }
 			if is_bufnr then
 				keymap_args.buffer = vim.api.nvim_get_current_buf()
@@ -39,7 +52,7 @@ function M.setup_keymaps_and_autocmds()
 		{
 			desc = "Marks: delete item quickfix",
 			func = "del_itemqf",
-			keys = Config.keymap.del_item,
+			keys = Config.keymap.quickfix.del_item,
 			mode = "n",
 		},
 		{
@@ -59,7 +72,7 @@ function M.setup_keymaps_and_autocmds()
 		{
 			desc = "Marks: toggle location list",
 			func = "toggle_loclist",
-			keys = Config.keymap.loclist.toggle_open,
+			keys = Config.keymap.quickfix.toggle_open_loclist,
 			mode = "n",
 		},
 	}
@@ -67,31 +80,7 @@ function M.setup_keymaps_and_autocmds()
 		{
 			desc = "Marks: toggle quickfix list",
 			func = "toggle_qf",
-			keys = Config.keymap.quickfix.toggle_open,
-			mode = "n",
-		},
-		{
-			desc = "Marks: insert sign mark (on cursor)",
-			func = "add_item_toqf",
-			keys = Config.keymap.quickfix.on_cursor,
-			mode = "n",
-		},
-		{
-			desc = "Marks: open local todo window",
-			func = "add_todo",
-			keys = Config.keymap.quickfix.add_todo,
-			mode = { "n", "v" },
-		},
-		{
-			desc = "Marks: open global todo window",
-			func = "add_todo_global",
-			keys = Config.keymap.quickfix.add_todo_global,
-			mode = { "n", "v" },
-		},
-		{
-			desc = "Marks: set cursor link capture todo",
-			func = "add_todo_capture_link",
-			keys = Config.keymap.quickfix.add_link_capture,
+			keys = Config.keymap.quickfix.toggle_open_qf,
 			mode = "n",
 		},
 		{
@@ -99,12 +88,6 @@ function M.setup_keymaps_and_autocmds()
 			func = "fzf_qf",
 			keys = Config.keymap.quickfix.fzf_qf,
 			mode = "n",
-		},
-		{
-			desc = "Marks: goto link capture",
-			func = "goto_link_capture",
-			keys = Config.keymap.quickfix.goto_link_capture,
-			mode = { "n", "v" },
 		},
 		{
 			desc = "Marks: save quickfix items",
@@ -119,7 +102,34 @@ function M.setup_keymaps_and_autocmds()
 			mode = "n",
 		},
 	}
+	local todo_note_keymaps = {
 
+		{
+			desc = "Marks: open local todo window",
+			func = "open_todo_local",
+			keys = Config.keymap.todo.add_todo,
+			mode = { "n", "v" },
+		},
+		{
+			desc = "Marks: open global todo window",
+			func = "todo_global",
+			keys = Config.keymap.todo.add_todo_global,
+			mode = { "n", "v" },
+		},
+		{
+			desc = "Marks: set cursor link capture todo",
+			func = "todo_with_capture_link",
+			keys = Config.keymap.todo.add_link_capture,
+			mode = "n",
+		},
+
+		{
+			desc = "Marks: goto link capture",
+			func = "todo_goto_capture_link",
+			keys = Config.keymap.quickfix.goto_link_capture,
+			mode = { "n", "v" },
+		},
+	}
 	local marks_keymaps = {
 		{
 			desc = "Marks: toggle marks",
@@ -137,6 +147,12 @@ function M.setup_keymaps_and_autocmds()
 			desc = "Marks: jump to prev",
 			func = "prev_mark",
 			keys = Config.keymap.marks.prev_mark,
+			mode = "n",
+		},
+		{
+			desc = "Marks: delete mark",
+			func = "delete",
+			keys = Config.keymap.marks.del_mark,
 			mode = "n",
 		},
 		{
@@ -158,12 +174,6 @@ function M.setup_keymaps_and_autocmds()
 			mode = "n",
 		},
 		{
-			desc = "Marks: delete mark",
-			func = "delete",
-			keys = Config.keymap.marks.del_mark,
-			mode = "n",
-		},
-		{
 			desc = "Marks: show config marks",
 			func = "show_config",
 			keys = Config.keymap.marks.show_config,
@@ -177,9 +187,10 @@ function M.setup_keymaps_and_autocmds()
 
 	set_ft_keymaps("QFSiletAuMappings", { "qf" }, ft_keymaps)
 
-	set_keymaps(qf_keymaps, false)
-	set_keymaps(loc_keymaps, false)
-	set_keymaps(marks_keymaps, false, true)
+	set_keymaps(qf_keymaps, false, false, false)
+	set_keymaps(todo_note_keymaps, false, false, true)
+	set_keymaps(loc_keymaps, false, false, false)
+	set_keymaps(marks_keymaps, false, true, false)
 end
 
 return M

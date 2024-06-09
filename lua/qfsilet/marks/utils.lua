@@ -1,4 +1,5 @@
-local M = { sign_cache = {} }
+local M = {}
+
 local builtin_marks = {
 	["."] = true,
 	["^"] = true,
@@ -14,30 +15,10 @@ for i = 0, 9 do
 	builtin_marks[tostring(i)] = true
 end
 
-function M.add_sign(bufnr, text, line, id, group, priority)
-	priority = priority or 10
-	local sign_name = "Marks_" .. text
-	if not M.sign_cache[sign_name] then
-		M.sign_cache[sign_name] = true
-		vim.fn.sign_define(sign_name, {
-			text = text,
-			-- texthl = "MarkSignHL",
-			-- numhl = "MarkSignNumHL",
-			texthl = "MyMark",
-		})
-	end
-	vim.fn.sign_place(id, group, sign_name, bufnr, { lnum = line, priority = priority })
-end
-
-function M.remove_sign(bufnr, id, group)
-	group = group or "MarkSigns"
-	vim.fn.sign_unplace(group, { buffer = bufnr, id = id })
-end
-
-function M.remove_buf_signs(bufnr, group)
-	group = group or "MarkSigns"
-	vim.fn.sign_unplace(group, { buffer = bufnr })
-end
+-- function M.remove_buf_signs(bufnr, group)
+-- 	group = group or "MarkSigns"
+-- 	vim.fn.sign_unplace(group, { buffer = bufnr })
+-- end
 
 function M.search(marks, start_data, init_values, cmp, cyclic)
 	local min_next = init_values

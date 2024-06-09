@@ -3,13 +3,12 @@ local uv, fn, L = vim.loop, vim.fn, vim.log
 -- local async = require("plenary.async")
 local SHA = require("qfsilet.sha")
 local Plenary_path = require("plenary.path")
-local Visual = require("qfsilet.visual")
 
 local M = {}
 
---         ┌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┐
---         ╎                           PATH                           ╎
---         └╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘
+-- ┌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┐
+-- ╎                           PATH                           ╎
+-- └╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘
 
 local function __get_cwd_root()
 	local HAVE_GITSIGNS = pcall(require, "gitsigns")
@@ -96,9 +95,9 @@ function M.current_file_path()
 	return vim.api.nvim_buf_get_name(0)
 end
 
---         ┌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┐
---         ╎                           LIST                           ╎
---         └╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘
+-- ┌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┐
+-- ╎                           LIST                           ╎
+-- └╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘
 
 function M.getCurrentList(items, isLocationlist)
 	local cur_list
@@ -127,17 +126,7 @@ function M.cleanupItems(items)
 
 	local tbl_stay = {}
 	for i = 1, #_tbl do
-		local x = _tbl[i]
-		local ttmatch = x.text:match("qfsilet")
-		if x.type == Visual.extmarks.unique_id and ttmatch ~= nil and #ttmatch > 0 then
-			local ttpath = x.text:sub(5)
-			local p = Plenary_path:new(fn.expand(ttpath))
-			if p:exists() then
-				table.insert(tbl_stay, _tbl[i])
-			end
-		else
-			table.insert(tbl_stay, _tbl[i])
-		end
+		table.insert(tbl_stay, _tbl[i])
 	end
 
 	items.qf.items = tbl_stay
@@ -146,9 +135,9 @@ function M.cleanupItems(items)
 	return items, title
 end
 
---         ┌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┐
---         ╎                           JSON                           ╎
---         └╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘
+-- ┌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┐
+-- ╎                           JSON                           ╎
+-- └╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘
 
 function M.jsonEncode(tbl)
 	return fn.json_encode(tbl)
@@ -179,9 +168,9 @@ function M.checkJSONPath(path)
 	end
 end
 
---         ┌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┐
---         ╎                           MISC                           ╎
---         └╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘
+-- ┌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┐
+-- ╎                           MISC                           ╎
+-- └╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘
 
 function M.feedkey(mode, motion, special)
 	local sequence = vim.api.nvim_replace_termcodes(motion, true, false, special or false)

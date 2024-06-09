@@ -3,7 +3,6 @@ local api = vim.api
 local cmd = vim.cmd
 
 local Utils = require("qfsilet.utils")
-local Visual = require("qfsilet.visual")
 local Plenary_path = require("plenary.path")
 local Note = require("qfsilet.note")
 
@@ -30,96 +29,18 @@ local function set_current_list(cur_list, is_local, win_id)
 		fn.setqflist({}, "r", what)
 
 		if qf.save_mode then
-			-- TODO: settings auto save?
-			print("")
+			-- TODO: setting auto save?
+			return
 		end
 	end
-end
-
-local function note_insertqf_allowed()
-	local ft = vim.bo[0].filetype
-	local is_loclist = Utils.isLocList()
-	local is_floatwin = api.nvim_win_get_config(0).relative ~= ""
-
-	if is_loclist or ft == "qf" or is_floatwin then
-		return true
-	end
-	return false
-end
-
-local function insert_list(items, is_local)
-	local cur_list = Utils.getCurrentList(items, is_local)
-
-	set_current_list(cur_list, is_local)
-
-	if Visual.extmarks.set_extmarks then
-		Visual.insert_extmarks(items, is_local)
-	end
-	if Visual.extmarks.set_signs then
-		Visual.insert_signs(items, is_local)
-	end
-
-	Visual.setup_buf_autocmds(is_local)
-end
-
-local function insert_note_to_list(is_note, location, dir_hash, is_local)
-	local qf_note = ""
-
-	if not is_note then
-		qf_note = api.nvim_get_current_line()
-	else
-		qf_note = " " .. dir_hash
-	end
-
-	local item = {
-		bufnr = fn.bufnr(),
-		lnum = location[1],
-		col = location[2] + 1,
-		text = qf_note,
-		type = Visual.extmarks.unique_id,
-	}
-	insert_list({ item }, is_local)
 end
 
 function qf.saveqf()
 	Note.saveqf_list()
 end
 
--- function qf.saveqf_global()
--- 	Note.saveqflist_global()
--- end
-
 function qf.loadqf()
 	Note.loadqf_list()
-end
-
--- function qf.loadqf_global()
--- 	Note.loadqflist_global()
--- end
-
-function qf.add_todo()
-	Note.todo_local()
-end
-
-function qf.add_todo_global()
-	Note.todo_global()
-end
-
-function qf.add_todo_capture_link()
-	Note.todo_with_capture_link()
-end
-
-function qf.goto_link_capture()
-	Note.todo_goto_capture_link()
-end
-
-function qf.add_item_toqf()
-	if note_insertqf_allowed() then
-		return Utils.warn("Cannot insert...\n(Do not do this inside qf)", "QFSilet")
-	end
-
-	local location = api.nvim_win_get_cursor(0)
-	insert_note_to_list(false, location, false)
 end
 
 function qf.fzf_qf()
@@ -226,13 +147,6 @@ function qf.del_itemqf()
 		fn.setqflist({})
 		cmd.cclose()
 	end
-
-	if Visual.extmarks.set_extmarks then
-		Visual.update_extmarks()
-	end
-	if Visual.extmarks.set_signs then
-		Visual.update_signs()
-	end
 end
 
 function qf.clear_qf_list()
@@ -240,13 +154,6 @@ function qf.clear_qf_list()
 
 	fn.setqflist({})
 	cmd.cclose()
-
-	if Visual.extmarks.set_extmarks then
-		Visual.update_extmarks()
-	end
-	if Visual.extmarks.set_signs then
-		Visual.update_signs()
-	end
 end
 
 function qf.clear_loc_list()
@@ -254,28 +161,16 @@ function qf.clear_loc_list()
 
 	fn.setloclist(0, {})
 	cmd.lclose()
-
-	if Visual.extmarks.set_extmarks then
-		Visual.update_extmarks()
-	end
-	if Visual.extmarks.set_signs then
-		Visual.update_signs()
-	end
 end
 
 local function filter_qfsilet_items(cur_list)
 	local new_list = {}
 	for _, item in ipairs(cur_list) do
-		if item.type ~= Visual.extmarks.unique_id then
-			table.insert(new_list, item)
-		else
-			-- Delete note item
-			if item.text:match("qfsilet") then
-				local note_fpath = item.text:sub(5)
-				local p = Plenary_path:new(fn.expand(note_fpath))
-				if p:exists() then
-					p:rm()
-				end
+		if item.text:match("qfsilet") then
+			local note_fpath = item.text:sub(5)
+			local p = Plenary_path:new(fn.expand(note_fpath))
+			if p:exists() then
+				p:rm()
 			end
 		end
 	end
@@ -290,13 +185,6 @@ function qf.clear_notes()
 
 	new_list = filter_qfsilet_items(fn.getqflist())
 	fn.setqflist(new_list)
-
-	if Visual.extmarks.set_extmarks then
-		Visual.update_extmarks()
-	end
-	if Visual.extmarks.set_signs then
-		Visual.update_signs()
-	end
 end
 
 return qf

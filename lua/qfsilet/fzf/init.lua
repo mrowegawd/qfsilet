@@ -1,8 +1,10 @@
-local Util = require("qfsilet.utils")
+local Utils = require("qfsilet.utils")
+local Visual = require("qfsilet.marks.visual")
+local UtilsFzf = require("qfsilet.fzf.utils")
 local fzf_ok, _ = pcall(require, "fzf-lua")
 
 if not fzf_ok then
-	Util.warn("fzf-lua diperlukan sebagai dependensi")
+	Utils.warn("fzf-lua diperlukan sebagai dependensi")
 	return
 end
 
@@ -45,8 +47,8 @@ function M.load(opts, isGlobal)
 		titleMsg = "global"
 	end
 
-	if not Util.checkJSONPath(Constant.defaults.base_path) then
-		Util.warn(
+	if not Utils.checkJSONPath(Constant.defaults.base_path) then
+		Utils.warn(
 			string.format([[Tidak ada %s note pada path project ini. Cobalah untuk membuatnya..]], titleMsg),
 			"QFSilet"
 		)
@@ -75,8 +77,8 @@ function M.load(opts, isGlobal)
 			local cols = vim.o.columns - 50
 			local collss = cols > 80 and cols - 80 or cols / 2
 
-			local win_height = math.ceil(Util.get_option("lines") * 0.5 - 10)
-			local win_width = math.ceil(Util.get_option("columns") * 0.5 - 20)
+			local win_height = math.ceil(Utils.get_option("lines") * 0.5 - 10)
+			local win_width = math.ceil(Utils.get_option("columns") * 0.5 - 20)
 			return { width = win_width, height = win_height, row = 20, col = collss }
 		end,
 		actions = vim.tbl_extend(
@@ -111,8 +113,8 @@ function M.sel_qf(opts, isLoad)
 			local cols = vim.o.columns - 50
 			local collss = cols > 80 and cols - 80 or cols / 2
 
-			local win_height = math.ceil(Util.get_option("lines") * 0.5 - 10)
-			local win_width = math.ceil(Util.get_option("columns") * 0.5 - 20)
+			local win_height = math.ceil(Utils.get_option("lines") * 0.5 - 10)
+			local win_width = math.ceil(Utils.get_option("columns") * 0.5 - 20)
 			return { width = win_width, height = win_height, row = 20, col = collss }
 		end,
 
@@ -167,10 +169,37 @@ function M.sel_qf(opts, isLoad)
 	})
 end
 
-function M.grep_marks(marks_opts, path)
-	local keyset = Util.key_to_tbl(marks_opts)
+function M.grep_marks(buffer)
+	local marks = {}
 
-	-- Create custom previewer fzf
+	for _, x in pairs(buffer) do
+		if #Utils.key_to_tbl(x.marks_by_line) > 0 then
+			for _, v in pairs(x.marks_by_line) do
+				local bufnr = x.placed_marks[v[1]].bufnr
+				local filename = vim.fn.pathshorten(x.placed_marks[v[1]].filename)
+				local line = x.placed_marks[v[1]].line
+				local col = x.placed_marks[v[1]].col
+				marks[#marks + 1] = Visual.extmarks.qf_sigil
+					.. " "
+					.. v[1]
+					.. " ["
+					.. bufnr
+					.. "] "
+					.. filename
+					.. ":"
+					.. line
+					.. ":"
+					.. col
+			end
+		end
+	end
+
+	if #marks == 0 then
+		Utils.info("No marks")
+		return
+	end
+
+	-- print(vim.inspect(marks))
 	local builtin = require("fzf-lua.previewer.builtin")
 	local marks_previewer = builtin.buffer_or_file:extend()
 
@@ -181,21 +210,33 @@ function M.grep_marks(marks_opts, path)
 	end
 
 	function marks_previewer:parse_entry(entry_str)
-		-- local path, line = entry_str:match("([^:]+):?(.*)")
-		return {
-			path = path,
-			line = marks_opts[entry_str].line,
-			col = marks_opts[entry_str].col,
-		}
+		entry_str = UtilsFzf.stripString(entry_str)
+
+		if entry_str then
+			local sel_text = entry_str:gsub(Visual.extmarks.qf_sigil .. " ", "")
+			local bufnr = string.match(sel_text, "%[(%d*)%]")
+			local mark = string.match(sel_text, "^(%w*)%s")
+			local nr = tonumber(bufnr)
+			for k, x in pairs(buffer) do
+				if k == nr then
+					local locate = x.placed_marks[mark]
+					return {
+						path = locate.filename,
+						line = locate.line,
+						col = locate.col,
+					}
+				end
+			end
+		end
 	end
 
-	require("fzf-lua").fzf_exec(keyset, {
+	require("fzf-lua").fzf_exec(marks, {
 		previewer = marks_previewer,
-		prompt = "Select mark> ",
-		actions = FzfMappings.mark_defaults(marks_opts),
+		prompt = "   ",
+		actions = FzfMappings.mark_defaults(buffer),
 		winopts = {
-			hl = { normal = "Normal" },
-			title = formatTitle("Marks ", "X", "GitSignsAdd"),
+			-- hl = { normal = "Normal" },
+			title = formatTitle("Select Marks", "X", "GitSignsAdd"),
 			border = "rounded",
 			preview = {
 				vertical = "up:45%", -- up|down:size
@@ -206,10 +247,10 @@ function M.grep_marks(marks_opts, path)
 			local cols = vim.o.columns - 50
 			local collss = cols > 80 and cols - 80 or cols / 2
 
-			local win_height = math.ceil(Util.get_option("lines") * 0.5)
-			local win_width = math.ceil(Util.get_option("columns") * 1)
+			local win_height = math.ceil(Utils.get_option("lines") * 0.5)
+			local win_width = math.ceil(Utils.get_option("columns") * 1)
 
-			local row = math.ceil((Util.get_option("lines") - win_height) * 1 + 5)
+			local row = math.ceil((Utils.get_option("lines") - win_height) * 1 + 5)
 			return { width = win_width, height = win_height, row = row, col = collss }
 		end,
 	})

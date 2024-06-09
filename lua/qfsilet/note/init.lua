@@ -14,8 +14,9 @@ local M = {}
 Path.init_global()
 Path.init_local()
 
-local function todo(isGlobal)
+local function todo(isGlobal, force)
 	isGlobal = isGlobal or false
+	force = force or false
 
 	-- Set path init first before doing something..
 	if isGlobal then
@@ -25,7 +26,11 @@ local function todo(isGlobal)
 	end
 
 	if not Utils.isFile(Constant.defaults.note_path) then
-		Utils.create_file(Constant.defaults.note_path)
+		if force then
+			Utils.create_file(Constant.defaults.note_path)
+		else
+			return
+		end
 	end
 
 	Ui.popup(Constant.defaults.note_path, isGlobal, Constant.defaults.base_path)
@@ -111,8 +116,12 @@ function M.todo_local()
 	todo()
 end
 
+function M.open_todo_local()
+	todo(false, true)
+end
+
 function M.todo_global()
-	todo(true)
+	todo(true, true)
 end
 
 function M.saveqf_list()

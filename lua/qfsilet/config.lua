@@ -1,26 +1,30 @@
 local fn, fmt = vim.fn, string.format
 
-local Visual = require("qfsilet.visual")
+local Visual = require("qfsilet.marks.visual")
 local Utils = require("qfsilet.utils")
 
 local M = {}
 
-local default_settings = {
+M.current_configs = {
 	save_dir = fn.stdpath("data") .. "/qfsilet",
 	hl_group = "Comment",
-	extmarks = false,
-	set_signs = true,
+	extmarks = {
+		qf_sigil = "", --"",
+		qf_badge = " qfNote",
+		set_signs = true,
+		priority = 10,
+	},
 	marks = {
 		enabled = true,
+		excluded = {
+			buftypes = {},
+			filetypes = {},
+		},
 		default_mappings = false,
 		builtin_marks = false,
 		cyclic = true,
 		force_write_shada = false,
 		refresh_interval = 250,
-		signs = {
-			enabled = true,
-			icon = "",
-		},
 		sign_priority = { lower = 10, upper = 15, builtin = 8, bookmark = 20 },
 		excluded_filetypes = {},
 	},
@@ -28,14 +32,6 @@ local default_settings = {
 		enabled = true,
 		maxheight = 8,
 		minheight = 5,
-	},
-	signs = {
-		qflist = "",
-		priority = 10,
-	},
-	notify = {
-		enabled = true,
-		notif_plugin = "noice",
 	},
 	file_spec = {
 		name = "todo",
@@ -49,25 +45,23 @@ local default_settings = {
 		filetype = "org",
 	},
 	keymap = {
-		del_item = "dd",
-		del_note = "DD",
 		quickfix = {
+			del_item = "dd",
 			clear_all = "C",
 			clear_notes = "cc",
-			toggle_open = "<leader>l",
-			on_cursor = "mq",
-			add_todo = "mt",
-			add_link_capture = "mc",
+			toggle_open_qf = "<leader>l",
+			toggle_open_loclist = "<localleader>l",
 			goto_link_capture = "g<cr>",
-			add_todo_global = "mT",
 			fzf_qf = "mx",
 			save_local = "ms",
 			save_global = "mS",
 			load_local = "ml",
 			load_global = "mL",
 		},
-		loclist = {
-			toggle_open = "<localleader>l",
+		todo = {
+			add_todo = "mt",
+			add_todo_global = "mT",
+			add_link_capture = "mc",
 		},
 		marks = {
 			toggle_mark = "m`",
@@ -76,18 +70,19 @@ local default_settings = {
 			prev_mark = "sp",
 			del_buf_mark = "dM",
 			del_mark = "dm",
+			del_mark_mod = "dmm",
 			fzf_marks = "mf",
 			fzf_send_qf_marks = "mX",
 		},
 	},
 }
 
-M.current_configs = {}
-
 local function merge_settings(cfg_tbl, opts)
-	opts = opts or {}
-	local settings = vim.tbl_deep_extend("force", cfg_tbl, opts)
-	return settings
+	vim.validate({
+		cfg_tbl = { cfg_tbl, "table" },
+		opts = { opts, "table" },
+	})
+	return vim.tbl_deep_extend("force", cfg_tbl, opts)
 end
 
 local function setup_highlight_groups()
@@ -96,18 +91,18 @@ local function setup_highlight_groups()
 		qf_ext_hl = Visual.extmarks.qf_ext_hl_group,
 	}
 	for id, name in pairs(names) do
-		local ok = vim.api.nvim_get_hl(0, { name = name, link = false })
-		if not ok then
-			vim.validate({
-				opt = { Visual.extmarks[id], "t" },
-			})
+		if type(Visual.extmarks[id]) == "table" then
+			---@diagnostic disable-next-line: param-type-mismatch
 			vim.api.nvim_set_hl(0, name, Visual.extmarks[id])
 		end
 	end
 end
 
 function M.update_settings(opts)
-	local settings = merge_settings(default_settings, opts)
+	vim.validate({
+		opts = { opts, "table" },
+	})
+	local settings = merge_settings(M.current_configs, opts)
 
 	-- Makes the quickfix and local list prettier. Borrowed from nvim-bqf.
 	function _G.qftf(info)
@@ -189,16 +184,15 @@ function M.update_settings(opts)
 		require("qfsilet.marks").setup(settings.marks.refresh_interval)
 	end
 
-	Visual.extmarks.set_extmarks = settings.extmarks
-	Visual.extmarks.set_signs = settings.set_signs
-	Visual.extmarks.qf_sigil = settings.signs.qflist
-	Visual.extmarks.priority = settings.signs.priority
+	for i_ext, _ in pairs(Visual.extmarks) do
+		for i_ext_set, _ in pairs(settings.extmarks) do
+			if i_ext == i_ext_set then
+				Visual.extmarks[i_ext] = settings.extmarks[i_ext_set]
+			end
+		end
+	end
 
 	setup_highlight_groups()
-	vim.fn.sign_define(
-		Visual.extmarks.qf_sigil,
-		{ text = Visual.extmarks.qf_sigil, texthl = Visual.extmarks.qf_sign_hl_group }
-	)
 
 	return settings
 end

@@ -1,28 +1,25 @@
-local M = {}
-
--- Credits: borrowed from arsham/listish.nvim
+local M = { sign_cache = {} }
 
 M.extmarks = {
+	enabled = true,
 	unique_id = "Z",
 	group = vim.api.nvim_create_augroup("QFSILET_AUTOCMDS", { clear = true }),
 	ns = vim.api.nvim_create_namespace("qfsilet-ns"),
 	listener_name = "QFSilet_autocmd_listener",
 
+	set_signs = true,
 	sign_group = "QFSilet_sign_group",
 
-	set_signs = false,
+	qf_sigil = "", --"",
 
-	qf_sigil = "",
 	qf_sign_hl_group = "QFSiletQfSign",
 	qf_sign_hl = { fg = "#8a62c6" },
 
-	local_sign_hl_group = "QFSiletLocalSign",
-	local_sign_hl = { fg = "#b5854a", bg = "#2A2D30" },
-	local_sigil = "",
+	-- local_sign_hl_group = "QFSiletLocalSign",
+	-- local_sign_hl = { fg = "#b5854a", bg = "#2A2D30" },
+	-- local_sigil = "",
 
-	priority = 1,
-
-	set_extmarks = false,
+	priority = 10,
 
 	qf_badge = " qfNote",
 	qf_ext_hl = { fg = "#8a62c6" },
@@ -125,21 +122,32 @@ function M.update_extmarks()
 	end
 end
 
-function M.insert_signs(items, is_local)
-	local sigil = M.extmarks.qf_sigil
-	if is_local then
-		sigil = M.extmarks.local_sigil
+function M.insert_signs(bufnr, text, line, id)
+	id = id or 0
+	bufnr = bufnr or 0
+
+	local sign_name = "Marks_" .. text
+
+	if not M.sign_cache[sign_name] then
+		M.sign_cache[sign_name] = true
+		if M.extmarks.set_signs then
+			vim.fn.sign_define(sign_name, { text = M.extmarks.qf_sigil, texthl = M.extmarks.qf_sign_hl_group })
+		else
+			vim.fn.sign_define(sign_name, { text = text, texthl = M.extmarks.qf_sign_hl_group })
+		end
 	end
 
-	for _, item in ipairs(items) do
-		vim.fn.sign_place(
-			0,
-			M.extmarks.sign_group,
-			sigil,
-			item.bufnr,
-			{ lnum = item.lnum, priority = M.extmarks.priority }
-		)
-	end
+	vim.fn.sign_place(id, M.extmarks.qf_sign_hl_group, sign_name, bufnr, { lnum = line, priority = 10 })
+end
+
+function M.remove_sign(bufnr, id, group)
+	group = group or M.extmarks.qf_sign_hl_group
+	vim.fn.sign_unplace(group, { buffer = bufnr, id = id })
+end
+
+function M.remove_buf_signs(bufnr, id, group)
+	group = group or M.extmarks.qf_sign_hl_group
+	vim.fn.sign_unplace(group, { buffer = bufnr, id = id })
 end
 
 ---Updates all the signs based on the qflist and locallist values. We don't
