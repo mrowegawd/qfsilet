@@ -1,5 +1,6 @@
 local Input = require("nui.input")
 local Popup = require("nui.popup")
+local NuiText = require("nui.text")
 local Util = require("qfsilet.utils")
 local Event = require("nui.utils.autocmd").event
 local Config = require("qfsilet.config").current_configs
@@ -28,8 +29,8 @@ local function get_desired_ui_size()
 
 	local total_width = math.floor(vim_width * total_width_ratio + 0.3)
 	local total_height = math.floor(vim_height * total_height_ratio + 0.3)
-	local initial_col = math.floor((vim_width - total_width) / 2 + 0.3) + 8
-	local initial_row = math.floor((vim_height - total_height) / 2 + 0.3) - 5
+	local initial_col = math.floor((vim_width - total_width) / 2 + 0.3) + 2
+	local initial_row = math.floor((vim_height - total_height) / 2 + 0.3) - 11
 
 	return initial_col, initial_row
 end
@@ -42,6 +43,15 @@ local function get_desired_popup_size()
 
 	return width, height
 end
+
+local function h(name)
+	return vim.api.nvim_get_hl(0, { name = name })
+end
+
+vim.api.nvim_set_hl(0, "Botol", { bg = h("WinSeparator").fg, bold = true, fg = h("Normal").fg })
+vim.api.nvim_set_hl(0, "BotolIcon", { fg = "green", bold = true })
+vim.api.nvim_set_hl(0, "BotolNormal", { fg = "black", bg = "white", bold = true })
+vim.api.nvim_set_hl(0, "BotolFloatNormal", { fg = "black", bg = "white", bold = true })
 
 function M.input(func, text_top_msg)
 	if vim.bo.filetype == "qf" then
@@ -58,7 +68,7 @@ function M.input(func, text_top_msg)
 			style = "single",
 			padding = { top = 1, bottom = 1, left = 1, right = 1 },
 			text = {
-				top = fmt(" [%s %s] ", Config.popup.icon_note, text_top_msg),
+				top = fmt("[%s %s]", Config.popup.icon_note, text_top_msg),
 				top_align = "center",
 			},
 		},
@@ -97,7 +107,7 @@ end
 function M.popup(fname_path, IsGlobal, base_path)
 	IsGlobal = IsGlobal or false
 
-	local top_ext_msg = IsGlobal and "Todo Global" or "Todo Current Project"
+	local top_ext_msg = IsGlobal and "Message?" or "Todo List"
 
 	local col, row = get_desired_ui_size()
 	local width, height = get_desired_popup_size()
@@ -110,25 +120,23 @@ function M.popup(fname_path, IsGlobal, base_path)
 		focusable = true,
 		zindex = 50,
 		win_options = {
-			winhighlight = Config.popup.winhighlight,
-			foldmethod = "manual",
+			-- winhighlight = Config.popup.winhighlight,
+			winhighlight = "Normal:BotolNormal",
 			foldcolumn = "0",
-			foldtext = "",
 		},
 		buf_options = {
-			-- bufhidden = "hide",
 			buflisted = false,
 			buftype = "nofile",
 			swapfile = false,
 			filetype = Config.popup.filetype,
 			modeline = false,
-			formatexpr = 'v:lua.require("orgmode.org.format")()',
 		},
 		border = {
 			padding = { top = 2, bottom = 2, left = 3, right = 3 },
 			style = "rounded",
+			highlight = "WinSeparator",
 			text = {
-				top = fmt(" [ %s %s ] ", Config.popup.icon_note, top_ext_msg),
+				top = NuiText(fmt(" %s ", top_ext_msg), "Botol"),
 				top_align = "center",
 			},
 		},
@@ -138,6 +146,8 @@ function M.popup(fname_path, IsGlobal, base_path)
 		pop_opts.relative = "editor"
 		pop_opts.position = "50%"
 		pop_opts.size = "70%"
+		pop_opts.win_options.winhighlight = Config.popup.winhighlight
+		pop_opts.border.highlight = "WinSeparator"
 	end
 
 	local popup = Popup(pop_opts)

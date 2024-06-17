@@ -16,7 +16,7 @@ local function mergeQuickFix(selected, opts, basePath)
 			local filePath = basePath .. "/" .. pth .. ".json"
 
 			local fileRead = Utils.getFileRead(filePath)
-			local jsonTbl = fn.json_decode(fileRead)
+			local jsonTbl = Utils.json_decode(fileRead)
 			if jsonTbl ~= nil then
 				if #jsonTbl.qf.items > 0 then
 					for _, tblVal in pairs(jsonTbl.qf.items) do
@@ -54,7 +54,7 @@ local function editQuickFix(selected, basePath)
 	local filePath = basePath .. "/" .. pth .. ".json"
 
 	local fileRead = Utils.getFileRead(filePath)
-	local tbl = fn.json_decode(fileRead)
+	local tbl = Utils.json_decode(fileRead)
 
 	if tbl == nil then
 		return
@@ -128,8 +128,13 @@ function M.mark_defaults(buffer)
 				local nr = tonumber(bufnr)
 				for k, x in pairs(buffer) do
 					if k == nr then
+						local found_ls = Utils.find_win_ls(bufnr)
 						local locate = x.placed_marks[mark]
-						vim.cmd("e " .. locate.filename)
+						if found_ls.found then
+							vim.api.nvim_set_current_win(found_ls.winid)
+						else
+							vim.cmd("e " .. locate.filename)
+						end
 						vim.api.nvim_win_set_cursor(0, { locate.line, locate.col })
 						vim.cmd("normal! zz")
 					end

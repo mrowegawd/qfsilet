@@ -9,10 +9,17 @@ M.current_configs = {
 	save_dir = fn.stdpath("data") .. "/qfsilet",
 	hl_group = "Comment",
 	extmarks = {
-		qf_sigil = "", --"",
-		qf_badge = " qfNote",
 		set_signs = true,
+
 		priority = 10,
+
+		qf_sigil = "", --"",
+		qf_sign_hl_group = "QFSiletQfSign",
+		qf_sign_hl = { fg = "#8a62c6" },
+
+		qf_badge = " qfNote",
+		qf_ext_hl = { fg = "#8a62c6" },
+		qf_ext_hl_group = "QFSiletQfExt",
 	},
 	marks = {
 		enabled = true,
@@ -41,7 +48,6 @@ M.current_configs = {
 	popup = {
 		winhighlight = "Normal:NormalFloat,FloatBorder:FloatBorder",
 		icon_note = " ", -- " ",
-		border = "",
 		filetype = "org",
 	},
 	keymap = {
@@ -170,7 +176,7 @@ function M.update_settings(opts)
 
 	if settings.theme_list.enabled then
 		vim.o.qftf = "{info -> v:lua.qftf(info)}"
-		local augroup = vim.api.nvim_create_augroup("QFSiletAdjustHWQf", { clear = true })
+		local augroup = vim.api.nvim_create_augroup("QFSiletThemeQF", { clear = true })
 		vim.api.nvim_create_autocmd("FileType", {
 			pattern = { "qf" },
 			group = augroup,

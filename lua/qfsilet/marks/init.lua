@@ -1,6 +1,9 @@
 local UtilsMark = require("qfsilet.marks.utils")
+local Utils = require("qfsilet.utils")
 local Config = require("qfsilet.config")
 local Visual = require("qfsilet.marks.visual")
+local Path = require("qfsilet.path")
+local Constant = require("qfsilet.constant")
 local M = {}
 
 M.buffers = {}
@@ -43,10 +46,6 @@ local function register_mark(mark, line, col, bufnr)
 		mark = string.char(mark:byte() + 1)
 	end
 	buffer.lowest_available_mark = mark
-end
-
-function M.show_config()
-	vim.print(vim.inspect(M.buffers))
 end
 
 function M.get_current_status_buf()
@@ -171,12 +170,18 @@ function M.next_mark()
 	local next = UtilsMark.search(marks, { line = line }, { line = math.huge }, comparator, true)
 
 	if next then
+		local found_ls = Utils.find_win_ls(next.bufnr)
+
 		if next.bufnr == bufnr then
 			vim.api.nvim_win_set_cursor(0, { next.line, next.col })
 			vim.cmd("normal! zz")
 		else
-			local bufname = vim.api.nvim_buf_get_name(next.bufnr)
-			vim.cmd("e " .. bufname)
+			if found_ls.found then
+				vim.api.nvim_set_current_win(found_ls.winid)
+			else
+				local bufname = vim.api.nvim_buf_get_name(next.bufnr)
+				vim.cmd("e " .. bufname)
+			end
 			vim.api.nvim_win_set_cursor(0, { next.line, next.col })
 			vim.cmd("normal! zz")
 		end
@@ -229,12 +234,18 @@ function M.prev_mark()
 	local prev = UtilsMark.search(marks, { line = line }, { line = -1 }, comparator, true)
 
 	if prev then
+		local found_ls = Utils.find_win_ls(prev.bufnr)
+
 		if prev.bufnr == bufnr then
 			vim.api.nvim_win_set_cursor(0, { prev.line, prev.col })
 			vim.cmd("normal! zz")
 		else
-			local bufname = vim.api.nvim_buf_get_name(prev.bufnr)
-			vim.cmd("e " .. bufname)
+			if found_ls.found then
+				vim.api.nvim_set_current_win(found_ls.winid)
+			else
+				local bufname = vim.api.nvim_buf_get_name(prev.bufnr)
+				vim.cmd("e " .. bufname)
+			end
 			vim.api.nvim_win_set_cursor(0, { prev.line, prev.col })
 			vim.cmd("normal! zz")
 		end
@@ -414,6 +425,30 @@ function M.refresh(force_reregister)
 	-- M.bookmark_state:refresh()
 end
 
+local function __save_marks()
+	local buffer = M.buffers
+	if not buffer then
+		return
+	end
+
+	Path.setup_path()
+
+	if Utils.isDir(Constant.defaults.base_path) then
+		local fn_name = Constant.defaults.base_path .. "/mark.lua"
+		Utils.save_table_to_file(buffer, fn_name)
+	end
+end
+
+local function __load_marks()
+	Path.setup_path()
+	local fn_name = Constant.defaults.base_path .. "/mark.lua"
+	if Utils.isDir(Constant.defaults.base_path) then
+		if Utils.isFile(fn_name) then
+			M.buffers = dofile(fn_name)
+		end
+	end
+end
+
 local function setup_commands()
 	-- vim.cmd([[augroup Qfsilet_marks_autocmds
 	--    autocmd!
@@ -422,16 +457,41 @@ local function setup_commands()
 	--  augroup end]])
 
 	local function augroup(name)
-		return vim.api.nvim_create_augroup("Qfsilet_marks" .. name, { clear = true })
+		return vim.api.nvim_create_augroup("QFSiletMarks" .. name, { clear = true })
 	end
 
 	-- Check if we need to reload the file when it changed
 	vim.api.nvim_create_autocmd({ "BufReadPost", "FocusGained", "BufWritePost" }, {
-		group = augroup("autocmds"),
+		group = augroup("Refresh"),
 		callback = function()
 			require("qfsilet.marks").refresh(true)
 		end,
 	})
+
+	-- vim.api.nvim_create_autocmd({ "VimLeave" }, {
+	-- 	group = augroup("SaveMark"),
+	-- 	callback = function()
+	-- 		__save_marks()
+	-- 	end,
+	-- })
+	--
+	-- vim.api.nvim_create_autocmd({ "VimEnter" }, {
+	-- 	group = augroup("LoadMark"),
+	-- 	callback = function()
+	-- 		__load_marks()
+	-- 	end,
+	-- })
+end
+
+function M.show_config()
+	vim.print(vim.inspect(M.buffers))
+	-- print("======================================")
+	-- print("======================================")
+	-- print("======================================")
+	-- print("======================================")
+	-- __save_marks()
+	--
+	-- __load_marks()
 end
 
 function M.setup(timer_setup)

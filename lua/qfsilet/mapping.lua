@@ -106,7 +106,7 @@ function M.setup_keymaps_and_autocmds()
 
 		{
 			desc = "Marks: open local todo window",
-			func = "open_todo_local",
+			func = "todo_local",
 			keys = Config.keymap.todo.add_todo,
 			mode = { "n", "v" },
 		},
@@ -185,7 +185,7 @@ function M.setup_keymaps_and_autocmds()
 		vim.api.nvim_create_user_command(cmd.name, Qfsilet_qf[cmd.func], { desc = cmd.desc })
 	end
 
-	set_ft_keymaps("QFSiletAuMappings", { "qf" }, ft_keymaps)
+	set_ft_keymaps("QFSiletMappings", { "qf" }, ft_keymaps)
 
 	set_keymaps(qf_keymaps, false, false, false)
 	set_keymaps(todo_note_keymaps, false, false, true)

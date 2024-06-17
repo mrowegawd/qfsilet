@@ -1,6 +1,5 @@
-local uv, fn, L = vim.loop, vim.fn, vim.log
+local fn, L = vim.fn, vim.log
 
--- local async = require("plenary.async")
 local SHA = require("qfsilet.sha")
 local Plenary_path = require("plenary.path")
 
@@ -79,7 +78,11 @@ function M.get_base_path_root(path, isGlobal)
 end
 
 function M.exists(filename)
-	local stat = uv.fs_stat(filename)
+	local stat
+	if filename then
+		stat = vim.loop.fs_stat(filename)
+	end
+
 	return stat and stat.type or false
 end
 
@@ -94,6 +97,32 @@ end
 function M.current_file_path()
 	return vim.api.nvim_buf_get_name(0)
 end
+
+function M.save_table_to_file(table, filename)
+	local file = io.open(filename, "w")
+	if file then
+		file:write("return ")
+		file:write(tostring(vim.inspect(table)))
+		file:close()
+	else
+		print("Gagal membuka file untuk ditulis.")
+	end
+end
+
+function M.find_win_ls(bufnr)
+	local found_ls = { found = false, winid = 0 }
+	for _, winnr in ipairs(vim.fn.range(0, vim.fn.winnr("$"))) do
+		local winbufnr = vim.fn.winbufnr(winnr)
+		if winbufnr > 0 and (winbufnr == bufnr) then
+			local winid = vim.fn.win_findbuf(winbufnr)[1] -- example winid: 1004, 1005
+			found_ls = { found = true, winid = winid }
+		end
+	end
+	return found_ls
+end
+
+-- Contoh penggunaan untuk menyimpan myTable ke dalam file "mytable.lua"
+-- saveTableToFile(myTable, "mark.lua")
 
 -- ┌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┐
 -- ╎                           LIST                           ╎
@@ -139,16 +168,16 @@ end
 -- ╎                           JSON                           ╎
 -- └╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘
 
-function M.jsonEncode(tbl)
-	return fn.json_encode(tbl)
+function M.json_encode(tbl)
+	return vim.json.encode(tbl)
 end
 
--- function M.jsonDecode(tbl)
--- 	return fn.json_decode(tbl)
--- end
+function M.json_decode(tbl)
+	return vim.json.decode(tbl)
+end
 
 function M.writeToFile(tbl, path_fname)
-	local tbl_json = M.jsonEncode(tbl)
+	local tbl_json = M.json_encode(tbl)
 	fn.writefile({ tbl_json }, path_fname)
 end
 
