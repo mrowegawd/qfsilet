@@ -128,7 +128,7 @@ function M.mark_defaults(buffer)
 				local nr = tonumber(bufnr)
 				for k, x in pairs(buffer) do
 					if k == nr then
-						local found_ls = Utils.find_win_ls(bufnr)
+						local found_ls = Utils.find_win_ls(tonumber(bufnr))
 						local locate = x.placed_marks[mark]
 						if found_ls.found then
 							vim.api.nvim_set_current_win(found_ls.winid)

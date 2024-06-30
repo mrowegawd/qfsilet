@@ -110,6 +110,9 @@ function M.save_table_to_file(table, filename)
 end
 
 function M.find_win_ls(bufnr)
+	vim.validate({
+		bufnr = { bufnr, "number" },
+	})
 	local found_ls = { found = false, winid = 0 }
 	for _, winnr in ipairs(vim.fn.range(0, vim.fn.winnr("$"))) do
 		local winbufnr = vim.fn.winbufnr(winnr)
