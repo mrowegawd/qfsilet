@@ -121,7 +121,7 @@ function M.update_settings(opts)
 		end
 		local limit = 60
 		local fname_fmt1, fname_fmt2 = "%-" .. limit .. "s", "…%." .. (limit - 1) .. "s"
-		local valid_fmt = "%s │%5d:%-3d│ %s %s"
+		local valid_fmt = "%s │%5d:%-3d│%s %s"
 		for i = info.start_idx, info.end_idx do
 			local e = items[i]
 			local fname = ""
