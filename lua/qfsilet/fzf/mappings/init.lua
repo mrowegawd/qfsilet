@@ -105,7 +105,7 @@ function M.deleteItem(basePath)
 
 			if Utils.isFile(filePath) then
 				local cmd = "!rm"
-				vim.api.nvim_exec(cmd .. " " .. filePath, { output = true })
+				vim.cmd(cmd .. " " .. filePath)
 				vim.cmd("lua require'fzf-lua'.resume()")
 			end
 		end,

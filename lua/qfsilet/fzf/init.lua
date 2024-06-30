@@ -1,5 +1,6 @@
 local Utils = require("qfsilet.utils")
 local Visual = require("qfsilet.marks.visual")
+local UtilMark = require("qfsilet.marks.utils")
 local UtilsFzf = require("qfsilet.fzf.utils")
 local fzf_ok, _ = pcall(require, "fzf-lua")
 
@@ -176,7 +177,8 @@ function M.grep_marks(buffer)
 		if #Utils.key_to_tbl(x.marks_by_line) > 0 then
 			for _, v in pairs(x.marks_by_line) do
 				local bufnr = x.placed_marks[v[1]].bufnr
-				local filename = vim.fn.pathshorten(x.placed_marks[v[1]].filename)
+				local filename = x.placed_marks[v[1]].filename
+				filename = UtilMark.format_filename(filename)
 				local line = x.placed_marks[v[1]].line
 				local col = x.placed_marks[v[1]].col
 				marks[#marks + 1] = Visual.extmarks.qf_sigil
