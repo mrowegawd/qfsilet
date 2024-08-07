@@ -214,6 +214,7 @@ function M.grep_marks(buffer)
 	function marks_previewer:parse_entry(entry_str)
 		entry_str = UtilsFzf.stripString(entry_str)
 
+		local data
 		if entry_str then
 			local sel_text = entry_str:gsub(Visual.extmarks.qf_sigil .. " ", "")
 			local bufnr = string.match(sel_text, "%[(%d*)%]")
@@ -222,7 +223,7 @@ function M.grep_marks(buffer)
 			for k, x in pairs(buffer) do
 				if k == nr then
 					local locate = x.placed_marks[mark]
-					return {
+					data = {
 						path = locate.filename,
 						line = locate.line,
 						col = locate.col,
@@ -230,6 +231,11 @@ function M.grep_marks(buffer)
 				end
 			end
 		end
+
+		if data then
+			return data
+		end
+		return {}
 	end
 
 	require("fzf-lua").fzf_exec(marks, {
