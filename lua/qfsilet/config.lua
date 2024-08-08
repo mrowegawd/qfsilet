@@ -63,6 +63,7 @@ M.current_configs = {
 			save_global = "mS",
 			load_local = "ml",
 			load_global = "mL",
+			add_item_to_qf = "<leader>al",
 		},
 		todo = {
 			add_todo = "mt",
@@ -70,7 +71,7 @@ M.current_configs = {
 			add_link_capture = "mc",
 		},
 		marks = {
-			toggle_mark = "m`",
+			toggle_mark = "mm",
 			show_config = "mr",
 			next_mark = "sn",
 			prev_mark = "sp",
@@ -78,7 +79,6 @@ M.current_configs = {
 			del_mark = "dm",
 			del_mark_mod = "dmm",
 			fzf_marks = "mf",
-			fzf_send_qf_marks = "mX",
 		},
 	},
 }

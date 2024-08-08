@@ -173,27 +173,11 @@ end
 function M.grep_marks(buffer)
 	local marks = {}
 
-	for _, x in pairs(buffer) do
-		if #Utils.key_to_tbl(x.marks_by_line) > 0 then
-			for _, v in pairs(x.marks_by_line) do
-				local bufnr = x.placed_marks[v[1]].bufnr
-				local filename = x.placed_marks[v[1]].filename
-				filename = UtilMark.format_filename(filename)
-				local line = x.placed_marks[v[1]].line
-				local col = x.placed_marks[v[1]].col
-				marks[#marks + 1] = Visual.extmarks.qf_sigil
-					.. " "
-					.. v[1]
-					.. " ["
-					.. bufnr
-					.. "] "
-					.. filename
-					.. ":"
-					.. line
-					.. ":"
-					.. col
-			end
-		end
+	for _, x in pairs(buffer.lists) do
+		local filename = Utils.format_filename(x.filename)
+		local col = x.col
+		local line = x.line
+		marks[#marks + 1] = Visual.extmarks.qf_sigil .. " " .. filename .. ":" .. line .. ":" .. col
 	end
 
 	if #marks == 0 then
@@ -201,7 +185,6 @@ function M.grep_marks(buffer)
 		return
 	end
 
-	-- print(vim.inspect(marks))
 	local builtin = require("fzf-lua.previewer.builtin")
 	local marks_previewer = builtin.buffer_or_file:extend()
 
@@ -214,27 +197,33 @@ function M.grep_marks(buffer)
 	function marks_previewer:parse_entry(entry_str)
 		entry_str = UtilsFzf.stripString(entry_str)
 
-		local data
 		if entry_str then
 			local sel_text = entry_str:gsub(Visual.extmarks.qf_sigil .. " ", "")
-			local bufnr = string.match(sel_text, "%[(%d*)%]")
-			local mark = string.match(sel_text, "^(%w*)%s")
-			local nr = tonumber(bufnr)
-			for k, x in pairs(buffer) do
-				if k == nr then
-					local locate = x.placed_marks[mark]
+			local line = string.match(sel_text, ":(%d+):")
+			local filename = string.match(sel_text, "([%w+]+%.%w+):")
+
+			if filename == nil then
+				return {}
+			end
+
+			local data
+
+			for _, x in pairs(buffer.lists) do
+				local filename_trim = Utils.format_filename(x.filename)
+				if string.match(filename_trim, filename) and tonumber(x.line) == tonumber(line) then
 					data = {
-						path = locate.filename,
-						line = locate.line,
-						col = locate.col,
+						path = x.filename,
+						line = x.line,
+						col = x.col,
 					}
 				end
 			end
+
+			if data then
+				return data
+			end
 		end
 
-		if data then
-			return data
-		end
 		return {}
 	end
 
@@ -242,8 +231,8 @@ function M.grep_marks(buffer)
 		previewer = marks_previewer,
 		prompt = "   ",
 		actions = FzfMappings.mark_defaults(buffer),
+		fzf_opts = { ["--header"] = [[ Ctrl-x:delete mark | Alt-x:delete all marks]] },
 		winopts = {
-			-- hl = { normal = "Normal" },
 			title = formatTitle("Select Marks", "X", "GitSignsAdd"),
 			border = "rounded",
 			preview = {

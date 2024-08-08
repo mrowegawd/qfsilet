@@ -89,45 +89,28 @@ function M.tablelength(T)
 	return count
 end
 
----@return string
-local function norm(path)
-	if path:sub(1, 1) == "~" then
-		local home = vim.uv.os_homedir()
-		if home then
-			if home:sub(-1) == "\\" or home:sub(-1) == "/" then
-				home = home:sub(1, -2)
-			end
-			path = home .. path:sub(2)
+function M.is_current_line_got_mark(bookmarks, line)
+	vim.validate({
+		bookmarks = { bookmarks, "table" },
+		line = { line, "number" },
+	})
+
+	if bookmarks.mark == nil then
+		return false
+	end
+
+	local filename = vim.api.nvim_buf_get_name(0)
+	for _, x in pairs(bookmarks.mark.lists) do
+		if x.line == line and x.filename == filename then
+			return true
 		end
 	end
-	path = path:gsub("\\", "/"):gsub("/+", "/")
-	return path:sub(-1) == "/" and path:sub(1, -2) or path
+
+	return false
 end
 
-local function realpath(path)
-	if path == "" or path == nil then
-		return nil
-	end
-	path = vim.uv.fs_realpath(path) or path
-	return norm(path)
-end
-
-local function cwd()
-	return realpath(vim.uv.cwd()) or ""
-end
-
-function M.format_filename(filename)
-	local cwds = cwd()
-	if filename:find(cwds, 1, true) == 1 then
-		filename = filename:sub(#cwds + 2)
-	end
-	local sep = package.config:sub(1, 1)
-	local parts = vim.split(filename, "[\\/]")
-	if #parts > 3 then
-		parts = { parts[1], "…", parts[#parts - 1], parts[#parts] }
-	end
-
-	return " " .. table.concat(parts, sep)
+function M.check_list_marks(marks, line)
+	return false
 end
 
 return M

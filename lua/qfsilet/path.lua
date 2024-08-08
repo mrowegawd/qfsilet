@@ -4,11 +4,11 @@ local Constant = require("qfsilet.constant")
 
 local M = {}
 
-local function create_dir(directory)
-	if not Utils.isDir(directory) then
-		Utils.create_dir(directory)
-	end
-end
+-- local function create_dir(directory)
+-- 	if not Utils.isDir(directory) then
+-- 		Utils.create_dir(directory)
+-- 	end
+-- end
 
 function M.create_file(filename)
 	if not Utils.isFile(filename) then
@@ -47,7 +47,7 @@ function M.setup_path(isGlobal)
 	isGlobal = isGlobal or false
 
 	M.init_constant_path(isGlobal)
-	create_dir(Constant.defaults.base_path)
+	-- create_dir(Constant.defaults.base_path)
 end
 
 return M

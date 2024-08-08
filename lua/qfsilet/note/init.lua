@@ -15,6 +15,10 @@ local function todo(isGlobal)
 	isGlobal = isGlobal or false
 
 	Path.setup_path(isGlobal)
+	if not Utils.isDir(Constant.defaults.base_path) then
+		Utils.create_dir(Constant.defaults.base_path)
+	end
+
 	Path.create_file(Constant.defaults.note_path)
 
 	Ui.popup(Constant.defaults.note_path, isGlobal, Constant.defaults.base_path)

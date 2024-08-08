@@ -187,4 +187,17 @@ function qf.clear_notes()
 	fn.setqflist(new_list)
 end
 
+function qf.add_item_to_qf()
+	vim.fn.setqflist({}, "a", {
+		items = {
+			{
+				bufnr = vim.api.nvim_get_current_buf(),
+				lnum = vim.api.nvim_win_get_cursor(0)[1],
+				text = vim.api.nvim_get_current_line(),
+			},
+		},
+	})
+	Utils.info("Added to qflist", "Qf")
+end
+
 return qf
