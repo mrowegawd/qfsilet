@@ -43,9 +43,9 @@ function M.get_current_status_buf()
 	return 0
 end
 
-function M.delete_mark(line, clear)
-	clear = UtilsMark.option_nil(clear, true)
-	local bufnr = vim.api.nvim_get_current_buf()
+function M.delete_mark(bufnr, line, clear)
+	clear = clear or UtilsMark.option_nil(clear, true)
+	bufnr = bufnr or vim.api.nvim_get_current_buf()
 	local buffer = M.buffers.mark
 
 	local filename = vim.api.nvim_buf_get_name(0)
@@ -58,20 +58,31 @@ function M.delete_mark(line, clear)
 end
 
 function M.delete_buf_marks(clear)
+	local bufnr = vim.api.nvim_get_current_buf()
 	clear = UtilsMark.option_nil(clear, true)
-	-- local buffer = M.buffers.mark
+	local buffer = M.buffers.mark
 
-	-- local bufnr = vim.api.nvim_get_current_buf()
-	-- M.buffers[bufnr] = {
-	-- 	placed_marks = {},
-	-- 	marks_by_line = {},
-	-- 	lowest_available_mark = "a",
-	-- }
+	for _, x in pairs(buffer.lists) do
+		local bname = vim.api.nvim_buf_get_name(bufnr)
+		if string.match(x.filename, bname) then
+			M.delete_mark(bufnr, x.line, clear)
+		end
+	end
 
 	-- Visual.remove_buf_signs(bufnr)
 	if clear then
 		vim.cmd("delmarks!")
 	end
+end
+
+function M.delete_line_marks()
+	local bufnr = vim.api.nvim_get_current_buf()
+	local pos = vim.api.nvim_win_get_cursor(0)
+	M.delete_mark(bufnr, pos[1])
+end
+
+function M.delete()
+	M.delete_line_marks()
 end
 
 local function jump_to(mark_lists, opts)
@@ -133,26 +144,6 @@ function M.prev_mark()
 	current_bookmark_idx = prev_idx
 
 	jump_to(buffer.lists, prev_elem())
-end
-
-function M.delete_line_marks()
-	local bufnr = vim.api.nvim_get_current_buf()
-	local pos = vim.api.nvim_win_get_cursor(0)
-	M.delete_mark(pos[1], bufnr)
-end
-
-function M.delete()
-	local err, input = pcall(function()
-		return string.char(vim.fn.getchar())
-	end)
-	if not err then
-		return
-	end
-
-	if UtilsMark.is_valid_mark(input) then
-		M.delete_mark(input)
-		return
-	end
 end
 
 function M.fzf_marks()
@@ -326,16 +317,15 @@ function M.setup(timer_setup)
 end
 
 function M.clear_all_marks()
-	local bufnr = vim.api.nvim_get_current_buf()
 	local buffer = M.buffers.mark
 
-	--  TODO: harus di load ke semua `bufnr`, kalau logic ini kurang
-	--  karena:
-	--  - ketika `bufnr = 0`, hanya satu buffer yang hilang, jika terbuka 3/2 buffer
-	--    hanya current buffer yang hilang sedangkan yang lain tidak
-	-- local filename = vim.api.nvim_buf_get_name(0)
 	for _, x in pairs(buffer.lists) do
-		Visual.remove_sign(bufnr, x.id)
+		for _, b in pairs(vim.api.nvim_list_bufs()) do
+			local bname = vim.api.nvim_buf_get_name(b)
+			if string.match(x.filename, bname) then
+				Visual.remove_sign(b, x.id)
+			end
+		end
 	end
 
 	M.buffers = {}

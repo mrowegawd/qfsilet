@@ -192,7 +192,7 @@ function M.mark_defaults(buffer)
 			end
 
 			require("qfsilet.marks").clear_all_marks()
-			Utils.info("Marks cleared", "Marks")
+			Utils.info("All marks cleared", "Marks")
 		end,
 	}
 end

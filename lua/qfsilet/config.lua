@@ -77,7 +77,7 @@ M.current_configs = {
 			prev_mark = "sp",
 			del_buf_mark = "dM",
 			del_mark = "dm",
-			del_mark_mod = "dmm",
+			-- del_mark_buf = "dmm",
 			fzf_marks = "mf",
 		},
 	},
