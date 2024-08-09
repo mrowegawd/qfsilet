@@ -98,6 +98,47 @@ function M.current_file_path()
 	return vim.api.nvim_buf_get_name(0)
 end
 
+---@return string
+local function norm(path)
+	if path:sub(1, 1) == "~" then
+		local home = vim.uv.os_homedir()
+		if home then
+			if home:sub(-1) == "\\" or home:sub(-1) == "/" then
+				home = home:sub(1, -2)
+			end
+			path = home .. path:sub(2)
+		end
+	end
+	path = path:gsub("\\", "/"):gsub("/+", "/")
+	return path:sub(-1) == "/" and path:sub(1, -2) or path
+end
+
+local function realpath(path)
+	if path == "" or path == nil then
+		return nil
+	end
+	path = vim.uv.fs_realpath(path) or path
+	return norm(path)
+end
+
+local function cwd()
+	return realpath(vim.uv.cwd()) or ""
+end
+
+function M.format_filename(filename)
+	local cwds = cwd()
+	if filename:find(cwds, 1, true) == 1 then
+		filename = filename:sub(#cwds + 2)
+	end
+	local sep = package.config:sub(1, 1)
+	local parts = vim.split(filename, "[\\/]")
+	if #parts > 3 then
+		parts = { parts[1], "…", parts[#parts - 1], parts[#parts] }
+	end
+
+	return " " .. table.concat(parts, sep)
+end
+
 function M.save_table_to_file(table, filename)
 	local file = io.open(filename, "w")
 	if file then
@@ -105,20 +146,28 @@ function M.save_table_to_file(table, filename)
 		file:write(tostring(vim.inspect(table)))
 		file:close()
 	else
-		print("Gagal membuka file untuk ditulis.")
+		print("Failed to save data table to file")
 	end
 end
 
-function M.find_win_ls(bufnr)
+function M.find_win_ls(opts)
 	vim.validate({
-		bufnr = { bufnr, "number" },
+		bufnr = { opts, "table" },
 	})
 	local found_ls = { found = false, winid = 0 }
 	for _, winnr in ipairs(vim.fn.range(0, vim.fn.winnr("$"))) do
 		local winbufnr = vim.fn.winbufnr(winnr)
-		if winbufnr > 0 and (winbufnr == bufnr) then
-			local winid = vim.fn.win_findbuf(winbufnr)[1] -- example winid: 1004, 1005
-			found_ls = { found = true, winid = winid }
+		if opts.bufnr and opts.bufnr > 0 then
+			if winbufnr > 0 and (winbufnr == opts.bufnr) then
+				local winid = vim.fn.win_findbuf(winbufnr)[1] -- example winid: 1004, 1005
+				found_ls = { found = true, winid = winid }
+			end
+		elseif opts.filename and #opts.filename > 0 then
+			local winnr_fn = vim.api.nvim_buf_get_name(winbufnr)
+			if string.match(opts.filename, winnr_fn) then
+				local winid = vim.fn.win_findbuf(winbufnr)[1] -- example winid: 1004, 1005
+				found_ls = { found = true, winid = winid }
+			end
 		end
 	end
 	return found_ls

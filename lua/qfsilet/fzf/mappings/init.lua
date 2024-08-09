@@ -123,19 +123,18 @@ function M.mark_defaults(buffer)
 			local sel_text = UtilsFzf.stripString(sel)
 			if sel_text then
 				local text = sel_text:gsub(Visual.extmarks.qf_sigil .. " ", "")
-				local bufnr = string.match(text, "%[(%d*)%]")
-				local mark = string.match(text, "^(%w*)%s")
-				local nr = tonumber(bufnr)
-				for k, x in pairs(buffer) do
-					if k == nr then
-						local found_ls = Utils.find_win_ls(tonumber(bufnr))
-						local locate = x.placed_marks[mark]
+				local line = string.match(text, ":(%d+):")
+				local filename = string.match(sel_text, "([%w+]+%.%w+):")
+				for _, x in pairs(buffer.lists) do
+					local filename_trim = Utils.format_filename(x.filename)
+					if string.match(filename_trim, filename) and tonumber(x.line) == tonumber(line) then
+						local found_ls = Utils.find_win_ls({ filename = x.filename })
 						if found_ls.found then
 							vim.api.nvim_set_current_win(found_ls.winid)
 						else
-							vim.cmd("e " .. locate.filename)
+							vim.cmd("e " .. x.filename)
 						end
-						vim.api.nvim_win_set_cursor(0, { locate.line, locate.col })
+						vim.api.nvim_win_set_cursor(0, { x.line, x.col })
 						vim.cmd("normal! zz")
 					end
 				end
@@ -151,14 +150,13 @@ function M.mark_defaults(buffer)
 			local sel_text = UtilsFzf.stripString(sel)
 			if sel_text then
 				local text = sel_text:gsub(Visual.extmarks.qf_sigil .. " ", "")
-				local bufnr = string.match(text, "%[(%d*)%]")
-				local mark = string.match(text, "^(%w*)%s")
-				local nr = tonumber(bufnr)
-				for k, x in pairs(buffer) do
-					if k == nr then
-						local locate = x.placed_marks[mark]
-						vim.cmd("vsplit " .. locate.filename)
-						vim.api.nvim_win_set_cursor(0, { locate.line, locate.col })
+				local line = string.match(text, ":(%d+):")
+				local filename = string.match(sel_text, "([%w+]+%.%w+):")
+				for _, x in pairs(buffer.lists) do
+					local filename_trim = Utils.format_filename(x.filename)
+					if string.match(filename_trim, filename) and tonumber(x.line) == tonumber(line) then
+						vim.cmd("vsplit " .. x.filename)
+						vim.api.nvim_win_set_cursor(0, { x.line, x.col })
 						vim.cmd("normal! zz")
 					end
 				end
@@ -174,18 +172,27 @@ function M.mark_defaults(buffer)
 			local sel_text = UtilsFzf.stripString(sel)
 			if sel_text then
 				local text = sel_text:gsub(Visual.extmarks.qf_sigil .. " ", "")
-				local bufnr = string.match(text, "%[(%d*)%]")
-				local mark = string.match(text, "^(%w*)%s")
-				local nr = tonumber(bufnr)
-				for k, x in pairs(buffer) do
-					if k == nr then
-						local locate = x.placed_marks[mark]
-						vim.cmd("split " .. locate.filename)
-						vim.api.nvim_win_set_cursor(0, { locate.line, locate.col })
+				local line = string.match(text, ":(%d+):")
+				local filename = string.match(sel_text, "([%w+]+%.%w+):")
+				for _, x in pairs(buffer.lists) do
+					local filename_trim = Utils.format_filename(x.filename)
+					if string.match(filename_trim, filename) and tonumber(x.line) == tonumber(line) then
+						vim.cmd("split " .. x.filename)
+						vim.api.nvim_win_set_cursor(0, { x.line, x.col })
 						vim.cmd("normal! zz")
 					end
 				end
 			end
+		end,
+
+		["alt-x"] = function(selected, _)
+			local sel = UtilsFzf.stripString(selected[1])
+			if sel == nil then
+				return
+			end
+
+			require("qfsilet.marks").clear_all_marks()
+			Utils.info("All marks cleared", "Marks")
 		end,
 	}
 end
