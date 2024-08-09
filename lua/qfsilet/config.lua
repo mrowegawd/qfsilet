@@ -60,9 +60,7 @@ M.current_configs = {
 			goto_link_capture = "g<cr>",
 			fzf_qf = "mx",
 			save_local = "ms",
-			save_global = "mS",
 			load_local = "ml",
-			load_global = "mL",
 			add_item_to_qf = "<leader>al",
 		},
 		todo = {

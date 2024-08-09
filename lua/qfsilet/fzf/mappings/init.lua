@@ -26,7 +26,7 @@ local function mergeQuickFix(selected, opts, basePath)
 			end
 		end
 	else
-		Utils.warn("Not implemented yet, abort it", "QFSilet")
+		Utils.warn("Not implemented yet, abort it", "QF")
 		return
 	end
 
@@ -42,7 +42,7 @@ local function mergeQuickFix(selected, opts, basePath)
 	fn.setqflist({}, action, what)
 	vim.cmd("copen")
 
-	Utils.info("Import successful (merged)", "QFSilet")
+	Utils.info("Import have been successfully completed (merged)", "QF")
 end
 
 local function editQuickFix(selected, basePath)
@@ -54,7 +54,7 @@ local function editQuickFix(selected, basePath)
 	local filePath = basePath .. "/" .. pth .. ".json"
 
 	local fileRead = Utils.getFileRead(filePath)
-	local tbl = Utils.json_decode(fileRead)
+	local tbl = vim.fn.json_decode(fileRead)
 
 	if tbl == nil then
 		return
@@ -71,7 +71,7 @@ local function editQuickFix(selected, basePath)
 	fn.setqflist({}, " ", cleanedTbl.qf)
 	vim.cmd("copen")
 
-	Utils.info("Import successful", "QFSilet")
+	Utils.info("Import have been successfully completed", "QF")
 end
 
 function M.editOrMergeQuickFix(opts, basePath)

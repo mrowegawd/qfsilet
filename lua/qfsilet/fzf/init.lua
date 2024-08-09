@@ -1,6 +1,5 @@
 local Utils = require("qfsilet.utils")
 local Visual = require("qfsilet.marks.visual")
-local UtilMark = require("qfsilet.marks.utils")
 local UtilsFzf = require("qfsilet.fzf.utils")
 local fzf_ok, _ = pcall(require, "fzf-lua")
 
