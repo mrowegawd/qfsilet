@@ -75,10 +75,27 @@ function M.delete_buf_marks(clear)
 	end
 end
 
+function M.delete_line_marks_builtin()
+	-- Delete current marks builtin
+	local marks = {}
+	for i = string.byte("a"), string.byte("z") do
+		local mark = string.char(i)
+		local mark_line = vim.fn.line("'" .. mark)
+		if mark_line == vim.fn.line(".") then
+			table.insert(marks, mark)
+		end
+	end
+
+	if #marks > 0 then
+		vim.cmd("delmarks " .. table.concat(marks, ""))
+	end
+end
+
 function M.delete_line_marks()
 	local bufnr = vim.api.nvim_get_current_buf()
 	local pos = vim.api.nvim_win_get_cursor(0)
 	M.delete_mark(bufnr, pos[1])
+	M.delete_line_marks_builtin()
 end
 
 function M.delete()
