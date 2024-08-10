@@ -150,31 +150,63 @@ function M.save_table_to_file(table, filename)
 	end
 end
 
+function M.win_is_valid(opts)
+	return opts.winid
+		and vim.api.nvim_win_is_valid(opts.winid)
+		and opts.bufnr
+		and vim.api.nvim_buf_is_valid(opts.bufnr)
+		and vim.api.nvim_win_get_buf(opts.winid) == opts.bufnr
+end
+
+function M._valid(win, buf)
+	if not win or not buf then
+		return false
+	end
+	if not vim.api.nvim_win_is_valid(win) or not vim.api.nvim_buf_is_valid(buf) then
+		return false
+	end
+	if vim.api.nvim_win_get_buf(win) ~= buf then
+		return false
+	end
+	-- if Preview.is_win(win) or vim.w[win].trouble then
+	-- 	return false
+	-- end
+	if vim.api.nvim_win_get_config(win).relative ~= "" then
+		return false
+	end
+	if vim.bo[buf].buftype ~= "" then
+		return false
+	end
+	return true
+end
+
 function M.find_win_ls(opts)
 	vim.validate({
 		bufnr = { opts, "table" },
 	})
 	local found_ls = { found = false, winid = 0 }
-	for _, winnr in ipairs(vim.fn.range(0, vim.fn.winnr("$"))) do
-		local winbufnr = vim.fn.winbufnr(winnr)
-		if opts.bufnr and opts.bufnr > 0 then
-			if winbufnr > 0 and (winbufnr == opts.bufnr) then
-				local winid = vim.fn.win_findbuf(winbufnr)[1] -- example winid: 1004, 1005
-				found_ls = { found = true, winid = winid }
-			end
-		elseif opts.filename and #opts.filename > 0 then
-			local winnr_fn = vim.api.nvim_buf_get_name(winbufnr)
-			if string.match(opts.filename, winnr_fn) then
-				local winid = vim.fn.win_findbuf(winbufnr)[1] -- example winid: 1004, 1005
-				found_ls = { found = true, winid = winid }
+
+	local wins = vim.api.nvim_list_wins()
+	for _, winid in ipairs(wins) do
+		local b = vim.api.nvim_win_get_buf(winid)
+		if M._valid(winid, b) then
+			local bufnr = vim.api.nvim_win_get_buf(winid)
+
+			if opts.bufnr and opts.bufnr > 0 then
+				if bufnr == opts.bufnr then
+					found_ls = { found = true, winid = winid, bufnr = bufnr, winnr = winid }
+				end
+			elseif opts.filename and #opts.filename > 0 then
+				local winid_fn = vim.api.nvim_buf_get_name(bufnr)
+				if string.match(opts.filename, winid_fn) then
+					found_ls = { found = true, winid = winid, bufnr = bufnr, winnr = winid }
+					break
+				end
 			end
 		end
 	end
 	return found_ls
 end
-
--- Contoh penggunaan untuk menyimpan myTable ke dalam file "mytable.lua"
--- saveTableToFile(myTable, "mark.lua")
 
 -- ┌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┐
 -- ╎                           LIST                           ╎

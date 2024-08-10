@@ -180,20 +180,20 @@ function M.grep_marks(buffer)
 	end
 
 	if #marks == 0 then
-		Utils.info("No marks")
+		Utils.info("No marks available", "Marks")
 		return
 	end
 
 	local builtin = require("fzf-lua.previewer.builtin")
-	local marks_previewer = builtin.buffer_or_file:extend()
+	local Markpreviewer = builtin.buffer_or_file:extend()
 
-	function marks_previewer:new(o, opts, fzf_win)
-		marks_previewer.super.new(self, o, opts, fzf_win)
-		setmetatable(self, marks_previewer)
+	function Markpreviewer:new(o, opts, fzf_win)
+		Markpreviewer.super.new(self, o, opts, fzf_win)
+		setmetatable(self, Markpreviewer)
 		return self
 	end
 
-	function marks_previewer:parse_entry(entry_str)
+	function Markpreviewer:parse_entry(entry_str)
 		entry_str = UtilsFzf.stripString(entry_str)
 
 		if entry_str then
@@ -227,7 +227,11 @@ function M.grep_marks(buffer)
 	end
 
 	require("fzf-lua").fzf_exec(marks, {
-		previewer = marks_previewer,
+		previewer = {
+			_ctor = function()
+				return Markpreviewer
+			end,
+		},
 		prompt = "   ",
 		actions = FzfMappings.mark_defaults(buffer),
 		fzf_opts = { ["--header"] = [[ Ctrl-x:delete mark | Alt-x:delete all marks]] },

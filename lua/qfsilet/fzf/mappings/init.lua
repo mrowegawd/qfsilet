@@ -130,11 +130,14 @@ function M.mark_defaults(buffer)
 					if string.match(filename_trim, filename) and tonumber(x.line) == tonumber(line) then
 						local found_ls = Utils.find_win_ls({ filename = x.filename })
 						if found_ls.found then
-							vim.api.nvim_set_current_win(found_ls.winid)
+							if Utils.win_is_valid(found_ls) then
+								vim.api.nvim_set_current_win(found_ls.winid)
+								vim.api.nvim_win_set_cursor(0, { x.line, x.col })
+							end
 						else
 							vim.cmd("e " .. x.filename)
+							vim.api.nvim_win_set_cursor(0, { x.line, x.col })
 						end
-						vim.api.nvim_win_set_cursor(0, { x.line, x.col })
 						vim.cmd("normal! zz")
 					end
 				end

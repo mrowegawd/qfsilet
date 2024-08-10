@@ -90,15 +90,15 @@ local function jump_to(mark_lists, opts)
 		if x.filename == opts.filename and x.line == opts.line then
 			local found_ls = Utils.find_win_ls({ filename = x.filename })
 			if found_ls.found then
-				vim.api.nvim_set_current_win(found_ls.winid)
+				if Utils.win_is_valid(found_ls) then
+					vim.api.nvim_set_current_win(found_ls.winid)
+					vim.api.nvim_win_set_cursor(0, { x.line, x.col })
+				end
 			else
 				vim.cmd("e " .. x.filename)
+				vim.api.nvim_win_set_cursor(0, { x.line, x.col })
+				vim.cmd("normal! zz")
 			end
-
-			vim.schedule(function()
-				pcall(vim.api.nvim_win_set_cursor, 0, { tonumber(x.line), tonumber(x.col) })
-				vim.cmd("norm! zvzz")
-			end)
 		end
 	end
 end
