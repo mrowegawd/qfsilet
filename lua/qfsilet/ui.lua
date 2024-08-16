@@ -48,10 +48,10 @@ local function h(name)
 	return vim.api.nvim_get_hl(0, { name = name })
 end
 
-vim.api.nvim_set_hl(0, "Botol", { bg = h("WinSeparator").fg, bold = true, fg = h("Normal").fg })
-vim.api.nvim_set_hl(0, "BotolIcon", { fg = "green", bold = true })
-vim.api.nvim_set_hl(0, "BotolNormal", { fg = "black", bg = "white", bold = true })
-vim.api.nvim_set_hl(0, "BotolFloatNormal", { fg = "black", bg = "white", bold = true })
+vim.api.nvim_set_hl(0, "Botol", { bg = h("NormalFloat").bg, bold = true, fg = h("Function").fg })
+-- vim.api.nvim_set_hl(0, "BotolIcon", { fg = "green", bold = true })
+-- vim.api.nvim_set_hl(0, "BotolNormal", { fg = "black", bg = "white", bold = true })
+-- vim.api.nvim_set_hl(0, "BotolFloatNormal", { fg = "black", bg = "white", bold = true })
 
 function M.input(func, text_top_msg)
 	if vim.bo.filetype == "qf" then
@@ -120,8 +120,7 @@ function M.popup(fname_path, IsGlobal, base_path)
 		focusable = true,
 		zindex = 50,
 		win_options = {
-			-- winhighlight = Config.popup.winhighlight,
-			winhighlight = "Normal:BotolNormal",
+			winhighlight = Config.popup.winhighlight,
 			foldcolumn = "0",
 		},
 		buf_options = {
@@ -134,9 +133,9 @@ function M.popup(fname_path, IsGlobal, base_path)
 		border = {
 			padding = { top = 2, bottom = 2, left = 3, right = 3 },
 			style = "rounded",
-			highlight = "WinSeparator",
+			highlight = "FloatBorder",
 			text = {
-				top = NuiText(fmt(" %s ", top_ext_msg), "Botol"),
+				top = NuiText(fmt(" %s ", top_ext_msg), "Function"),
 				top_align = "center",
 			},
 		},
@@ -147,7 +146,7 @@ function M.popup(fname_path, IsGlobal, base_path)
 		pop_opts.position = "50%"
 		pop_opts.size = "70%"
 		pop_opts.win_options.winhighlight = Config.popup.winhighlight
-		pop_opts.border.highlight = "WinSeparator"
+		pop_opts.border.highlight = "FloatBorder"
 	end
 
 	local popup = Popup(pop_opts)

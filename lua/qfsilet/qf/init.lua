@@ -150,14 +150,14 @@ function qf.del_itemqf()
 end
 
 function qf.clear_qf_list()
-	Utils.info("Item lists cleared", "QFSilet")
+	Utils.info("Item lists cleared", "QF")
 
 	fn.setqflist({})
 	cmd.cclose()
 end
 
 function qf.clear_loc_list()
-	Utils.info("Item lists cleared", "QFSilet")
+	Utils.info("Item lists cleared", "QF")
 
 	fn.setloclist(0, {})
 	cmd.lclose()

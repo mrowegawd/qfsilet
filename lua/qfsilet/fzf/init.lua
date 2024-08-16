@@ -58,7 +58,7 @@ function M.load(opts, isGlobal)
 	require("fzf-lua").files({
 		cwd = Constant.defaults.base_path,
 		previewer = false,
-		fzf_opts = { ["--header"] = [[Ctrl-x:'delete']] },
+		fzf_opts = { ["--header"] = [[ctrl-x:'delete']] },
 		cmd = "fd -d 1 -e json | cut -d. -f1",
 		no_header_i = true,
 		no_header = true,
@@ -234,7 +234,7 @@ function M.grep_marks(buffer)
 		},
 		prompt = "   ",
 		actions = FzfMappings.mark_defaults(buffer),
-		fzf_opts = { ["--header"] = [[ Ctrl-x:delete mark | Alt-x:delete all marks]] },
+		fzf_opts = { ["--header"] = [[ ctrl-x:delete mark | alt-x:delete all marks]] },
 		winopts = {
 			title = formatTitle("Select Marks", "X", "GitSignsAdd"),
 			border = "rounded",

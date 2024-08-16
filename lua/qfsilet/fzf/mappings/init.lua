@@ -124,20 +124,12 @@ function M.mark_defaults(buffer)
 			if sel_text then
 				local text = sel_text:gsub(Visual.extmarks.qf_sigil .. " ", "")
 				local line = string.match(text, ":(%d+):")
-				local filename = string.match(sel_text, "([%w+]+%.%w+):")
+				local filename = string.match(sel_text, "([%w_%.%-]+)%:?")
 				for _, x in pairs(buffer.lists) do
 					local filename_trim = Utils.format_filename(x.filename)
-					if string.match(filename_trim, filename) and tonumber(x.line) == tonumber(line) then
-						local found_ls = Utils.find_win_ls({ filename = x.filename })
-						if found_ls.found then
-							if Utils.win_is_valid(found_ls) then
-								vim.api.nvim_set_current_win(found_ls.winid)
-								vim.api.nvim_win_set_cursor(0, { x.line, x.col })
-							end
-						else
-							vim.cmd("e " .. x.filename)
-							vim.api.nvim_win_set_cursor(0, { x.line, x.col })
-						end
+					if filename and string.match(filename_trim, filename) and tonumber(x.line) == tonumber(line) then
+						vim.cmd("e " .. x.filename)
+						vim.api.nvim_win_set_cursor(0, { x.line, x.col })
 						vim.cmd("normal! zz")
 					end
 				end
@@ -154,10 +146,10 @@ function M.mark_defaults(buffer)
 			if sel_text then
 				local text = sel_text:gsub(Visual.extmarks.qf_sigil .. " ", "")
 				local line = string.match(text, ":(%d+):")
-				local filename = string.match(sel_text, "([%w+]+%.%w+):")
+				local filename = string.match(sel_text, "([%w_%.%-]+)%:?")
 				for _, x in pairs(buffer.lists) do
 					local filename_trim = Utils.format_filename(x.filename)
-					if string.match(filename_trim, filename) and tonumber(x.line) == tonumber(line) then
+					if filename and string.match(filename_trim, filename) and tonumber(x.line) == tonumber(line) then
 						vim.cmd("vsplit " .. x.filename)
 						vim.api.nvim_win_set_cursor(0, { x.line, x.col })
 						vim.cmd("normal! zz")
@@ -176,16 +168,25 @@ function M.mark_defaults(buffer)
 			if sel_text then
 				local text = sel_text:gsub(Visual.extmarks.qf_sigil .. " ", "")
 				local line = string.match(text, ":(%d+):")
-				local filename = string.match(sel_text, "([%w+]+%.%w+):")
+				local filename = string.match(sel_text, "([%w_%.%-]+)%:?")
 				for _, x in pairs(buffer.lists) do
 					local filename_trim = Utils.format_filename(x.filename)
-					if string.match(filename_trim, filename) and tonumber(x.line) == tonumber(line) then
+					if filename and string.match(filename_trim, filename) and tonumber(x.line) == tonumber(line) then
 						vim.cmd("split " .. x.filename)
 						vim.api.nvim_win_set_cursor(0, { x.line, x.col })
 						vim.cmd("normal! zz")
 					end
 				end
 			end
+		end,
+
+		["ctrl-x"] = function(selected, _)
+			local sel = UtilsFzf.stripString(selected[1])
+			if sel == nil then
+				return
+			end
+
+			Utils.info("Not Impelemented yet", "Marks")
 		end,
 
 		["alt-x"] = function(selected, _)
