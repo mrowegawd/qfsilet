@@ -103,6 +103,11 @@ function M.delete()
 end
 
 local function jump_to(mark_lists, opts)
+	if not opts then
+		Utils.info("No marks available", "Marks")
+		return
+	end
+
 	for _, x in pairs(mark_lists) do
 		if x.filename == opts.filename and x.line == opts.line then
 			local found_ls = Utils.find_win_ls({ filename = x.filename })
