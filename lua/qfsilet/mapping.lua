@@ -44,25 +44,25 @@ end
 
 function M.setup_keymaps_and_autocmds()
 	local qf_autocmds = {
-		{ name = "SaveQf", desc = "QF: save qflist local", func = "saveqf", mode = "n" },
-		{ name = "LoadQf", desc = "QF: load qflist local", func = "loadqf", mode = "n" },
+		{ name = "SaveQf", desc = "Qf: save qflist local", func = "saveqf", mode = "n" },
+		{ name = "LoadQf", desc = "Qf: load qflist local", func = "loadqf", mode = "n" },
 	}
 
 	local ft_keymaps = {
 		{
-			desc = "QF: delete item quickfix",
+			desc = "Qf: delete item quickfix",
 			func = "del_itemqf",
 			keys = Config.keymap.quickfix.del_item,
 			mode = "n",
 		},
 		{
-			desc = "QF: clear list of notes on current quickfix",
+			desc = "Qf: clear list of notes on current quickfix",
 			func = "clear_notes",
 			keys = Config.keymap.quickfix.clear_notes,
 			mode = "n",
 		},
 		{
-			desc = "QF: clear all items quickfix",
+			desc = "Qf: clear all items quickfix",
 			func = "clear_qf_list",
 			keys = Config.keymap.quickfix.clear_all,
 			mode = "n",
@@ -70,7 +70,7 @@ function M.setup_keymaps_and_autocmds()
 	}
 	local loc_keymaps = {
 		{
-			desc = "QFLIST: toggle location list",
+			desc = "Loclist: toggle location list",
 			func = "toggle_loclist",
 			keys = Config.keymap.quickfix.toggle_open_loclist,
 			mode = "n",
@@ -78,31 +78,31 @@ function M.setup_keymaps_and_autocmds()
 	}
 	local qf_keymaps = {
 		{
-			desc = "QF: toggle quickfix list",
+			desc = "Qf: toggle quickfix list",
 			func = "toggle_qf",
 			keys = Config.keymap.quickfix.toggle_open_qf,
 			mode = "n",
 		},
 		{
-			desc = "QF: open todo cursor and collect with quickfix",
+			desc = "Qf: open todo cursor and collect with quickfix",
 			func = "fzf_qf",
 			keys = Config.keymap.quickfix.fzf_qf,
 			mode = "n",
 		},
 		{
-			desc = "QF: save quickfix items",
+			desc = "Qf: save quickfix items",
 			func = "saveqf",
 			keys = Config.keymap.quickfix.save_local,
 			mode = "n",
 		},
 		{
-			desc = "QF: load quickfix items",
+			desc = "Qf: load quickfix items",
 			func = "loadqf",
 			keys = Config.keymap.quickfix.load_local,
 			mode = "n",
 		},
 		{
-			desc = "QF: add current cursor line to qf",
+			desc = "Qf: add current cursor line to qf",
 			func = "add_item_to_qf",
 			keys = Config.keymap.quickfix.add_item_to_qf,
 			mode = "n",
