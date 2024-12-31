@@ -135,7 +135,7 @@ function M.popup(fname_path, IsGlobal, base_path)
 			style = "rounded",
 			highlight = "FloatBorder",
 			text = {
-				top = NuiText(fmt(" %s ", top_ext_msg), "Function"),
+				top = NuiText(fmt(" %s ", top_ext_msg), Config.popup.title_higroup),
 				top_align = "center",
 			},
 		},

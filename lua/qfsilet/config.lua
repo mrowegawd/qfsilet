@@ -47,6 +47,7 @@ M.current_configs = {
 	},
 	popup = {
 		winhighlight = "Normal:NormalFloat,FloatBorder:FloatBorder",
+		title_higroup = "Function",
 		icon_note = " ", -- " ",
 		filetype = "org",
 	},
