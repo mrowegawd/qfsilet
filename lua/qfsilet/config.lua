@@ -46,9 +46,11 @@ M.current_configs = {
 		ext_file = "org",
 	},
 	popup = {
-		winhighlight = "Normal:NormalFloat,FloatBorder:FloatBorder",
-		title_higroup = "Function",
 		icon_note = " ", -- " ",
+		title_local = "Message?",
+		title_global = "Todo List",
+		winhighlight = "Normal:NormalFloat,FloatBorder:FloatBorder",
+		higroup_title = "Function",
 		filetype = "org",
 	},
 	keymap = {

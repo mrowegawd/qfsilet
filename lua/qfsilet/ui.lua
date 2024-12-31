@@ -107,7 +107,7 @@ end
 function M.popup(fname_path, IsGlobal, base_path)
 	IsGlobal = IsGlobal or false
 
-	local top_ext_msg = IsGlobal and "Message?" or "Todo List"
+	local top_ext_msg = IsGlobal and Config.popup.title_global or Config.popup.title_local
 
 	local col, row = get_desired_ui_size()
 	local width, height = get_desired_popup_size()
@@ -135,7 +135,7 @@ function M.popup(fname_path, IsGlobal, base_path)
 			style = "rounded",
 			highlight = "FloatBorder",
 			text = {
-				top = NuiText(fmt(" %s ", top_ext_msg), Config.popup.title_higroup),
+				top = NuiText(fmt(" %s ", top_ext_msg), Config.popup.higroup_title),
 				top_align = "center",
 			},
 		},
