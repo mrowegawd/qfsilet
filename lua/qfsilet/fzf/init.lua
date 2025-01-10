@@ -62,24 +62,27 @@ function M.load(opts, isGlobal)
 		cmd = "fd -d 1 -e json | cut -d. -f1",
 		no_header_i = true,
 		no_header = true,
-		winopts = {
-			hl = { normal = "Normal" },
-			border = "rounded",
-			height = 0.4,
-			-- title = formatTitle(titleMsg:gsub("^%l", string.upper) .. " Qf items", "", "Boolean"),
-			title = formatTitle(string.format("Load (%s) qf items", titleMsg), "", "Boolean"),
-			width = 0.30,
-			row = 0.40,
-			col = 0.55,
-			preview = { hidden = "hidden" },
-		},
-		winopts_fn = function()
+		winopts = function()
 			local cols = vim.o.columns - 50
 			local collss = cols > 80 and cols - 80 or cols / 2
 
 			local win_height = math.ceil(Utils.get_option("lines") * 0.5 - 10)
 			local win_width = math.ceil(Utils.get_option("columns") * 0.5 - 20)
-			return { width = win_width, height = win_height, row = 20, col = collss }
+			return {
+				hl = { normal = "Normal" },
+				border = "rounded",
+				-- height = 0.4,
+				-- title = formatTitle(titleMsg:gsub("^%l", string.upper) .. " Qf items", "", "Boolean"),
+				title = formatTitle(string.format("Load (%s) qf items", titleMsg), "", "Boolean"),
+				-- width = 0.30,
+				-- row = 0.40,
+				-- col = 0.55,
+				preview = { hidden = "hidden" },
+				width = win_width,
+				height = win_height,
+				row = 20,
+				col = collss,
+			}
 		end,
 		actions = vim.tbl_extend(
 			"keep",
@@ -99,23 +102,27 @@ function M.sel_qf(opts, isLoad)
 
 	require("fzf-lua").fzf_exec({ "global", "local" }, {
 		prompt = prompt_prefix .. " quickfix items? ",
-		winopts = {
-			hl = { normal = "Normal" },
-			border = "rounded",
-			height = 0.4,
-			-- title = formatTitle(titleMsg:gsub("^%l", string.upper) .. " Qf items", "", "Boolean"),
-			width = 0.30,
-			row = 0.40,
-			col = 0.55,
-			preview = { hidden = "hidden" },
-		},
-		winopts_fn = function()
+		winopts = function()
 			local cols = vim.o.columns - 50
 			local collss = cols > 80 and cols - 80 or cols / 2
 
 			local win_height = math.ceil(Utils.get_option("lines") * 0.5 - 10)
 			local win_width = math.ceil(Utils.get_option("columns") * 0.5 - 20)
-			return { width = win_width, height = win_height, row = 20, col = collss }
+			return {
+				width = win_width,
+				height = win_height,
+				row = 20,
+				col = collss,
+
+				hl = { normal = "Normal" },
+				border = "rounded",
+				-- height = 0.4,
+				-- title = formatTitle(titleMsg:gsub("^%l", string.upper) .. " Qf items", "", "Boolean"),
+				-- width = 0.30,
+				-- row = 0.40,
+				-- col = 0.55,
+				preview = { hidden = "hidden" },
+			}
 		end,
 
 		actions = {
@@ -235,15 +242,7 @@ function M.grep_marks(buffer)
 		prompt = "   ",
 		actions = FzfMappings.mark_defaults(buffer),
 		fzf_opts = { ["--header"] = [[ ctrl-x:delete mark | alt-x:delete all marks]] },
-		winopts = {
-			title = formatTitle("Select Marks", "X", "GitSignsAdd"),
-			border = "rounded",
-			preview = {
-				vertical = "up:45%", -- up|down:size
-				horizontal = "right:60%", -- right|left:size
-			},
-		},
-		winopts_fn = function()
+		winopts = function()
 			local cols = vim.o.columns - 50
 			local collss = cols > 80 and cols - 80 or cols / 2
 
@@ -251,7 +250,19 @@ function M.grep_marks(buffer)
 			local win_width = math.ceil(Utils.get_option("columns") * 1)
 
 			local row = math.ceil((Utils.get_option("lines") - win_height) * 1 + 5)
-			return { width = win_width, height = win_height, row = row, col = collss }
+			return {
+				width = win_width,
+				height = win_height,
+				row = row,
+				col = collss,
+
+				title = formatTitle("Select Marks", "X", "GitSignsAdd"),
+				border = "rounded",
+				preview = {
+					vertical = "up:45%", -- up|down:size
+					horizontal = "right:60%", -- right|left:size
+				},
+			}
 		end,
 	})
 end

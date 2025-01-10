@@ -186,7 +186,23 @@ function M.mark_defaults(buffer)
 				return
 			end
 
-			Utils.info("Not Impelemented yet", "Marks")
+			-- Utils.info("Not Impelemented yet", "Marks")
+			local sel_text = UtilsFzf.stripString(sel)
+			if sel_text then
+				local text = sel_text:gsub(Visual.extmarks.qf_sigil .. " ", "")
+				local line = string.match(text, ":(%d+):")
+				local filename = string.match(sel_text, "([%w_%.%-]+)%:?")
+				for i, x in pairs(buffer.lists) do
+					local filename_trim = Utils.format_filename(x.filename)
+					if filename and string.match(filename_trim, filename) and tonumber(x.line) == tonumber(line) then
+						-- print(vim.inspect(buffer.lists[i]))
+						buffer.lists[i] = nil
+						Visual.remove_sign(x.bufnr, x.id)
+					end
+				end
+			end
+
+			require("fzf-lua").actions.resume()
 		end,
 
 		["alt-x"] = function(selected, _)
