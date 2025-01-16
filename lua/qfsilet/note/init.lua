@@ -76,7 +76,7 @@ function M.loadqf_list()
 end
 
 function M.todo_with_capture_link()
-	Utils.info("Copied to system clipboard", "Link capture")
+	Utils.info("copied..", "Todo Link Capture")
 	fn.setreg("+", UtilsNote.capturelink(), "c")
 	todo()
 end

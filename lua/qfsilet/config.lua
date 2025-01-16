@@ -72,12 +72,11 @@ M.current_configs = {
 		},
 		marks = {
 			toggle_mark = "mm",
-			show_config = "mr",
+			show_config = "m?",
 			next_mark = "sn",
 			prev_mark = "sp",
 			del_buf_mark = "dM",
 			del_mark = "dm",
-			-- del_mark_buf = "dmm",
 			fzf_marks = "mf",
 		},
 	},

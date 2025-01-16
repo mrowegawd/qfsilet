@@ -61,17 +61,20 @@ end
 function M.gotolink()
 	local str_file = fn.expand("<cWORD>")
 
-	if not str_file:match("File:") then
+	if not str_file:match("file:") then
 		return
 	end
 
-	local filename = str_file:match("File.(.*)+")
-	local lnum_lcol = fn.split(string.gsub(str_file:match("File.*+(.*)]"), "]", ""), ":")
-	local row = tonumber(lnum_lcol[1])
-	local col = tonumber(lnum_lcol[2])
+	-- remove the bracket [[ ... ]]
+	local fname = fn.split(str_file:match("file:(.*):"), ":")
 
-	cmd("e " .. filename)
-	api.nvim_win_set_cursor(0, { row, col })
+	local sel_str = str_file:match("file:(.*).*")
+	local tbl_col = fn.split(sel_str:match(":[0-9]+"), ":")
+	local col = tonumber(tbl_col[1])
+
+	cmd("e " .. fname[1])
+	api.nvim_win_set_cursor(0, { col, 0 })
+	cmd("silent! :e")
 end
 
 return M

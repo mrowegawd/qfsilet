@@ -168,7 +168,7 @@ function M.setup_keymaps_and_autocmds()
 			mode = "n",
 		},
 		{
-			desc = "Marks: open marks with fzf",
+			desc = "Marks: select marks with picker",
 			func = "fzf_marks",
 			keys = Config.keymap.marks.fzf_marks,
 			mode = "n",
