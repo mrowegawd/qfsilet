@@ -34,14 +34,14 @@ M.extmarks = {
 -- it will set it and returns -false.
 ---@param bufnr number
 ---@return boolean
-local function buf_autocmd_is_set(bufnr)
-	local ok, _ = pcall(vim.api.nvim_buf_get_var, bufnr, M.extmarks.listener_name)
-	if ok then
-		return true
-	end
-	vim.api.nvim_buf_set_var(bufnr, M.extmarks.listener_name, true)
-	return false
-end
+-- local function buf_autocmd_is_set(bufnr)
+-- 	local ok, _ = pcall(vim.api.nvim_buf_get_var, bufnr, M.extmarks.listener_name)
+-- 	if ok then
+-- 		return true
+-- 	end
+-- 	vim.api.nvim_buf_set_var(bufnr, M.extmarks.listener_name, true)
+-- 	return false
+-- end
 
 ---For each item in the items list, it creates an extmark.
 function M.insert_extmarks(items, is_local)
@@ -122,7 +122,16 @@ function M.update_extmarks()
 	end
 end
 
-function M.insert_signs(bufnr, text, line, id)
+function M.insert_signs(opts, bufnr, text, line, id)
+	vim.validate({
+		opts = { opts, "table", true },
+		bufnr = { bufnr, "number", true },
+		text = { text, "string", true },
+		line = { line, "number", true },
+		id = { id, "string", true },
+	})
+
+	opts = opts or {}
 	id = id or 0
 	bufnr = bufnr or 0
 
@@ -137,7 +146,12 @@ function M.insert_signs(bufnr, text, line, id)
 		end
 	end
 
-	vim.fn.sign_place(id, M.extmarks.qf_sign_hl_group, sign_name, bufnr, { lnum = line, priority = 10 })
+	local priority = 1
+	if opts and opts.marks.sign_priority.mark then
+		priority = opts.marks.sign_priority.mark
+	end
+
+	vim.fn.sign_place(id, M.extmarks.qf_sign_hl_group, sign_name, bufnr, { lnum = line, priority = priority })
 end
 
 function M.remove_sign(bufnr, id, group)
@@ -153,81 +167,81 @@ end
 ---Updates all the signs based on the qflist and locallist values. We don't
 ---have a mechanism to detect item removeal, therefore it has to clear the
 ---signs and add them again on all buffers.
-function M.update_signs()
-	vim.fn.sign_unplace(M.extmarks.sign_group)
+-- function M.update_signs()
+-- 	vim.fn.sign_unplace(M.extmarks.sign_group)
+--
+-- 	local locallist = {}
+-- 	local buffers = buffer_list()
+-- 	for _, buf in ipairs(buffers) do
+-- 		local list = vim.fn.getloclist(buf)
+-- 		if #list > 0 then
+-- 			locallist = merge_list(locallist, list)
+-- 		end
+-- 	end
+-- 	local qflist = vim.fn.getqflist()
+-- 	-- Bail early.
+-- 	if #locallist + #qflist == 0 then
+-- 		vim.api.nvim_clear_autocmds({ group = M.extmarks.group })
+-- 		return
+-- 	end
+--
+-- 	if #qflist > 0 then
+-- 		M.insert_signs(qflist, false)
+-- 	end
+--
+-- 	local items = {}
+-- 	if #locallist > 0 then
+-- 		for _, item in ipairs(locallist) do
+-- 			if item.type == M.extmarks.unique_id then
+-- 				table.insert(items, item)
+-- 			end
+-- 		end
+-- 		M.insert_signs(items, true)
+-- 	end
+-- end
 
-	local locallist = {}
-	local buffers = buffer_list()
-	for _, buf in ipairs(buffers) do
-		local list = vim.fn.getloclist(buf)
-		if #list > 0 then
-			locallist = merge_list(locallist, list)
-		end
-	end
-	local qflist = vim.fn.getqflist()
-	-- Bail early.
-	if #locallist + #qflist == 0 then
-		vim.api.nvim_clear_autocmds({ group = M.extmarks.group })
-		return
-	end
+-- local function get_buffers_in_list(is_local)
+-- 	if is_local then
+-- 		return { 0 }
+-- 	end
+--
+-- 	local buffers = {}
+-- 	local items = vim.fn.getqflist()
+-- 	for _, item in ipairs(items) do
+-- 		buffers[item.bufnr] = true
+-- 	end
+--
+-- 	local list = {}
+-- 	for item in pairs(buffers) do
+-- 		table.insert(list, item)
+-- 	end
+-- 	return list
+-- end
 
-	if #qflist > 0 then
-		M.insert_signs(qflist, false)
-	end
-
-	local items = {}
-	if #locallist > 0 then
-		for _, item in ipairs(locallist) do
-			if item.type == M.extmarks.unique_id then
-				table.insert(items, item)
-			end
-		end
-		M.insert_signs(items, true)
-	end
-end
-
-local function get_buffers_in_list(is_local)
-	if is_local then
-		return { 0 }
-	end
-
-	local buffers = {}
-	local items = vim.fn.getqflist()
-	for _, item in ipairs(items) do
-		buffers[item.bufnr] = true
-	end
-
-	local list = {}
-	for item in pairs(buffers) do
-		table.insert(list, item)
-	end
-	return list
-end
-
-function M.setup_buf_autocmds(is_local)
-	local buffers = get_buffers_in_list(is_local)
-	for _, bufnr in ipairs(buffers) do
-		if not buf_autocmd_is_set(bufnr) then
-			vim.api.nvim_create_autocmd({ "BufEnter", "FocusGained" }, {
-				buffer = bufnr,
-				group = M.extmarks.group,
-
-				callback = function()
-					local lazyredraw = vim.opt.lazyredraw:get()
-					vim.opt.lazyredraw = true
-					if M.extmarks.set_extmarks then
-						M.update_extmarks()
-					end
-
-					if M.extmarks.set_signs then
-						M.update_signs()
-					end
-					vim.opt.lazyredraw = lazyredraw
-				end,
-				desc = "Check for qfsilet notes",
-			})
-		end
-	end
-end
+-- function M.setup_buf_autocmds(is_local)
+-- 	local buffers = get_buffers_in_list(is_local)
+-- 	for _, bufnr in ipairs(buffers) do
+-- 		if not buf_autocmd_is_set(bufnr) then
+-- 			vim.api.nvim_create_autocmd({ "BufEnter", "FocusGained" }, {
+-- 				buffer = bufnr,
+-- 				group = M.extmarks.group,
+--
+-- 				callback = function()
+-- 					local lazyredraw = vim.opt.lazyredraw:get()
+-- 					vim.opt.lazyredraw = true
+-- 					if M.extmarks.set_extmarks then
+-- 						M.update_extmarks()
+-- 					end
+--
+-- 					if M.extmarks.set_signs then
+-- 						M.update_signs()
+-- 					end
+-- 					vim.opt.lazyredraw = lazyredraw
+-- 				end,
+-- 				desc = "Check for qfsilet notes",
+-- 			})
+-- 		end
+-- 	end
+-- end
 
 return M

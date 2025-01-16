@@ -31,6 +31,7 @@ local function register_mark(line, col, bufnr, is_force)
 	end
 
 	if display_signs then
+		-- print("yo")
 		M.add_sign(bufnr, line, id)
 	end
 end
@@ -110,9 +111,14 @@ local function jump_to(mark_lists, opts)
 
 	for _, x in pairs(mark_lists) do
 		if x.filename == opts.filename and x.line == opts.line then
-			vim.cmd("e " .. x.filename)
+			local found_ls = Utils.find_win_ls({ filename = x.filename })
+			if found_ls.found then
+				vim.cmd("buffer " .. x.filename)
+			else
+				vim.cmd("e " .. x.filename)
+			end
 			vim.api.nvim_win_set_cursor(0, { x.line, x.col })
-			vim.cmd("normal! zz")
+			vim.cmd("norm! zvzz")
 		end
 	end
 end
@@ -205,11 +211,33 @@ function M.refresh_deforce(force)
 		M.buffers.mark = {
 			lists = {},
 		}
-	else
+	end
+
+	local separator = function()
+		return "/"
+	end
+
+	local function remove_trailing(path)
+		local p, _ = path:gsub(separator() .. "$", "")
+		return p
+	end
+
+	local function basename(path)
+		path = remove_trailing(path)
+		local i = path:match("^.*()" .. separator())
+		if not i then
+			return path
+		end
+		return path:sub(i + 1, #path)
+	end
+
+	if #buffer.mark.lists > 0 then
 		for _, x in ipairs(buffer.mark.lists) do
 			local bufnr = vim.api.nvim_get_current_buf()
 			local winnr_fn = vim.api.nvim_buf_get_name(bufnr)
-			if string.match(x.filename, winnr_fn) then
+
+			local basename_winnr_fn = basename(winnr_fn):gsub("([%-%^%$%(%)%.%[%]%+%-%?%*])", "%%%1")
+			if winnr_fn ~= "" and basename(x.filename):match(basename_winnr_fn) then
 				register_mark(x.line, x.col, bufnr, force)
 			end
 		end
@@ -218,7 +246,7 @@ end
 
 function M.add_sign(bufnr, line, id)
 	-- TODO: Check ini, `excluded.filetypes` belum diset
-	-- local config = Config.current_configs
+	local config = Config.current_configs
 	-- print(vim.inspect(config.marks.excluded.filetypes))
 	local buftype = vim.api.nvim_get_option_value("buftype", {})
 	if
@@ -239,7 +267,7 @@ function M.add_sign(bufnr, line, id)
 	end
 
 	local text = "abc"
-	Visual.insert_signs(bufnr, text, line, id)
+	Visual.insert_signs(config, bufnr, text, line, id)
 end
 
 function M.refresh(force_reregister)
