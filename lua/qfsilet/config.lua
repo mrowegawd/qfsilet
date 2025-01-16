@@ -59,16 +59,15 @@ M.current_configs = {
 			clear_notes = "cc",
 			toggle_open_qf = "<Leader>q",
 			toggle_open_loclist = "<leader>Q",
-			goto_link_capture = "g<cr>",
-			fzf_qf = "mx",
 			save_local = "ms",
 			load_local = "ml",
-			add_item_to_qf = "<leader>al",
+			add_item_to_qf = "ma",
 		},
 		todo = {
 			add_todo = "mt",
 			add_todo_global = "mT",
 			add_link_capture = "mc",
+			goto_link_capture = "g<cr>",
 		},
 		marks = {
 			toggle_mark = "mm",

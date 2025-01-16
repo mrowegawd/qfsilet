@@ -48,17 +48,14 @@ function M.load(opts, isGlobal)
 	end
 
 	if not Utils.checkJSONPath(Constant.defaults.base_path) then
-		Utils.warn(
-			string.format([[Tidak ada %s note pada path project ini. Cobalah untuk membuatnya..]], titleMsg),
-			"QFSilet"
-		)
+		Utils.warn(string.format([[No %s list qf items on this cwd. Cobalah untuk membuatnya..]], titleMsg), "QFSilet")
 		return
 	end
 
 	require("fzf-lua").files({
 		cwd = Constant.defaults.base_path,
 		previewer = false,
-		fzf_opts = { ["--header"] = [[ctrl-x:'delete']] },
+		fzf_opts = { ["--header"] = [[ ctrl-x:delete]] },
 		cmd = "fd -d 1 -e json | cut -d. -f1",
 		no_header_i = true,
 		no_header = true,
@@ -69,19 +66,15 @@ function M.load(opts, isGlobal)
 			local win_height = math.ceil(Utils.get_option("lines") * 0.5 - 10)
 			local win_width = math.ceil(Utils.get_option("columns") * 0.5 - 20)
 			return {
-				hl = { normal = "Normal" },
+				hls = { normal = "Normal" },
 				border = "rounded",
-				-- height = 0.4,
-				-- title = formatTitle(titleMsg:gsub("^%l", string.upper) .. " Qf items", "", "Boolean"),
-				title = formatTitle(string.format("Load (%s) qf items", titleMsg), "", "Boolean"),
-				-- width = 0.30,
-				-- row = 0.40,
-				-- col = 0.55,
+				title = formatTitle(string.format("Load (%s) Quickfix items", titleMsg), ""),
 				preview = { hidden = "hidden" },
 				width = win_width,
 				height = win_height,
 				row = 20,
 				col = collss,
+				backdrop = 60,
 			}
 		end,
 		actions = vim.tbl_extend(
@@ -95,13 +88,13 @@ end
 function M.sel_qf(opts, isLoad)
 	isLoad = isLoad or false
 
-	local prompt_prefix = "Save"
+	local prompt_prefix = "Save Quickfix Items"
 	if isLoad then
-		prompt_prefix = "Load"
+		prompt_prefix = "Load Quickfix Items"
 	end
 
 	require("fzf-lua").fzf_exec({ "global", "local" }, {
-		prompt = prompt_prefix .. " quickfix items? ",
+		prompt = "   ",
 		winopts = function()
 			local cols = vim.o.columns - 50
 			local collss = cols > 80 and cols - 80 or cols / 2
@@ -113,14 +106,10 @@ function M.sel_qf(opts, isLoad)
 				height = win_height,
 				row = 20,
 				col = collss,
-
-				hl = { normal = "Normal" },
+				backdrop = 60,
+				hls = { normal = "Normal" },
 				border = "rounded",
-				-- height = 0.4,
-				-- title = formatTitle(titleMsg:gsub("^%l", string.upper) .. " Qf items", "", "Boolean"),
-				-- width = 0.30,
-				-- row = 0.40,
-				-- col = 0.55,
+				title = formatTitle("QF-" .. prompt_prefix, ""),
 				preview = { hidden = "hidden" },
 			}
 		end,
@@ -256,7 +245,7 @@ function M.grep_marks(buffer)
 				row = row,
 				col = collss,
 
-				title = formatTitle("QFMarks", ""),
+				title = formatTitle("QF-Marks", ""),
 				border = "rounded",
 				preview = {
 					vertical = "up:45%", -- up|down:size

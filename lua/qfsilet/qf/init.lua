@@ -43,12 +43,6 @@ function qf.loadqf()
 	Note.loadqf_list()
 end
 
-function qf.fzf_qf()
-	require("fzf-lua").quickfix({
-		prompt = "    ",
-	})
-end
-
 local function is_vim_list_open()
 	for _, win in ipairs(api.nvim_list_wins()) do
 		local buf = api.nvim_win_get_buf(win)
@@ -197,7 +191,13 @@ function qf.add_item_to_qf()
 			},
 		},
 	})
-	Utils.info("Added to qflist", "Qf")
+	local is_location_target = "quickfix" == "location"
+	local cmd_ = is_location_target and { "lclose", "lopen" } or { "cclose", "copen" }
+	local is_open = is_vim_list_open()
+	if not is_open then
+		cmd[cmd_[2]]()
+		cmd("wincmd p")
+	end
 end
 
 return qf

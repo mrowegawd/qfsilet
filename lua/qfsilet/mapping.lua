@@ -50,19 +50,19 @@ function M.setup_keymaps_and_autocmds()
 
 	local ft_keymaps = {
 		{
-			desc = "Qf: delete item quickfix",
+			desc = "Qf: delete item quickfix [QFsilet]",
 			func = "del_itemqf",
 			keys = Config.keymap.quickfix.del_item,
 			mode = "n",
 		},
 		{
-			desc = "Qf: clear list of notes on current quickfix",
+			desc = "Qf: clear list of notes on current quickfix [QFsilet]",
 			func = "clear_notes",
 			keys = Config.keymap.quickfix.clear_notes,
 			mode = "n",
 		},
 		{
-			desc = "Qf: clear all items quickfix",
+			desc = "Qf: clear all items quickfix [QFsilet]",
 			func = "clear_qf_list",
 			keys = Config.keymap.quickfix.clear_all,
 			mode = "n",
@@ -70,7 +70,7 @@ function M.setup_keymaps_and_autocmds()
 	}
 	local loc_keymaps = {
 		{
-			desc = "Loclist: toggle location list",
+			desc = "Loclist: toggle location list [QFsilet]",
 			func = "toggle_loclist",
 			keys = Config.keymap.quickfix.toggle_open_loclist,
 			mode = "n",
@@ -78,31 +78,25 @@ function M.setup_keymaps_and_autocmds()
 	}
 	local qf_keymaps = {
 		{
-			desc = "Qf: toggle quickfix list",
+			desc = "Qf: toggle quickfix list [QFsilet]",
 			func = "toggle_qf",
 			keys = Config.keymap.quickfix.toggle_open_qf,
 			mode = "n",
 		},
 		{
-			desc = "Qf: open todo cursor and collect with quickfix",
-			func = "fzf_qf",
-			keys = Config.keymap.quickfix.fzf_qf,
-			mode = "n",
-		},
-		{
-			desc = "Qf: save quickfix items",
+			desc = "Qf: save quickfix items [QFsilet]",
 			func = "saveqf",
 			keys = Config.keymap.quickfix.save_local,
 			mode = "n",
 		},
 		{
-			desc = "Qf: load quickfix items",
+			desc = "Qf: load quickfix items [QFsilet]",
 			func = "loadqf",
 			keys = Config.keymap.quickfix.load_local,
 			mode = "n",
 		},
 		{
-			desc = "Qf: add current cursor line to qf",
+			desc = "Qf: add item to qf [QFsilet]",
 			func = "add_item_to_qf",
 			keys = Config.keymap.quickfix.add_item_to_qf,
 			mode = "n",
@@ -111,70 +105,70 @@ function M.setup_keymaps_and_autocmds()
 	local todo_note_keymaps = {
 
 		{
-			desc = "Marks: open local todo window",
+			desc = "Marks: open local todo window [QFsilet]",
 			func = "todo_local",
 			keys = Config.keymap.todo.add_todo,
 			mode = { "n", "v" },
 		},
 		{
-			desc = "Marks: open global todo window",
+			desc = "Marks: open global todo window [QFsilet]",
 			func = "todo_global",
 			keys = Config.keymap.todo.add_todo_global,
 			mode = { "n", "v" },
 		},
 		{
-			desc = "Marks: set cursor link capture todo",
+			desc = "Marks: capture link [QFsilet]",
 			func = "todo_with_capture_link",
 			keys = Config.keymap.todo.add_link_capture,
 			mode = "n",
 		},
 
 		{
-			desc = "Marks: goto link capture",
+			desc = "Marks: go to link capture [QFsilet]",
 			func = "todo_goto_capture_link",
-			keys = Config.keymap.quickfix.goto_link_capture,
+			keys = Config.keymap.todo.goto_link_capture,
 			mode = { "n", "v" },
 		},
 	}
 	local marks_keymaps = {
 		{
-			desc = "Marks: toggle marks",
+			desc = "Marks: toggle marks [QFsilet]",
 			func = "toggle_mark_cursor",
 			keys = Config.keymap.marks.toggle_mark,
 			mode = "n",
 		},
 		{
-			desc = "Marks: jump to next",
+			desc = "Marks: jump to next [QFsilet]",
 			func = "next_mark",
 			keys = Config.keymap.marks.next_mark,
 			mode = "n",
 		},
 		{
-			desc = "Marks: jump to prev",
+			desc = "Marks: jump to prev [QFsilet]",
 			func = "prev_mark",
 			keys = Config.keymap.marks.prev_mark,
 			mode = "n",
 		},
 		{
-			desc = "Marks: delete mark",
+			desc = "Marks: delete mark [QFsilet]",
 			func = "delete",
 			keys = Config.keymap.marks.del_mark,
 			mode = "n",
 		},
 		{
-			desc = "Marks: delete all current marks",
+			desc = "Marks: delete all current marks [QFsilet]",
 			func = "delete_buf_marks",
 			keys = Config.keymap.marks.del_buf_mark,
 			mode = "n",
 		},
 		{
-			desc = "Marks: select marks with picker",
+			desc = "Marks: select marks with picker [QFsilet]",
 			func = "fzf_marks",
 			keys = Config.keymap.marks.fzf_marks,
 			mode = "n",
 		},
 		{
-			desc = "Marks: show config marks",
+			desc = "Marks: show config marks [QFsilet]",
 			func = "show_config",
 			keys = Config.keymap.marks.show_config,
 			mode = "n",
