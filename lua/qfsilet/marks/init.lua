@@ -11,7 +11,7 @@ M.buffers = {}
 local display_signs = true
 local current_bookmark_idx = 0
 
-local function register_mark(line, col, bufnr, is_force)
+local function register_mark(line, col, bufnr, is_force, id)
 	is_force = is_force or false
 	col = col or 1
 	bufnr = bufnr or vim.api.nvim_get_current_buf()
@@ -23,7 +23,7 @@ local function register_mark(line, col, bufnr, is_force)
 		return
 	end
 
-	local id = tostring(line .. bufnr)
+	id = id or tostring(line .. bufnr)
 
 	local line_count = vim.api.nvim_buf_line_count(bufnr)
 	if not is_force and (line_count + 1) > line then
@@ -238,7 +238,7 @@ function M.refresh_deforce(force)
 
 			local basename_winnr_fn = basename(winnr_fn):gsub("([%-%^%$%(%)%.%[%]%+%-%?%*])", "%%%1")
 			if winnr_fn ~= "" and basename(x.filename):match(basename_winnr_fn) then
-				register_mark(x.line, x.col, bufnr, force)
+				register_mark(x.line, x.col, bufnr, force, x.id)
 			end
 		end
 	end
