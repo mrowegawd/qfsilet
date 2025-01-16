@@ -34,10 +34,10 @@ local stat_fname_todo = {
 
 local function formatTitle(str, icon, iconHl)
 	return {
-		{ " " },
-		{ (icon and icon .. " " or ""), iconHl or "Keyword" },
-		{ str, "Bold" },
-		{ " " },
+		{ " ", "FzfLuaPreviewTitle" },
+		{ (icon and icon .. " " or ""), iconHl or "FzfLuaPreviewTitle" },
+		{ str, "FzfLuaPreviewTitle" },
+		{ " ", "FzfLuaPreviewTitle" },
 	}
 end
 
@@ -241,7 +241,7 @@ function M.grep_marks(buffer)
 		},
 		prompt = "   ",
 		actions = FzfMappings.mark_defaults(buffer),
-		fzf_opts = { ["--header"] = [[ ctrl-x:delete mark | alt-x:delete all marks]] },
+		fzf_opts = { ["--header"] = [[ ctrl-x:delete  alt-x:delete-all]] },
 		winopts = function()
 			local cols = vim.o.columns - 50
 			local collss = cols > 80 and cols - 80 or cols / 2
@@ -256,7 +256,7 @@ function M.grep_marks(buffer)
 				row = row,
 				col = collss,
 
-				title = formatTitle("Select Marks", "X", "GitSignsAdd"),
+				title = formatTitle("QFMarks", ""),
 				border = "rounded",
 				preview = {
 					vertical = "up:45%", -- up|down:size

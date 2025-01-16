@@ -180,13 +180,34 @@ function M.mark_defaults(buffer)
 			end
 		end,
 
+		["ctrl-t"] = function(selected, _)
+			local sel = UtilsFzf.stripString(selected[1])
+			if sel == nil then
+				return
+			end
+
+			local sel_text = UtilsFzf.stripString(sel)
+			if sel_text then
+				local text = sel_text:gsub(Visual.extmarks.qf_sigil .. " ", "")
+				local line = string.match(text, ":(%d+):")
+				local filename = string.match(sel_text, "([%w_%.%-]+)%:?")
+				for _, x in pairs(buffer.lists) do
+					local filename_trim = Utils.format_filename(x.filename)
+					if filename and string.match(filename_trim, filename) and tonumber(x.line) == tonumber(line) then
+						vim.cmd("tabe " .. x.filename)
+						vim.api.nvim_win_set_cursor(0, { x.line, x.col })
+						vim.cmd("normal! zz")
+					end
+				end
+			end
+		end,
+
 		["ctrl-x"] = function(selected, _)
 			local sel = UtilsFzf.stripString(selected[1])
 			if sel == nil then
 				return
 			end
 
-			-- Utils.info("Not Impelemented yet", "Marks")
 			local sel_text = UtilsFzf.stripString(sel)
 			if sel_text then
 				local text = sel_text:gsub(Visual.extmarks.qf_sigil .. " ", "")
@@ -202,7 +223,7 @@ function M.mark_defaults(buffer)
 				end
 			end
 
-			require("fzf-lua").actions.resume()
+			-- require("fzf-lua").actions.resume()
 		end,
 
 		["alt-x"] = function(selected, _)
