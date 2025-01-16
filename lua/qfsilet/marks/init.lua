@@ -110,17 +110,9 @@ local function jump_to(mark_lists, opts)
 
 	for _, x in pairs(mark_lists) do
 		if x.filename == opts.filename and x.line == opts.line then
-			local found_ls = Utils.find_win_ls({ filename = x.filename })
-			if found_ls.found then
-				if Utils.win_is_valid(found_ls) then
-					vim.api.nvim_set_current_win(found_ls.winid)
-					vim.api.nvim_win_set_cursor(0, { x.line, x.col })
-				end
-			else
-				vim.cmd("e " .. x.filename)
-				vim.api.nvim_win_set_cursor(0, { x.line, x.col })
-				vim.cmd("normal! zz")
-			end
+			vim.cmd("e " .. x.filename)
+			vim.api.nvim_win_set_cursor(0, { x.line, x.col })
+			vim.cmd("normal! zz")
 		end
 	end
 end
@@ -144,7 +136,8 @@ function M.next_mark()
 
 	current_bookmark_idx = next_idx
 
-	jump_to(buffer.lists, next_elem())
+	local mark_lists = buffer.lists
+	jump_to(mark_lists, next_elem())
 end
 
 function M.prev_mark()
@@ -165,7 +158,8 @@ function M.prev_mark()
 
 	current_bookmark_idx = prev_idx
 
-	jump_to(buffer.lists, prev_elem())
+	local mark_lists = buffer.lists
+	jump_to(mark_lists, prev_elem())
 end
 
 function M.fzf_marks()
@@ -223,8 +217,15 @@ function M.refresh_deforce(force)
 end
 
 function M.add_sign(bufnr, line, id)
-	local conf = Config.current_configs
-	if #conf.marks.excluded.filetypes > 0 and vim.tbl_contains(conf.marks.excluded.filetypes, vim.bo[0].filetype) then
+	-- TODO: Check ini, `excluded.filetypes` belum diset
+	-- local config = Config.current_configs
+	-- print(vim.inspect(config.marks.excluded.filetypes))
+	local buftype = vim.api.nvim_get_option_value("buftype", {})
+	if
+		-- #config.marks.excluded.filetypes > 0
+		-- and vim.tbl_contains(config.marks.excluded.filetypes, vim.bo[0].filetype)
+		buftype == "prompt" or buftype == "nofile"
+	then
 		return
 	end
 	if vim.bo.filetype == "" and (vim.bo.buftype == "terminal" or vim.bo.filetype == "toggleterm") then
