@@ -32,12 +32,24 @@ local stat_fname_todo = {
 	},
 }
 
+local function h(name)
+	return vim.api.nvim_get_hl(0, { name = name })
+end
+
+-- set hl-groups
+vim.api.nvim_set_hl(
+	0,
+	"QFSiletPreviewTitle",
+	{ fg = h("Normal").bg, bg = h("ErrorMsg").fg, italic = true, bold = true }
+)
+vim.api.nvim_set_hl(0, "QFSiletNormal", { fg = h("Normal").bg, bg = h("ErrorMsg").fg, italic = true, bold = true })
+
 local function formatTitle(str, icon, iconHl)
 	return {
-		{ " ", "FzfLuaPreviewTitle" },
-		{ (icon and icon .. " " or ""), iconHl or "FzfLuaPreviewTitle" },
-		{ str, "FzfLuaPreviewTitle" },
-		{ " ", "FzfLuaPreviewTitle" },
+		{ " ", "QFSiletNormal" },
+		{ (icon and icon .. " " or ""), iconHl or "QFSiletPreviewTitle" },
+		{ str, "QFSiletNormal" },
+		{ " ", "QFSiletNormal" },
 	}
 end
 
@@ -244,7 +256,6 @@ function M.grep_marks(buffer)
 				height = win_height,
 				row = row,
 				col = collss,
-
 				title = formatTitle("QF-Marks", ""),
 				border = "rounded",
 				preview = {

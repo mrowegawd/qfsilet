@@ -10,7 +10,8 @@ M.extmarks = {
 	set_signs = true,
 	sign_group = "QFSilet_sign_group",
 
-	qf_sigil = "", --"",
+	-- qf_sigil = "", --"",
+	qf_sigil = "",
 
 	qf_sign_hl_group = "QFSiletQfSign",
 	qf_sign_hl = { fg = "#8a62c6" },
@@ -122,18 +123,14 @@ function M.update_extmarks()
 	end
 end
 
-function M.insert_signs(opts, bufnr, text, line, id)
+function M.insert_signs(id, bufnr, line, text, opts)
 	vim.validate({
-		opts = { opts, "table", true },
+		id = { id, "number", true },
 		bufnr = { bufnr, "number", true },
-		text = { text, "string", true },
 		line = { line, "number", true },
-		id = { id, "string", true },
+		text = { text, "string", true },
+		opts = { opts, "table", true },
 	})
-
-	opts = opts or {}
-	id = id or 0
-	bufnr = bufnr or 0
 
 	local sign_name = "Marks_" .. text
 
@@ -150,6 +147,7 @@ function M.insert_signs(opts, bufnr, text, line, id)
 	if opts and opts.marks.sign_priority.mark then
 		priority = opts.marks.sign_priority.mark
 	end
+	-- print(id .. " " .. bufnr .. " " .. line .. " " .. text .. " " .. priority)
 
 	vim.fn.sign_place(id, M.extmarks.qf_sign_hl_group, sign_name, bufnr, { lnum = line, priority = priority })
 end

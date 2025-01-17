@@ -11,10 +11,15 @@ M.buffers = {}
 local display_signs = true
 local current_bookmark_idx = 0
 
-local function register_mark(line, col, bufnr, is_force, id)
+local function register_mark(id, bufnr, line, col, is_force)
+	vim.validate({
+		id = { id, "number" },
+		bufnr = { bufnr, "number" },
+	})
+
 	is_force = is_force or false
 	col = col or 1
-	bufnr = bufnr or vim.api.nvim_get_current_buf()
+	-- bufnr = bufnr or vim.api.nvim_get_current_buf()
 
 	local filename = vim.api.nvim_buf_get_name(0)
 	local buffer = M.buffers.mark
@@ -23,16 +28,13 @@ local function register_mark(line, col, bufnr, is_force, id)
 		return
 	end
 
-	id = id or tostring(line .. bufnr)
-
 	local line_count = vim.api.nvim_buf_line_count(bufnr)
 	if not is_force and (line_count + 1) > line then
 		table.insert(buffer.lists, { line = line, col = col, filename = filename, id = id })
 	end
 
 	if display_signs then
-		-- print("yo")
-		M.add_sign(bufnr, line, id)
+		M.add_sign(id, bufnr, line)
 	end
 end
 
@@ -188,7 +190,8 @@ function M.place_next_mark(line, col)
 		}
 	end
 
-	register_mark(line, col, bufnr)
+	local id = tonumber(line .. bufnr)
+	register_mark(id, bufnr, line, col)
 end
 
 function M.toggle_mark_cursor()
@@ -238,27 +241,32 @@ function M.refresh_deforce(force)
 
 			local basename_winnr_fn = basename(winnr_fn):gsub("([%-%^%$%(%)%.%[%]%+%-%?%*])", "%%%1")
 			if winnr_fn ~= "" and basename(x.filename):match(basename_winnr_fn) then
-				register_mark(x.line, x.col, bufnr, force, x.id)
+				register_mark(tonumber(x.id), bufnr, x.line, x.col, force)
 			end
 		end
 	end
 end
 
-function M.add_sign(bufnr, line, id)
-	-- TODO: Check ini, `excluded.filetypes` belum diset
+function M.add_sign(id, bufnr, line)
 	local config = Config.current_configs
-	-- print(vim.inspect(config.marks.excluded.filetypes))
-	local buftype = vim.api.nvim_get_option_value("buftype", {})
-	if
-		-- #config.marks.excluded.filetypes > 0
-		-- and vim.tbl_contains(config.marks.excluded.filetypes, vim.bo[0].filetype)
-		buftype == "prompt" or buftype == "nofile"
-	then
+
+	local buftype = vim.api.nvim_get_option_value("buftype", { buf = bufnr })
+	if buftype == "prompt" or buftype == "nofile" then
 		return
 	end
-	if vim.bo.filetype == "" and (vim.bo.buftype == "terminal" or vim.bo.filetype == "toggleterm") then
+
+	if buftype ~= "" and buftype ~= "quickfix" then
 		return
 	end
+
+	local filetype = vim.api.nvim_get_option_value("filetype", { buf = bufnr })
+	if vim.tbl_contains(config.marks.excluded.filetypes, filetype) then
+		return false
+	end
+
+	-- if vim.bo.filetype == "" and (vim.bo.buftype == "terminal" or vim.bo.filetype == "toggleterm") then
+	-- 	return
+	-- end
 
 	local buffer = M.buffers.mark
 
@@ -267,7 +275,7 @@ function M.add_sign(bufnr, line, id)
 	end
 
 	local text = "abc"
-	Visual.insert_signs(config, bufnr, text, line, id)
+	Visual.insert_signs(id, bufnr, line, text, config)
 end
 
 function M.refresh(force_reregister)
@@ -314,11 +322,11 @@ end
 
 local function setup_commands()
 	local function augroup(name)
-		return vim.api.nvim_create_augroup("QFSiletMarks" .. name, { clear = true })
+		return vim.api.nvim_create_augroup("QFSilet" .. name, { clear = true })
 	end
 
 	vim.api.nvim_create_autocmd({ "BufReadPost", "BufWritePost", "BufEnter" }, {
-		group = augroup("Refresh"),
+		group = augroup("RefreshMark"),
 		callback = function()
 			M.refresh(true)
 		end,
@@ -342,7 +350,7 @@ end
 
 function M.show_config()
 	vim.print(vim.inspect(M.buffers))
-	vim.print("current bookmark idx: " .. current_bookmark_idx)
+	-- vim.print("current bookmark idx: " .. current_bookmark_idx)
 	-- print("======================================")
 	-- print("======================================")
 	-- print("======================================")
