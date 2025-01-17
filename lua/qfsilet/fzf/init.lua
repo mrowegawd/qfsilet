@@ -37,12 +37,8 @@ local function h(name)
 end
 
 -- set hl-groups
-vim.api.nvim_set_hl(
-	0,
-	"QFSiletPreviewTitle",
-	{ fg = h("Normal").bg, bg = h("ErrorMsg").fg, italic = true, bold = true }
-)
-vim.api.nvim_set_hl(0, "QFSiletNormal", { fg = h("Normal").bg, bg = h("ErrorMsg").fg, italic = true, bold = true })
+vim.api.nvim_set_hl(0, "QFSiletPreviewTitle", { fg = h("Normal").fg, bg = h("Normal").fg, italic = true, bold = true })
+vim.api.nvim_set_hl(0, "QFSiletNormal", { fg = h("Normal").bg, bg = h("Normal").fg, italic = true, bold = true })
 
 local function formatTitle(str, icon, iconHl)
 	return {
@@ -184,7 +180,7 @@ function M.grep_marks(buffer)
 		local filename = Utils.format_filename(x.filename)
 		local col = x.col
 		local line = x.line
-		marks[#marks + 1] = Visual.extmarks.qf_sigil .. " " .. filename .. ":" .. line .. ":" .. col
+		marks[#marks + 1] = filename .. ":" .. line .. ":" .. col
 	end
 
 	if #marks == 0 then
@@ -240,27 +236,20 @@ function M.grep_marks(buffer)
 				return Markpreviewer
 			end,
 		},
-		prompt = "   ",
+		prompt = "    ",
 		actions = FzfMappings.mark_defaults(buffer),
-		fzf_opts = { ["--header"] = [[ ctrl-x:delete  alt-x:delete-all]] },
+		fzf_opts = { ["--header"] = [[  ctrl-x:delete  alt-x:delete-all]] },
 		winopts = function()
-			local cols = vim.o.columns - 50
-			local collss = cols > 80 and cols - 80 or cols / 2
-
-			local win_height = math.ceil(Utils.get_option("lines") * 0.5)
-			local win_width = math.ceil(Utils.get_option("columns") * 1)
-
-			local row = math.ceil((Utils.get_option("lines") - win_height) * 1 + 5)
 			return {
-				width = win_width,
-				height = win_height,
-				row = row,
-				col = collss,
-				title = formatTitle("QF-Marks", ""),
+				width = 0.80,
+				height = 0.80,
+				row = 0.55,
+				col = 0.55,
+				title = formatTitle("QF-Marks", Visual.extmarks.qf_sigil),
 				border = "rounded",
 				preview = {
 					vertical = "up:45%", -- up|down:size
-					horizontal = "right:60%", -- right|left:size
+					horizontal = "right:70%", -- right|left:size
 				},
 			}
 		end,

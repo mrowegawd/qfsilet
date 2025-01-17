@@ -11,11 +11,35 @@ M.buffers = {}
 local display_signs = true
 local current_bookmark_idx = 0
 
+local function exclude_buf(bufnr)
+	local config = Config.current_configs
+
+	local buftype = vim.api.nvim_get_option_value("buftype", { buf = bufnr })
+	if buftype == "prompt" or buftype == "nofile" then
+		return false
+	end
+
+	if buftype ~= "" and buftype ~= "quickfix" then
+		return false
+	end
+
+	local filetype = vim.api.nvim_get_option_value("filetype", { buf = bufnr })
+	if vim.tbl_contains(config.marks.excluded.filetypes, filetype) then
+		return false
+	end
+
+	return true
+end
+
 local function register_mark(id, bufnr, line, col, is_force)
 	vim.validate({
 		id = { id, "number" },
 		bufnr = { bufnr, "number" },
 	})
+
+	if not exclude_buf(bufnr) then
+		return
+	end
 
 	is_force = is_force or false
 	col = col or 1
@@ -248,33 +272,17 @@ function M.refresh_deforce(force)
 end
 
 function M.add_sign(id, bufnr, line)
-	local config = Config.current_configs
-
-	local buftype = vim.api.nvim_get_option_value("buftype", { buf = bufnr })
-	if buftype == "prompt" or buftype == "nofile" then
-		return
-	end
-
-	if buftype ~= "" and buftype ~= "quickfix" then
-		return
-	end
-
-	local filetype = vim.api.nvim_get_option_value("filetype", { buf = bufnr })
-	if vim.tbl_contains(config.marks.excluded.filetypes, filetype) then
-		return false
-	end
-
-	-- if vim.bo.filetype == "" and (vim.bo.buftype == "terminal" or vim.bo.filetype == "toggleterm") then
-	-- 	return
-	-- end
-
 	local buffer = M.buffers.mark
-
 	if not buffer then
 		return
 	end
 
+	if not exclude_buf(bufnr) then
+		return
+	end
+
 	local text = "abc"
+	local config = Config.current_configs
 	Visual.insert_signs(id, bufnr, line, text, config)
 end
 
