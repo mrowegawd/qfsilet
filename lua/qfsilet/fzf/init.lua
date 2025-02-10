@@ -1,7 +1,7 @@
 local Utils = require("qfsilet.utils")
 local Visual = require("qfsilet.marks.visual")
 local UtilsFzf = require("qfsilet.fzf.utils")
-local fzf_ok, _ = pcall(require, "fzf-lua")
+local fzf_ok, Fzflua = pcall(require, "fzf-lua")
 
 if not fzf_ok then
 	Utils.warn("fzf-lua diperlukan sebagai dependensi")
@@ -60,10 +60,10 @@ function M.load(opts, isGlobal)
 		return
 	end
 
-	require("fzf-lua").files({
+	Fzflua.files({
 		cwd = Constant.defaults.base_path,
 		previewer = false,
-		fzf_opts = { ["--header"] = [[ ctrl-x:delete]] },
+		fzf_opts = { ["--header"] = [[ctrl-x:delete]] },
 		cmd = "fd -d 1 -e json | cut -d. -f1",
 		no_header_i = true,
 		no_header = true,
@@ -101,8 +101,8 @@ function M.sel_qf(opts, isLoad)
 		prompt_prefix = "Load Quickfix Items"
 	end
 
-	require("fzf-lua").fzf_exec({ "global", "local" }, {
-		prompt = "   ",
+	FzfLua.fzf_exec({ "global", "local" }, {
+		prompt = "  ",
 		winopts = function()
 			local cols = vim.o.columns - 50
 			local collss = cols > 80 and cols - 80 or cols / 2
@@ -230,15 +230,15 @@ function M.grep_marks(buffer)
 		return {}
 	end
 
-	require("fzf-lua").fzf_exec(marks, {
+	FzfLua.fzf_exec(marks, {
 		previewer = {
 			_ctor = function()
 				return Markpreviewer
 			end,
 		},
-		prompt = "    ",
+		prompt = "  ",
 		actions = FzfMappings.mark_defaults(buffer),
-		fzf_opts = { ["--header"] = [[  ctrl-x:delete  alt-x:delete-all]] },
+		fzf_opts = { ["--header"] = [[ctrl-x:delete  alt-x:delete-all]] },
 		winopts = function()
 			return {
 				width = 0.80,

@@ -76,7 +76,7 @@ function M.input(func, text_top_msg)
 	}
 
 	local input = Input(input_opts, {
-		prompt = "> ",
+		prompt = "  ",
 		default_value = "",
 		on_close = function() end,
 		on_submit = function(value)
@@ -97,11 +97,6 @@ function M.input(func, text_top_msg)
 	input:map("n", "<c-c>", function()
 		input:unmount()
 	end, { noremap = true })
-end
-
-local function refresh_orgmode(fname_path)
-	local Headline = require("orgmode")
-	Headline:reload(fname_path)
 end
 
 function M.popup(fname_path, IsGlobal, base_path)
@@ -157,8 +152,6 @@ function M.popup(fname_path, IsGlobal, base_path)
 
 		if vim.fn.getfsize(fname_path) <= 1 then
 			Util.rmdir(base_path)
-		else
-			refresh_orgmode(fname_path)
 		end
 
 		popup:unmount()
@@ -178,8 +171,6 @@ function M.popup(fname_path, IsGlobal, base_path)
 
 		if vim.fn.getfsize(fname_path) <= 1 then
 			Util.rmdir(base_path)
-		else
-			refresh_orgmode(fname_path)
 		end
 
 		popup:unmount()

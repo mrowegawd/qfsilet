@@ -27,6 +27,9 @@ local function todo(isGlobal)
 		cmd("0r! cat " .. Constant.defaults.note_path)
 		cmd("0") -- Go to top of document
 	end
+
+	-- Ensure the note path buffer are not listed
+	UtilsNote.delete_buffer_by_name(Constant.defaults.note_path)
 end
 
 local function saveqflist(isGlobal)
@@ -34,7 +37,7 @@ local function saveqflist(isGlobal)
 
 	local lists_qf = UtilsNote.get_current_list()
 	if #lists_qf == 0 then
-		Utils.warn("Current quickfix list is empty\nWe abort it..", "QFSilet")
+		Utils.warn("Quickfix list is empty. Abort it..", "QFSilet")
 		return
 	end
 

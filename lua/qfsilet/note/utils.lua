@@ -77,4 +77,24 @@ function M.gotolink()
 	cmd("silent! :e")
 end
 
+local function is_file_in_buffers(filename)
+	local buffers = vim.api.nvim_list_bufs()
+
+	for _, buf in ipairs(buffers) do
+		local bufname = vim.api.nvim_buf_get_name(buf)
+		if bufname == filename then
+			return buf
+		end
+	end
+
+	return nil
+end
+
+function M.delete_buffer_by_name(filename)
+	local buf = is_file_in_buffers(filename)
+	if buf then
+		vim.api.nvim_buf_delete(buf, { force = true })
+	end
+end
+
 return M
