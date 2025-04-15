@@ -294,6 +294,10 @@ function M.info(msg, name)
 	vim.notify(msg, L.levels.INFO, { title = name or "QFSilet" })
 end
 
+function M.debug_info(msg)
+	M.info(msg, "DEBUG QFSILET")
+end
+
 function M.warn(msg, name)
 	vim.notify(msg, L.levels.WARN, { title = name or "QFSilet" })
 end

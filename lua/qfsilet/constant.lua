@@ -5,6 +5,7 @@ M.defaults = {
 	base_hash = "",
 	note_path = "",
 	global_note_dir = "",
+	global_qf_dir = "",
 }
 
 return M

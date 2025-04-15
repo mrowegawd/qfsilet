@@ -44,8 +44,8 @@ end
 
 function M.setup_keymaps_and_autocmds()
 	local qf_autocmds = {
-		{ name = "SaveQf", desc = "Qf: save qflist local", func = "saveqf", mode = "n" },
-		{ name = "LoadQf", desc = "Qf: load qflist local", func = "loadqf", mode = "n" },
+		{ name = "SaveQf", desc = "Qf: save qflist", func = "saveqf", mode = "n" },
+		{ name = "LoadQf", desc = "Qf: load qflist", func = "loadqf", mode = "n" },
 	}
 
 	local ft_keymaps = {

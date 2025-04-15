@@ -310,10 +310,10 @@ local function __save_marks()
 		end
 		Utils.create_file(fn_name)
 		Utils.save_table_to_file(buffer, fn_name)
-	else
-		if Utils.isFile(fn_name) then
-			Utils.rmdir(fn_name)
-		end
+		-- else
+		-- 	if Utils.isFile(fn_name) then
+		-- 		Utils.rmdir(fn_name)
+		-- 	end
 	end
 end
 

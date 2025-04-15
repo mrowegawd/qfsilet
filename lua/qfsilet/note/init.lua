@@ -11,13 +11,16 @@ local Ui = require("qfsilet.ui")
 
 local M = {}
 
+Path.setup_global_path() -- setup global path for qf and note
+
+local function setup_base_path()
+	Path.setup_path()
+	Path.create_dir(Constant.defaults.base_path)
+end
+
 local function todo(isGlobal)
 	isGlobal = isGlobal or false
-
-	Path.setup_path(isGlobal)
-	if not Utils.isDir(Constant.defaults.base_path) then
-		Utils.create_dir(Constant.defaults.base_path)
-	end
+	setup_base_path()
 
 	Path.create_file(Constant.defaults.note_path)
 
@@ -32,35 +35,25 @@ local function todo(isGlobal)
 	UtilsNote.delete_buffer_by_name(Constant.defaults.note_path)
 end
 
-local function saveqflist(isGlobal)
-	isGlobal = isGlobal or false
+local function saveqflist()
+	setup_base_path()
 
 	local lists_qf = UtilsNote.get_current_list()
 	if #lists_qf == 0 then
-		Utils.warn("Quickfix list is empty. Abort it..", "QFSilet")
+		Utils.warn("QUICKFIX list is empty. Abort it..", "QF")
 		return
 	end
 
-	Path.setup_path(isGlobal)
-	if not Utils.isDir(Constant.defaults.base_path) then
-		Utils.create_dir(Constant.defaults.base_path)
-	end
 	require("qfsilet.fzf").sel_qf(Config)
 end
 
-local function loadqflist(isGlobal)
-	isGlobal = isGlobal or false
-
-	Path.setup_path(isGlobal)
-	if not Utils.isDir(Constant.defaults.base_path) then
-		Utils.create_dir(Constant.defaults.base_path)
-	end
+local function loadqflist()
 	require("qfsilet.fzf").sel_qf(Config, true)
 end
 
 -- Get todos if any local todo exists
 function M.get_todo()
-	Path.init_constant_path(false)
+	Path.init_constant_path()
 	if Utils.isFile(Constant.defaults.note_path) then
 		todo(false)
 	end

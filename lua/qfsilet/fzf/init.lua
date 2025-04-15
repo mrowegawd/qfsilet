@@ -49,19 +49,23 @@ local function formatTitle(str, icon, iconHl)
 	}
 end
 
-function M.load(opts, isGlobal)
+function M.load_items_qf(opts, isGlobal)
 	local titleMsg = "local"
+	local path_qf = Constant.defaults.base_path
 	if isGlobal then
 		titleMsg = "global"
+		path_qf = Constant.defaults.global_qf_dir
 	end
 
-	if not Utils.checkJSONPath(Constant.defaults.base_path) then
-		Utils.warn(string.format([[No %s list qf items on this cwd. Cobalah untuk membuatnya..]], titleMsg), "QFSilet")
+	if not Utils.checkJSONPath(path_qf) then
+		local warn_message =
+			string.format([[There is no saved QUICKFIX list at the '%s' path. Try creating one.]], titleMsg)
+		Utils.warn(warn_message, "QF")
 		return
 	end
 
 	Fzflua.files({
-		cwd = Constant.defaults.base_path,
+		cwd = path_qf,
 		previewer = false,
 		fzf_opts = { ["--header"] = [[ctrl-x:delete]] },
 		cmd = "fd -d 1 -e json | cut -d. -f1",
@@ -84,8 +88,8 @@ function M.load(opts, isGlobal)
 		end,
 		actions = vim.tbl_extend(
 			"keep",
-			FzfMappings.editOrMergeQuickFix(opts, Constant.defaults.base_path),
-			FzfMappings.deleteItem(Constant.defaults.base_path)
+			FzfMappings.editOrMergeQuickFix(opts, path_qf),
+			FzfMappings.deleteItem(path_qf)
 		),
 	})
 end
@@ -120,18 +124,21 @@ function M.sel_qf(opts, isLoad)
 						if selected[1] == "global" then
 							checkGlobal = true
 						end
-						M.load(opts, checkGlobal)
+						M.load_items_qf(opts, checkGlobal)
 					else
 						local lists_qf = UtilsNote.get_current_list()
 
 						Ui.input(function(inputMsg)
+							vim.cmd("startinsert!")
 							-- If `value` contains spaces, concat it them with underscore
 							if inputMsg == "" then
 								return
 							end
 
-							inputMsg = inputMsg:gsub("%s", "_")
-							inputMsg = inputMsg:gsub("%.", "_")
+							local title = inputMsg
+
+							title = title:gsub("%s", "_")
+							title = title:gsub("%.", "_")
 
 							for _, tbl in ipairs(lists_qf) do
 								local jbl = {
@@ -146,12 +153,15 @@ function M.sel_qf(opts, isLoad)
 							end
 
 							stat_fname_todo.qf.idx = "$"
-							stat_fname_todo.qf.title = inputMsg
+							stat_fname_todo.qf.title = title
 
-							stat_fname_todo.cwd_root = Constant.defaults.base_path
+							local path_qf = Constant.defaults.base_path
+							if selected[1] == "global" then
+								path_qf = Constant.defaults.global_qf_dir
+							end
+							stat_fname_todo.cwd_root = path_qf
 
-							UtilsNote.save_list_to_file(Constant.defaults.base_path, stat_fname_todo, inputMsg, true)
-							Utils.info("save qf items -> " .. inputMsg, "QF")
+							UtilsNote.save_list_to_file(path_qf, stat_fname_todo, title)
 						end, selected[1] .. " Save Quickfix")
 
 						for _, fname in pairs(stat_fname_todo.deleted) do

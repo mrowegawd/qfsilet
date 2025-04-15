@@ -8,29 +8,67 @@ local cmd = vim.cmd
 
 local M = {}
 
-function M.save_list_to_file(base_path, tbl, title, is_notify)
-	title = title or fn.getqflist({ title = 0 })
+local function format_title_qf(base_path, title)
+	local qf_title = fn.getqflist({ title = 0 }).title
 
-	local fname_path = base_path .. "/" .. title .. ".json"
+	local fmt_str_title = function(prefix, str_title)
+		prefix = #prefix > 0 and "_" .. prefix .. "-" or "-"
+		prefix = str_title .. prefix
+		return prefix
+	end
+
+	local prefix = ""
+	if qf_title:match("%[FzfLua%]%sfiles:%s") then
+		prefix = qf_title:gsub("%[FzfLua%]%sfiles:%s", "")
+		prefix = fmt_str_title(prefix, "fzflua_file")
+	end
+
+	if qf_title:match("%[FzfLua%]%slive_grep_glob:%s") then
+		prefix = qf_title:gsub("%[FzfLua%]%slive_grep_glob:%s", "")
+		prefix = fmt_str_title(prefix, "fzflua_grep")
+	end
+
+	if qf_title:match("%[FzfLua%]%sblines:%s") then
+		prefix = qf_title:gsub("%[FzfLua%]%sblines:%s", "")
+		prefix = fmt_str_title(prefix, "fzflua_blines")
+	end
+
+	if qf_title:match("Fzf_diffview") then
+		prefix = qf_title:gsub("Fzf_diffview", "")
+		prefix = fmt_str_title(prefix, "fzf_diffview")
+	end
+
+	-- TODO: untuk prefix Octo, sepertinya format title dari plugin Octo tidak ada hanya tanda kurung '()'
+	-- ini membuat susah untuk di buat format
+	-- if qf_title:match("%s%(%)") then
+	-- 	local qf_list = vim.fn.getqflist({ winid = 0, items = 0 })
+	-- 	print(vim.inspect(qf_list.items))
+	-- 	-- prefix = qf_title:gsub("%[FzfLua%]%sfiles:%s", "")
+	-- 	-- prefix = prefix .. "_"
+	-- end
+
+	local fname = prefix .. title .. ".json"
+	local fname_path = base_path .. "/" .. fname
+	return fname_path, fname
+end
+
+function M.save_list_to_file(base_path, tbl, title)
+	local fname_path, fname = format_title_qf(base_path, title)
 	local success_msg = "Success saving"
 
-	if is_notify then
-		if Utils.isFile(fname_path) then
-			Ui.input(function(input)
-				if input ~= nil and input == "y" or #input < 1 then
-					Utils.writeToFile(tbl, fname_path)
-				else
-					success_msg = "Cancel save"
-				end
-
-				Utils.info(fmt("%s file %s.json", success_msg, title))
-			end, fmt("File %s exists, rewrite it? [y/n]", title))
-		else
-			Utils.writeToFile(tbl, fname_path)
-		end
+	if Utils.isFile(fname_path) then
+		Ui.input(function(input)
+			if input ~= nil and input == "y" or #input < 1 then
+				Utils.writeToFile(tbl, fname_path)
+			else
+				success_msg = "Cancel save"
+			end
+		end, fmt("File %s exists, rewrite it? [y/n]", title))
 	else
 		Utils.writeToFile(tbl, fname_path)
 	end
+
+	Utils.info(fmt("%s file '%s'", success_msg, fname))
 end
 
 function M.get_current_list(items, isGlobal)

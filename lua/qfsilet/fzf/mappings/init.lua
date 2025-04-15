@@ -1,6 +1,5 @@
 local fn = vim.fn
 
-local Constant = require("qfsilet.constant")
 local Utils = require("qfsilet.utils")
 local Visual = require("qfsilet.marks.visual")
 local UtilsFzf = require("qfsilet.fzf.utils")
@@ -61,12 +60,11 @@ local function editQuickFix(selected, basePath)
 	end
 
 	local cleanedTbl, title = Utils.cleanupItems(tbl)
-
 	if #cleanedTbl.qf.items == 0 then
 		return
 	end
 
-	Utils.writeToFile(cleanedTbl, Constant.defaults.base_path .. "/" .. title .. ".json")
+	Utils.writeToFile(cleanedTbl, basePath .. "/" .. title .. ".json")
 
 	fn.setqflist({}, " ", cleanedTbl.qf)
 	vim.cmd("copen")
