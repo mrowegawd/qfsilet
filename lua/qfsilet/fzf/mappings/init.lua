@@ -42,7 +42,7 @@ local function mergeQuickFix(selected, opts, basePath)
 	fn.setqflist({}, action, what)
 	vim.cmd("copen")
 
-	Utils.info("Import have been successfully completed (merged)", "QF")
+	Utils.info("Import has been successfully loaded and merged", "QF")
 end
 
 local function editQuickFix(selected, basePath)
@@ -71,7 +71,7 @@ local function editQuickFix(selected, basePath)
 	fn.setqflist({}, " ", cleanedTbl.qf)
 	vim.cmd("copen")
 
-	Utils.info("Import have been successfully completed", "QF")
+	Utils.info("Import data [" .. title .. "] hash been loaded successfully", "QF")
 end
 
 function M.editOrMergeQuickFix(opts, basePath)
@@ -104,7 +104,7 @@ function M.deleteItem(basePath)
 			local filePath = basePath .. "/" .. sel .. ".json"
 
 			if Utils.isFile(filePath) then
-				local cmd = "!rm"
+				local cmd = "silent! !rm"
 				vim.cmd(cmd .. " " .. filePath)
 				vim.cmd("lua require'fzf-lua'.resume()")
 			end

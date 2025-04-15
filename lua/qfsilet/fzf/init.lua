@@ -37,7 +37,7 @@ local function h(name)
 end
 
 -- set hl-groups
-vim.api.nvim_set_hl(0, "QFSiletPreviewTitle", { fg = h("Normal").fg, bg = h("Normal").fg, italic = true, bold = true })
+vim.api.nvim_set_hl(0, "QFSiletPreviewTitle", { fg = h("Normal").bg, bg = h("Normal").fg, italic = true, bold = true })
 vim.api.nvim_set_hl(0, "QFSiletNormal", { fg = h("Normal").bg, bg = h("Normal").fg, italic = true, bold = true })
 
 local function formatTitle(str, icon, iconHl)
@@ -68,9 +68,6 @@ function M.load(opts, isGlobal)
 		no_header_i = true,
 		no_header = true,
 		winopts = function()
-			local cols = vim.o.columns - 50
-			local collss = cols > 80 and cols - 80 or cols / 2
-
 			local win_height = math.ceil(Utils.get_option("lines") * 0.5 - 10)
 			local win_width = math.ceil(Utils.get_option("columns") * 0.5 - 20)
 			return {
@@ -80,8 +77,8 @@ function M.load(opts, isGlobal)
 				preview = { hidden = "hidden" },
 				width = win_width,
 				height = win_height,
-				row = 20,
-				col = collss,
+				row = 0.50,
+				col = 0.50,
 				backdrop = 60,
 			}
 		end,
@@ -103,24 +100,17 @@ function M.sel_qf(opts, isLoad)
 
 	FzfLua.fzf_exec({ "global", "local" }, {
 		prompt = "  ",
-		winopts = function()
-			local cols = vim.o.columns - 50
-			local collss = cols > 80 and cols - 80 or cols / 2
-
-			local win_height = math.ceil(Utils.get_option("lines") * 0.5 - 10)
-			local win_width = math.ceil(Utils.get_option("columns") * 0.5 - 20)
-			return {
-				width = win_width,
-				height = win_height,
-				row = 20,
-				col = collss,
-				backdrop = 60,
-				hls = { normal = "Normal" },
-				border = "rounded",
-				title = formatTitle("QF-" .. prompt_prefix, ""),
-				preview = { hidden = "hidden" },
-			}
-		end,
+		winopts = {
+			width = 0.30,
+			height = 0.15,
+			row = 0.50,
+			col = 0.50,
+			backdrop = 60,
+			hls = { normal = "Normal" },
+			border = "rounded",
+			title = formatTitle("QF-" .. prompt_prefix, ""),
+			preview = { hidden = "hidden" },
+		},
 
 		actions = {
 			["default"] = function(selected, _)
@@ -161,7 +151,8 @@ function M.sel_qf(opts, isLoad)
 							stat_fname_todo.cwd_root = Constant.defaults.base_path
 
 							UtilsNote.save_list_to_file(Constant.defaults.base_path, stat_fname_todo, inputMsg, true)
-						end, selected[1] .. " Save")
+							Utils.info("save qf items -> " .. inputMsg, "QF")
+						end, selected[1] .. " Save Quickfix")
 
 						for _, fname in pairs(stat_fname_todo.deleted) do
 							table.insert(stat_fname_todo.saved, fname)

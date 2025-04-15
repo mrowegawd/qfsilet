@@ -38,8 +38,8 @@ end
 local function get_desired_popup_size()
 	local vim_width, vim_height = get_current_screen_size()
 
-	local width = math.floor(vim_width / 2 + 4)
-	local height = math.floor(vim_height / 2 - 5)
+	local width = math.floor(vim_width / 3.5 + 4)
+	local height = math.floor(vim_height / 3 - 5)
 
 	return width, height
 end
@@ -114,10 +114,7 @@ function M.popup(fname_path, IsGlobal, base_path)
 		enter = true,
 		focusable = true,
 		zindex = 50,
-		win_options = {
-			winhighlight = Config.popup.winhighlight,
-			foldcolumn = "0",
-		},
+		win_options = { foldcolumn = "0", winhighlight = Config.popup.winhighlight },
 		buf_options = {
 			buflisted = false,
 			buftype = "nofile",
@@ -128,7 +125,7 @@ function M.popup(fname_path, IsGlobal, base_path)
 		border = {
 			padding = { top = 2, bottom = 2, left = 3, right = 3 },
 			style = "rounded",
-			highlight = "FloatBorder",
+			highlight = Config.popup.winhighlight,
 			text = {
 				top = NuiText(fmt(" %s ", top_ext_msg), Config.popup.higroup_title),
 				top_align = "center",
@@ -140,8 +137,6 @@ function M.popup(fname_path, IsGlobal, base_path)
 		pop_opts.relative = "editor"
 		pop_opts.position = "50%"
 		pop_opts.size = "70%"
-		pop_opts.win_options.winhighlight = Config.popup.winhighlight
-		pop_opts.border.highlight = "FloatBorder"
 	end
 
 	local popup = Popup(pop_opts)

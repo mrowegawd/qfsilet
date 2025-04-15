@@ -51,6 +51,10 @@ end
 local function loadqflist(isGlobal)
 	isGlobal = isGlobal or false
 
+	Path.setup_path(isGlobal)
+	if not Utils.isDir(Constant.defaults.base_path) then
+		Utils.create_dir(Constant.defaults.base_path)
+	end
 	require("qfsilet.fzf").sel_qf(Config, true)
 end
 
