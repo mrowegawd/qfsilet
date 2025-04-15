@@ -291,6 +291,7 @@ function M.refresh(force_reregister)
 	-- 	return
 	-- end
 
+	-- Utils.info("Yay force to refres them")
 	force_reregister = force_reregister or false
 	M.refresh_deforce(force_reregister)
 end
@@ -310,10 +311,10 @@ local function __save_marks()
 		end
 		Utils.create_file(fn_name)
 		Utils.save_table_to_file(buffer, fn_name)
-		-- else
-		-- 	if Utils.isFile(fn_name) then
-		-- 		Utils.rmdir(fn_name)
-		-- 	end
+	else
+		if Utils.isFile(fn_name) then
+			Utils.rmdir(fn_name)
+		end
 	end
 end
 
@@ -328,30 +329,43 @@ local function __load_marks()
 	end
 end
 
+local is_unset_augroup = false
+local function unset_augroup(name)
+	vim.validate({ name = { name, "string" } })
+	pcall(vim.api.nvim_del_augroup_by_name, name)
+end
+
 local function setup_commands()
 	local function augroup(name)
 		return vim.api.nvim_create_augroup("QFSilet" .. name, { clear = true })
 	end
 
-	vim.api.nvim_create_autocmd({ "BufReadPost", "BufWritePost", "BufEnter" }, {
+	vim.api.nvim_create_autocmd({ "BufWinEnter" }, {
 		group = augroup("RefreshMark"),
 		callback = function()
+			if is_unset_augroup then
+				unset_augroup("QFSiletLoadMark")
+				is_unset_augroup = false
+			end
+			-- Utils.info("Yay refresh them")
 			M.refresh(true)
 		end,
 	})
 
-	vim.api.nvim_create_autocmd({ "ExitPre" }, {
+	vim.api.nvim_create_autocmd({ "ExitPre", "BufWritePost" }, {
 		group = augroup("SaveMark"),
 		callback = function()
 			__save_marks()
 		end,
 	})
 
-	vim.api.nvim_create_autocmd({ "VimEnter" }, {
+	vim.api.nvim_create_autocmd({ "BufWinEnter" }, {
 		group = augroup("LoadMark"),
 		once = true,
 		callback = function()
+			-- Utils.info("Yay load them")
 			__load_marks()
+			is_unset_augroup = true
 		end,
 	})
 end
