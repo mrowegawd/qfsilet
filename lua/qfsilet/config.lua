@@ -51,6 +51,10 @@ M.current_configs = {
 		winhighlight = "Normal:NormalFloat,FloatBorder:FloatBorder",
 		higroup_title = "Function",
 		filetype = "org",
+		todo = {
+			local_use = "default", -- orgmode or custom
+			global_use = "default",
+		},
 	},
 	keymap = {
 		quickfix = {

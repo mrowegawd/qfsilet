@@ -324,4 +324,33 @@ function M.key_to_tbl(marks_opts)
 	return keyset
 end
 
+function M.check_wins(wins)
+	wins = wins or {}
+	vim.validate({ wins = { wins, "table" } })
+
+	local win_tbl = { found = false, winbufnr = 0, winnr = 0, winid = 0 }
+
+	local ft_wins = { "incline" }
+	if #wins > 0 then
+		for _, x in pairs(wins) do
+			ft_wins[#ft_wins + 1] = x
+		end
+	end
+
+	for _, winnr in ipairs(vim.fn.range(1, vim.fn.winnr("$"))) do
+		local winbufnr = vim.fn.winbufnr(winnr)
+		if
+			winbufnr > 0
+			and (
+				vim.tbl_contains(ft_wins, vim.api.nvim_get_option_value("filetype", { buf = winbufnr }))
+				or vim.tbl_contains(ft_wins, vim.api.nvim_get_option_value("buftype", { buf = winbufnr }))
+			)
+		then
+			local winid = vim.fn.win_findbuf(winbufnr)[1] -- example winid: 1004, 1005
+			win_tbl = { found = true, winbufnr = winbufnr, winnr = winnr, winid = winid }
+		end
+	end
+	return win_tbl
+end
+
 return M

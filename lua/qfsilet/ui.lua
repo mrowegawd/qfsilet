@@ -145,7 +145,7 @@ function M.popup(fname_path, IsGlobal, base_path)
 	popup:on({ Event.BufLeave, Event.QuitPre }, function()
 		vim.cmd("silent! wq! " .. fname_path)
 
-		if vim.fn.getfsize(fname_path) <= 1 then
+		if base_path and vim.fn.getfsize(fname_path) <= 1 then
 			Util.rmdir(base_path)
 		end
 
@@ -164,7 +164,7 @@ function M.popup(fname_path, IsGlobal, base_path)
 		trim([[%s/\($\n\s*\)\+\%$//]])
 		trim([[%s/\s\+$//e]])
 
-		if vim.fn.getfsize(fname_path) <= 1 then
+		if base_path and vim.fn.getfsize(fname_path) <= 1 then
 			Util.rmdir(base_path)
 		end
 
