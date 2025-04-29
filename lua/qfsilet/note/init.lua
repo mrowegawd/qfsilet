@@ -44,6 +44,8 @@ local __open_orgmode = function()
 	if not orgmode.found then
 		vim.cmd([[topleft 10split]])
 		vim.cmd("e " .. refile_path)
+		vim.api.nvim_set_option_value("winfixheight", true, { scope = "local", win = 0 })
+		-- vim.api.nvim_set_option_value("winfixbuf", true, { scope = "local", win = 0 })
 		return
 	end
 
