@@ -81,7 +81,7 @@ function M.editOrMergeQuickFix(opts, basePath)
 				editQuickFix(selected[1], basePath)
 			end
 		end,
-		["ctrl-q"] = function(selected, _)
+		["alt-q"] = function(selected, _)
 			if #selected > 1 then
 				mergeQuickFix(selected, opts, basePath)
 			else

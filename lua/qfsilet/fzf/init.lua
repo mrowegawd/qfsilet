@@ -67,7 +67,7 @@ function M.load_items_qf(opts, isGlobal)
 	Fzflua.files({
 		cwd = path_qf,
 		previewer = false,
-		fzf_opts = { ["--header"] = [[ctrl-x:delete]] },
+		fzf_opts = { ["--header"] = [[^x:delete]] },
 		cmd = "fd -d 1 -e json | cut -d. -f1",
 		no_header_i = true,
 		no_header = true,
@@ -239,7 +239,7 @@ function M.grep_marks(buffer)
 		},
 		prompt = "  ",
 		actions = FzfMappings.mark_defaults(buffer),
-		fzf_opts = { ["--header"] = [[ctrl-x:delete  alt-x:delete-all]] },
+		fzf_opts = { ["--header"] = [[^x:delete  A-x:delete-all]] },
 		winopts = function()
 			return {
 				width = 0.80,
