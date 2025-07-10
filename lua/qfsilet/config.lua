@@ -69,7 +69,7 @@ M.current_configs = {
 		},
 		todo = {
 			add_todo = "mt",
-			add_todo_global = "mT",
+			add_todo_global = "mn",
 			add_link_capture = "mc",
 			goto_link_capture = "g<cr>",
 		},
