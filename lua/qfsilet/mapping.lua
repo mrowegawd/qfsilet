@@ -105,19 +105,25 @@ function M.setup_keymaps_and_autocmds()
 	local todo_note_keymaps = {
 
 		{
-			desc = "Marks: open local todo window [QFsilet]",
-			func = "todo_local",
-			keys = Config.keymap.todo.add_todo,
+			desc = "Note: open local todo [QFsilet]",
+			func = "todo_project",
+			keys = Config.keymap.todo.add_local,
 			mode = { "n", "v" },
 		},
 		{
-			desc = "Marks: open global todo window [QFsilet]",
-			func = "todo_global",
-			keys = Config.keymap.todo.add_todo_global,
+			desc = "Note: open global todo [QFsilet]",
+			func = "todo_org",
+			keys = Config.keymap.todo.add_global,
 			mode = { "n", "v" },
 		},
 		{
-			desc = "Marks: capture link [QFsilet]",
+			desc = "Note: open note message [QFsilet]",
+			func = "note_message",
+			keys = Config.keymap.todo.add_message,
+			mode = { "n", "v" },
+		},
+		{
+			desc = "Note: capture link cursor [QFsilet]",
 			func = "todo_with_capture_link",
 			keys = Config.keymap.todo.add_link_capture,
 			mode = "n",

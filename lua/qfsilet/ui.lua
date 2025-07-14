@@ -141,8 +141,16 @@ function M.popup(fname_path, IsGlobal, base_path)
 
 	local popup = Popup(pop_opts)
 
-	-- popup:on(Event.QuitPre, function()
+	local trim = function(pattern)
+		local save = vim.fn.winsaveview()
+		cmd(string.format("keepjumps keeppatterns silent! %s", pattern))
+		vim.fn.winrestview(save)
+	end
+
 	popup:on({ Event.BufLeave, Event.QuitPre }, function()
+		trim([[%s/\($\n\s*\)\+\%$//]])
+		trim([[%s/\s\+$//e]])
+
 		vim.cmd("silent! wq! " .. fname_path)
 
 		if base_path and vim.fn.getfsize(fname_path) <= 1 then
@@ -152,17 +160,11 @@ function M.popup(fname_path, IsGlobal, base_path)
 		popup:unmount()
 	end)
 
-	local trim = function(pattern)
-		local save = vim.fn.winsaveview()
-		cmd(string.format("keepjumps keeppatterns silent! %s", pattern))
-		vim.fn.winrestview(save)
-	end
-
 	popup:map("n", { "<Esc>", "q" }, function()
-		vim.cmd("silent! wq! " .. fname_path)
-
 		trim([[%s/\($\n\s*\)\+\%$//]])
 		trim([[%s/\s\+$//e]])
+
+		vim.cmd("silent! wq! " .. fname_path)
 
 		if base_path and vim.fn.getfsize(fname_path) <= 1 then
 			Util.rmdir(base_path)
@@ -170,12 +172,6 @@ function M.popup(fname_path, IsGlobal, base_path)
 
 		popup:unmount()
 	end, { noremap = true })
-
-	-- vim.api.nvim_buf_call(popup.bufnr, function()
-	-- 	if vim.fn.mode() ~= "n" then
-	-- 		vim.api.nvim_input("<Esc>")
-	-- 	end
-	-- end)
 
 	popup:mount()
 end

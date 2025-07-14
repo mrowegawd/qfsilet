@@ -52,8 +52,9 @@ M.current_configs = {
 		higroup_title = "Function",
 		filetype = "org",
 		todo = {
-			local_use = "default", -- orgmode or custom
-			global_use = "default",
+			project = "orgmode", -- orgmode or custom
+			global = "orgmode",
+			message = "default",
 		},
 	},
 	keymap = {
@@ -68,8 +69,9 @@ M.current_configs = {
 			add_item_to_qf = "ma",
 		},
 		todo = {
-			add_todo = "mt",
-			add_todo_global = "mn",
+			add_message = "mN",
+			add_global = "mn",
+			add_local = "mp",
 			add_link_capture = "mc",
 			goto_link_capture = "g<cr>",
 		},
