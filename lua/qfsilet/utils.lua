@@ -227,11 +227,9 @@ function M.getCurrentList(items, isLocationlist)
 	return cur_list
 end
 
-function M.isLocList()
-	-- This func will check if current buffer is loclist
-	-- if loclist, filewinid will return more than zero (true)
-	local location_list = fn.getloclist(0, { filewinid = 0 })
-	return location_list.filewinid > 0
+function M.isLocList(buf)
+	buf = buf or 0
+	return vim.fn.getloclist(buf, { filewinid = 1 }).filewinid ~= 0
 end
 
 function M.cleanupItems(items)

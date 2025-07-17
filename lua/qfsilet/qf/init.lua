@@ -5,6 +5,7 @@ local cmd = vim.cmd
 local Utils = require("qfsilet.utils")
 local Plenary_path = require("plenary.path")
 local Note = require("qfsilet.note")
+local Config = require("qfsilet.config").current_configs
 
 local qf = {
 	base_path = "",
@@ -44,14 +45,19 @@ function qf.loadqf()
 end
 
 local function is_vim_list_open()
+	local curbuf = api.nvim_get_current_buf()
 	for _, win in ipairs(api.nvim_list_wins()) do
 		local buf = api.nvim_win_get_buf(win)
-		local location_list = Utils.isLocList()
-		if vim.bo[buf].filetype == "qf" or location_list then
-			return true
+		if curbuf == buf then
+			if Utils.isLocList(win) then
+				return true, "location"
+			end
+			if vim.bo[buf].filetype == "qf" then
+				return true, "quickfix"
+			end
 		end
 	end
-	return false
+	return false, ""
 end
 
 local function toggle_list(list_type, kill)
@@ -60,23 +66,33 @@ local function toggle_list(list_type, kill)
 	end
 
 	local is_location_target = list_type == "location"
-	local cmd_ = is_location_target and { "lclose", "lopen" } or { "cclose", "copen" }
-	local is_open = is_vim_list_open()
-	if is_open then
-		return cmd[cmd_[1]]()
+	local cmd_ = is_location_target and { "lclose", Config.theme_list.quickfix.lopen }
+		or { "cclose", Config.theme_list.quickfix.copen }
+	local is_open, qf_or_loclist = is_vim_list_open()
+
+	if is_open and (list_type == qf_or_loclist) then
+		vim.cmd(cmd_[1])
+		return
 	end
+
 	local list = is_location_target and fn.getloclist(0) or fn.getqflist()
 	if vim.tbl_isempty(list) then
 		local msg_prefix = (is_location_target and "Location" or "QuickFix")
-		return vim.notify(msg_prefix .. " List is Empty.", vim.log.levels.WARN)
+		Utils.warn(msg_prefix .. " List is Empty.", "QF")
+
+		if vim.bo[0].filetype == "qf" then
+			cmd.wincmd("p")
+		end
+		return
 	end
 
 	local winnr = fn.winnr()
-	cmd[cmd_[2]]()
+	vim.cmd(cmd_[2])
+
 	if fn.winnr() ~= winnr then
 		cmd.wincmd("p")
 	end
-	vim.cmd([[wincmd p]])
+	cmd.wincmd("p")
 end
 
 function qf.toggle_qf()
@@ -134,8 +150,7 @@ function qf.del_itemqf()
 
 		vim.cmd(string.format("%scfirst", curqfidx))
 		vim.schedule(function()
-			vim.cmd("noau copen")
-			vim.cmd("wincmd J")
+			vim.cmd(Config.theme_list.quickfix.copen)
 		end)
 	elseif #cur_list == 0 then
 		fn.setqflist({})
@@ -193,7 +208,7 @@ function qf.add_item_to_qf()
 	})
 	local is_location_target = "quickfix" == "location"
 	local cmd_ = is_location_target and { "lclose", "lopen" } or { "cclose", "copen" }
-	local is_open = is_vim_list_open()
+	local is_open, _ = is_vim_list_open()
 	if not is_open then
 		cmd[cmd_[2]]()
 		cmd("wincmd p")

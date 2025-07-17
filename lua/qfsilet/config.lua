@@ -38,6 +38,10 @@ M.current_configs = {
 		enabled = true,
 		maxheight = 8,
 		minheight = 5,
+		quickfix = {
+			copen = "belowright copen",
+			lopen = "belowright lopen",
+		},
 	},
 	file_spec = {
 		name = "todo",
@@ -62,11 +66,11 @@ M.current_configs = {
 			del_item = "dd",
 			clear_all = "C",
 			clear_notes = "cc",
-			toggle_open_qf = "<Leader>q",
-			toggle_open_loclist = "<leader>Q",
-			save_local = "ms",
-			load_local = "ml",
-			add_item_to_qf = "ma",
+			toggle_open_qf = "<Leader>qj",
+			toggle_open_loclist = "<Leader>ql",
+			save_local = "<Leader>qs",
+			load_local = "<Leader>qL",
+			add_item_to_qf = "<Leader>qy",
 		},
 		todo = {
 			add_message = "mN",

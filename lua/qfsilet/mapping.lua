@@ -70,7 +70,7 @@ function M.setup_keymaps_and_autocmds()
 	}
 	local loc_keymaps = {
 		{
-			desc = "Loclist: toggle location list [QFsilet]",
+			desc = "Qf: toggle loclist [QFsilet]",
 			func = "toggle_loclist",
 			keys = Config.keymap.quickfix.toggle_open_loclist,
 			mode = "n",
@@ -78,7 +78,7 @@ function M.setup_keymaps_and_autocmds()
 	}
 	local qf_keymaps = {
 		{
-			desc = "Qf: toggle quickfix list [QFsilet]",
+			desc = "Qf: toggle quickfix [QFsilet]",
 			func = "toggle_qf",
 			keys = Config.keymap.quickfix.toggle_open_qf,
 			mode = "n",

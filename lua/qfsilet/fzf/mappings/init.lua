@@ -3,6 +3,7 @@ local fn = vim.fn
 local Utils = require("qfsilet.utils")
 local Visual = require("qfsilet.marks.visual")
 local UtilsFzf = require("qfsilet.fzf.utils")
+local Config = require("qfsilet.config").current_configs
 
 local M = {}
 
@@ -38,8 +39,17 @@ local function mergeQuickFix(selected, opts, basePath)
 		title = opts.prefixTitle .. ":Merged",
 	}
 
-	fn.setqflist({}, action, what)
-	vim.cmd("copen")
+	if Utils.isLocList() then
+		vim.fn.setloclist(0, {}, " ", {
+			nr = "$",
+			items = what.items,
+			title = what.title,
+		})
+		vim.cmd(Config.theme_list.quickfix.lopen)
+	else
+		fn.setqflist({}, action, what)
+		vim.cmd(Config.theme_list.quickfix.copen)
+	end
 
 	Utils.info("Import has been successfully loaded and merged", "QF")
 end
@@ -67,7 +77,7 @@ local function editQuickFix(selected, basePath)
 	Utils.writeToFile(cleanedTbl, basePath .. "/" .. title .. ".json")
 
 	fn.setqflist({}, " ", cleanedTbl.qf)
-	vim.cmd("copen")
+	vim.cmd(Config.theme_list.quickfix.copen)
 
 	Utils.info("Import data [" .. title .. "] hash been loaded successfully", "QF")
 end
