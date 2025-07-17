@@ -35,9 +35,13 @@ M.current_configs = {
 		sign_priority = { lower = 10, upper = 15, builtin = 8, mark = 1 },
 	},
 	theme_list = {
-		enabled = true,
-		maxheight = 8,
-		minheight = 5,
+		set = {
+			enabled = false,
+		},
+		auto_height = {
+			enabled = true,
+			maxheight = 10,
+		},
 		quickfix = {
 			copen = "belowright copen",
 			lopen = "belowright lopen",
@@ -161,9 +165,8 @@ function M.update_settings(opts)
 		return ret
 	end
 
-	local function addjustWindowHWQf(maxheight, minheight)
+	local function addjustWindowHWQf(maxheight)
 		maxheight = maxheight or 7
-		minheight = minheight or 4
 		local l = 1
 		local n_lines = 0
 		local w_width = fn.winwidth(vim.api.nvim_get_current_win())
@@ -174,23 +177,22 @@ function M.update_settings(opts)
 			n_lines = n_lines + fn.float2nr(fn.ceil(line_width))
 			i = i + 1
 		end
-
-		local getheight = fn.max({ fn.min({ n_lines, maxheight }), minheight })
-		if getheight > maxheight then
-			vim.cmd(fmt("%swincmd _", tostring(maxheight)))
-		else
-			vim.cmd(fmt("%swincmd _", getheight))
-		end
+		--
+		local height = math.min(n_lines, maxheight)
+		vim.cmd(fmt("%swincmd _", height + 1))
 	end
 
-	if settings.theme_list.enabled then
-		vim.o.qftf = "{info -> v:lua.qftf(info)}"
+	if settings.theme_list.set.enabled then
+		vim.o.qftf = "{info -> v:lua.qftf(info)}" -- uncomment this line if needed..
+	end
+
+	if settings.theme_list.auto_height.enabled then
 		local augroup = vim.api.nvim_create_augroup("QFSiletThemeQF", { clear = true })
 		vim.api.nvim_create_autocmd("FileType", {
 			pattern = { "qf" },
 			group = augroup,
 			callback = function()
-				addjustWindowHWQf(settings.theme_list.maxheight, settings.theme_list.minheight)
+				addjustWindowHWQf(settings.theme_list.maxheight)
 			end,
 		})
 	end
