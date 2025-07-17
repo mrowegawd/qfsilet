@@ -108,13 +108,14 @@ function qf.del_itemqf()
 
 	local cur_list = {}
 	local close_cmd = "close"
+	local open_cmd = Config.theme_list.quickfix.copen
 	local win_id = fn.win_getid()
+
 	local is_loc = fn.getwininfo(win_id)[1].loclist == 1
-
 	cur_list = Utils.getCurrentList({}, is_loc)
-
 	if is_loc then
 		close_cmd = "lclose"
+		open_cmd = Config.theme_list.quickfix.lopen
 	end
 
 	local count = vim.v.count
@@ -150,11 +151,16 @@ function qf.del_itemqf()
 
 		vim.cmd(string.format("%scfirst", curqfidx))
 		vim.schedule(function()
-			vim.cmd(Config.theme_list.quickfix.copen)
+			vim.cmd(open_cmd)
 		end)
 	elseif #cur_list == 0 then
-		fn.setqflist({})
-		cmd.cclose()
+		if is_loc then
+			fn.setloclist(0)
+			cmd.lclose()
+		else
+			fn.setqflist({})
+			cmd.cclose()
+		end
 	end
 end
 
@@ -196,23 +202,40 @@ function qf.clear_notes()
 	fn.setqflist(new_list)
 end
 
-function qf.add_item_to_qf()
-	vim.fn.setqflist({}, "a", {
-		items = {
-			{
-				bufnr = vim.api.nvim_get_current_buf(),
-				lnum = vim.api.nvim_win_get_cursor(0)[1],
-				text = vim.api.nvim_get_current_line(),
-			},
+local function add_item_to_qf(list_type)
+	local is_location_target = list_type == "location"
+	local cmd_ = is_location_target and { "lclose", Config.theme_list.quickfix.lopen, "loclist" }
+		or { "cclose", Config.theme_list.quickfix.copen, "qflist" }
+
+	local items = {
+		{
+			bufnr = vim.api.nvim_get_current_buf(),
+			lnum = vim.api.nvim_win_get_cursor(0)[1],
+			text = vim.api.nvim_get_current_line(),
 		},
-	})
-	local is_location_target = "quickfix" == "location"
-	local cmd_ = is_location_target and { "lclose", "lopen" } or { "cclose", "copen" }
+	}
+	--
+	if is_location_target then
+		vim.fn.setloclist(0, {}, "a", { items = items })
+	else
+		vim.fn.setqflist({}, "a", { items = items })
+	end
+
+	Utils.info(string.format("Add %s -> %s", cmd_[3], vim.api.nvim_get_current_line()))
+
 	local is_open, _ = is_vim_list_open()
 	if not is_open then
-		cmd[cmd_[2]]()
+		vim.cmd(cmd_[2])
 		cmd("wincmd p")
 	end
+end
+
+function qf.add_item_qf()
+	add_item_to_qf("quickfix")
+end
+
+function qf.add_item_loc()
+	add_item_to_qf("location")
 end
 
 return qf

@@ -1,12 +1,5 @@
 local fn = vim.fn
--- local Util = require("qfsilet.utils")
--- local ok, _ = pcall(require, "trouble")
--- local UtilMarks = require("qfsilet.marks.utils")
-
--- if not ok then
--- 	Util.warn("trouble diperlukan sebagai dependensi")
--- 	return
--- end
+local Config = require("qfsilet.config")
 
 local M = {
 	open = false,
@@ -22,8 +15,7 @@ local entry_to_qf = function(text, entry)
 		-- type = entry.qf_type,
 	}
 end
-
-local function set_current_list(items, is_local, win_id)
+local set_current_list = function(items, is_local, win_id)
 	win_id = fn.win_getid() or win_id
 	is_local = false or is_local
 
@@ -66,25 +58,10 @@ function M.qfmarks(item_marks, path)
 
 	M.open = true
 
-	vim.cmd([[copen]])
+	vim.cmd(Config.theme_list.quickfix.copen)
 end
-
 function M.get_signs()
-	-- local signs = {}
-	-- for _, v in pairs(Tutil.severity) do
-	-- 	if v ~= "Other" then
-	-- 		-- pcall to catch entirely unbound or cleared out sign hl group
-	-- 		local status, sign = pcall(function()
-	-- 			return vim.trim(vim.fn.sign_getdefined(Tutil.get_severity_label(v, "Sign"))[1].text)
-	-- 		end)
-	-- 		if not status then
-	-- 			sign = v:sub(1, 1)
-	-- 		end
-	-- 		signs[string.lower(v)] = sign
-	-- 	end
-	--
-	-- end
-	-- return signs
+	return ""
 end
 
 return M

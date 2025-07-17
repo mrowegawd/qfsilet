@@ -96,9 +96,15 @@ function M.setup_keymaps_and_autocmds()
 			mode = "n",
 		},
 		{
-			desc = "Qf: add item to qf [QFsilet]",
-			func = "add_item_to_qf",
+			desc = "Qf: add an item to qf [QFsilet]",
+			func = "add_item_qf",
 			keys = Config.keymap.quickfix.add_item_to_qf,
+			mode = "n",
+		},
+		{
+			desc = "Qf: add an item to loclist [QFsilet]",
+			func = "add_item_loc",
+			keys = Config.keymap.quickfix.add_item_to_loc,
 			mode = "n",
 		},
 	}

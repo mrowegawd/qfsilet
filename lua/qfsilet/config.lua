@@ -71,6 +71,7 @@ M.current_configs = {
 			save_local = "<Leader>qs",
 			load_local = "<Leader>qL",
 			add_item_to_qf = "<Leader>qy",
+			add_item_to_loc = "<Leader>qY",
 		},
 		todo = {
 			add_message = "mN",
