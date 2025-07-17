@@ -70,6 +70,7 @@ M.current_configs = {
 			del_item = "dd",
 			clear_all = "C",
 			clear_notes = "cc",
+			rename_title = "<Leader>qR",
 			toggle_open_qf = "<Leader>qj",
 			toggle_open_loclist = "<Leader>ql",
 			save_local = "<Leader>qs",

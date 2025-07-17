@@ -62,8 +62,8 @@ function M.setup_keymaps_and_autocmds()
 			mode = "n",
 		},
 		{
-			desc = "Qf: clear all items quickfix [QFsilet]",
-			func = "clear_qf_list",
+			desc = "Qf: clear all items quickfix/loclist [QFsilet]",
+			func = "clear_all_item_lists",
 			keys = Config.keymap.quickfix.clear_all,
 			mode = "n",
 		},
@@ -81,6 +81,12 @@ function M.setup_keymaps_and_autocmds()
 			desc = "Qf: toggle quickfix [QFsilet]",
 			func = "toggle_qf",
 			keys = Config.keymap.quickfix.toggle_open_qf,
+			mode = "n",
+		},
+		{
+			desc = "Qf: rename quickfix/loclist [QFsilet]",
+			func = "rename_title",
+			keys = Config.keymap.quickfix.rename_title,
 			mode = "n",
 		},
 		{

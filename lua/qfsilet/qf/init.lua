@@ -6,6 +6,7 @@ local Utils = require("qfsilet.utils")
 local Plenary_path = require("plenary.path")
 local Note = require("qfsilet.note")
 local Config = require("qfsilet.config").current_configs
+local Ui = require("qfsilet.ui")
 
 local qf = {
 	base_path = "",
@@ -14,37 +15,36 @@ local qf = {
 	save_mode = false,
 }
 
-local function set_current_list(cur_list, is_local, win_id)
-	win_id = fn.win_getid() or win_id
-	is_local = false or is_local
+local set_current_list = function(cur_list, is_local, win_id)
+	win_id = win_id or fn.win_getid()
+	is_local = is_local or false
+
+	local what = {
+		idx = "$",
+		items = cur_list,
+		title = is_local and fn.getloclist(0, { title = 0 }).title or fn.getqflist({ title = 0 }),
+	}
 
 	if is_local then
-		fn.setloclist(win_id, cur_list)
-	else
-		local what = {
-			idx = "$",
-			items = cur_list,
-			title = fn.getqflist({ title = 0 }),
-		}
-
-		fn.setqflist({}, "r", what)
-
-		if qf.save_mode then
-			-- TODO: setting auto save?
-			return
-		end
+		fn.setloclist(win_id, {}, "r", {
+			nr = "$",
+			items = what.items,
+			title = what.title,
+		})
+		return
 	end
+
+	fn.setqflist({}, "r", what)
 end
 
 function qf.saveqf()
 	Note.saveqf_list()
 end
-
 function qf.loadqf()
 	Note.loadqf_list()
 end
 
-local function is_vim_list_open()
+local is_vim_list_open = function()
 	local curbuf = api.nvim_get_current_buf()
 	for _, win in ipairs(api.nvim_list_wins()) do
 		local buf = api.nvim_win_get_buf(win)
@@ -59,8 +59,7 @@ local function is_vim_list_open()
 	end
 	return false, ""
 end
-
-local function toggle_list(list_type, kill)
+local toggle_list = function(list_type, kill)
 	if kill then
 		return cmd([[q]])
 	end
@@ -98,11 +97,9 @@ end
 function qf.toggle_qf()
 	toggle_list("quickfix")
 end
-
 function qf.toggle_loclist()
 	toggle_list("location")
 end
-
 function qf.del_itemqf()
 	local curqfidx = vim.fn.line(".")
 
@@ -110,8 +107,7 @@ function qf.del_itemqf()
 	local close_cmd = "close"
 	local open_cmd = Config.theme_list.quickfix.copen
 	local win_id = fn.win_getid()
-
-	local is_loc = fn.getwininfo(win_id)[1].loclist == 1
+	local is_loc = Utils.isLocList()
 	cur_list = Utils.getCurrentList({}, is_loc)
 	if is_loc then
 		close_cmd = "lclose"
@@ -141,7 +137,12 @@ function qf.del_itemqf()
 	end
 
 	if #cur_list ~= 0 then
-		set_current_list(cur_list, false, win_id)
+		if is_loc then
+			set_current_list(cur_list, true, win_id)
+		else
+			set_current_list(cur_list, false, win_id)
+		end
+
 		if #cur_list == 0 then
 			api.nvim_command(close_cmd)
 		elseif item ~= 1 then
@@ -149,36 +150,47 @@ function qf.del_itemqf()
 			api.nvim_command(close_cmd)
 		end
 
-		vim.cmd(string.format("%scfirst", curqfidx))
+		if is_loc then
+			vim.cmd(string.format("%slfirst", curqfidx))
+		else
+			vim.cmd(string.format("%scfirst", curqfidx))
+		end
+
 		vim.schedule(function()
 			vim.cmd(open_cmd)
 		end)
 	elseif #cur_list == 0 then
 		if is_loc then
-			fn.setloclist(0)
-			cmd.lclose()
+			fn.setloclist(0, {}, "r")
 		else
 			fn.setqflist({})
-			cmd.cclose()
 		end
+
+		api.nvim_command(close_cmd)
 	end
 end
 
-function qf.clear_qf_list()
-	Utils.info("Item lists cleared", "QF")
-
+local clear_qf_list = function()
+	Utils.info("✅ The item list has been cleared", "QF")
 	fn.setqflist({})
 	cmd.cclose()
 end
-
-function qf.clear_loc_list()
-	Utils.info("Item lists cleared", "QF")
-
-	fn.setloclist(0, {})
+local clear_loc_list = function()
+	Utils.info("✅ The item list has been cleared", "LF")
+	fn.setloclist(0, {}, "r")
 	cmd.lclose()
 end
 
-local function filter_qfsilet_items(cur_list)
+function qf.clear_all_item_lists()
+	if Utils.isLocList() then
+		clear_loc_list()
+		return
+	end
+
+	clear_qf_list()
+end
+
+local filter_qfsilet_items = function(cur_list)
 	local new_list = {}
 	for _, item in ipairs(cur_list) do
 		if item.text:match("qfsilet") then
@@ -202,10 +214,15 @@ function qf.clear_notes()
 	fn.setqflist(new_list)
 end
 
-local function add_item_to_qf(list_type)
+local add_item_to_qf = function(list_type)
 	local is_location_target = list_type == "location"
 	local cmd_ = is_location_target and { "lclose", Config.theme_list.quickfix.lopen, "loclist" }
 		or { "cclose", Config.theme_list.quickfix.copen, "qflist" }
+
+	local title = is_location_target and fn.getloclist(0, { title = 0 }).title or fn.getqflist({ title = 0 }).title
+	if title and title:match("setqflist") or #title == 0 then
+		title = "Add item into " .. (is_location_target and "lf" or "qf")
+	end
 
 	local items = {
 		{
@@ -216,12 +233,12 @@ local function add_item_to_qf(list_type)
 	}
 	--
 	if is_location_target then
-		vim.fn.setloclist(0, {}, "a", { items = items })
+		fn.setloclist(0, {}, "a", { items = items, title = title })
 	else
-		vim.fn.setqflist({}, "a", { items = items })
+		fn.setqflist({}, "a", { items = items, title = title })
 	end
 
-	Utils.info(string.format("Add %s -> %s", cmd_[3], vim.api.nvim_get_current_line()))
+	Utils.info(string.format("Add %s -> %s", cmd_[3], vim.api.nvim_get_current_line()), "QF-" .. cmd_[3])
 
 	local is_open, _ = is_vim_list_open()
 	if not is_open then
@@ -233,9 +250,49 @@ end
 function qf.add_item_qf()
 	add_item_to_qf("quickfix")
 end
-
 function qf.add_item_loc()
 	add_item_to_qf("location")
+end
+
+local rename_title = function(list_type, win_id)
+	win_id = win_id or fn.win_getid() -- or 0
+	local is_location_target = list_type == "location"
+	local cmd_ = is_location_target and { "lclose", Config.theme_list.quickfix.lopen, "QF-loclist" }
+		or { "cclose", Config.theme_list.quickfix.copen, "QF-qflist" }
+
+	if Utils.isLocList() then
+		Utils.warn(
+			"Sorry, this action is not supported.\nNo API available to edit the title.\nOnly supported for quickfix lists.",
+			cmd_[3]
+		)
+		-- setloclist ga bisa di set title karena via API nya seperti itu?
+		-- vim.fn.setloclist(0, {}, "r", {
+		-- 	title = title,
+		-- 	-- items = cur_list,
+		-- })
+		return
+	end
+
+	Ui.input(function(inputMsg)
+		if inputMsg == "" then
+			return
+		end
+
+		local title = inputMsg
+		title = title:gsub("%s", "_")
+		title = title:gsub("%.", "_")
+
+		vim.fn.setqflist({}, "r", { title = title })
+		vim.cmd(cmd_[2])
+	end, "Rename " .. cmd_[3])
+end
+
+function qf.rename_title()
+	if Utils.isLocList() then
+		rename_title("location")
+		return
+	end
+	rename_title("quickfix")
 end
 
 return qf
