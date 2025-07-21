@@ -111,7 +111,6 @@ function M.sel_qf(opts, isLoad)
 			col = 0.50,
 			backdrop = 60,
 			hls = { normal = "Normal" },
-			border = "rounded",
 			title = formatTitle("QF-" .. prompt_prefix, ""),
 			preview = { hidden = "hidden" },
 		},
@@ -247,10 +246,10 @@ function M.grep_marks(buffer)
 				row = 0.55,
 				col = 0.55,
 				title = formatTitle("QF-Marks", Visual.extmarks.qf_sigil),
-				border = "rounded",
+				fullscreen = false,
 				preview = {
-					vertical = "up:45%", -- up|down:size
-					horizontal = "right:70%", -- right|left:size
+					vertical = "up:40%", -- up|down:size
+					horizontal = "right:60%", -- right|left:size
 				},
 			}
 		end,
