@@ -332,7 +332,7 @@ function M.mark_defaults(buffer)
 				end
 
 				if #items > 0 then
-					vim.fn.setqflist({}, "r", { title = "Marks-", items = items })
+					vim.fn.setqflist({}, "r", { title = "Marks-All", items = items })
 					vim.cmd(Config.theme_list.quickfix.copen)
 				end
 			end,
@@ -433,7 +433,7 @@ function M.mark_defaults(buffer)
 					vim.fn.setloclist(0, {}, " ", {
 						nr = "$",
 						items = items,
-						title = "Marks-",
+						title = "Marks-All",
 					})
 					vim.cmd(Config.theme_list.quickfix.lopen)
 				end

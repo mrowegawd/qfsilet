@@ -13,7 +13,6 @@ M.current_configs = {
 
 		priority = 10,
 
-		qf_crosssign = "",
 		qf_sigil = "", --"",
 		qf_sign_hl_group = "QFSiletQfSign",
 		qf_sign_hl = { fg = "#8a62c6" },
@@ -21,6 +20,11 @@ M.current_configs = {
 		qf_badge = " qfNote",
 		qf_ext_hl = { fg = "#8a62c6" },
 		qf_ext_hl_group = "QFSiletQfExt",
+	},
+	icons = {
+		done = "✅",
+		undone = "❌",
+		mark = "📌",
 	},
 	marks = {
 		enabled = true,
@@ -87,10 +91,10 @@ M.current_configs = {
 			goto_link_capture = "g<cr>",
 		},
 		marks = {
-			toggle_mark = "mm",
-			show_config = "m?",
-			next_mark = "sn",
-			prev_mark = "sp",
+			toggle_mark = "T",
+			show_config = "<Leader>q?",
+			next_mark = "<Leader>wn",
+			prev_mark = "<Leader>wp",
 			del_buf_mark = "dM",
 			del_mark = "dm",
 			fzf_marks = "mf",

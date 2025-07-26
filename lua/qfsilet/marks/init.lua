@@ -86,6 +86,7 @@ function M.delete_mark(bufnr, line, clear)
 end
 
 function M.delete_buf_marks(clear)
+	local config = Config.current_configs
 	local bufnr = vim.api.nvim_get_current_buf()
 	clear = UtilsMark.option_nil(clear, true)
 	local buffer = M.buffers.mark
@@ -101,6 +102,8 @@ function M.delete_buf_marks(clear)
 	if clear then
 		vim.cmd("delmarks!")
 	end
+
+	Utils.info(config.icons.done .. " Marks for the current buffer have been removed!", "Marks")
 end
 
 function M.delete_line_marks_builtin()
@@ -227,10 +230,10 @@ function M.toggle_mark_cursor()
 
 	if UtilsMark.is_current_line_got_mark(M.buffers, pos[1]) then
 		M.delete_line_marks()
-		Utils.info(config.extmarks.qf_crosssign .. " Mark Removed", "Marks")
+		Utils.info(config.icons.done .. " Mark Removed", "Marks")
 	else
 		M.place_next_mark(pos[1], pos[2], text)
-		Utils.info(config.extmarks.qf_sigil .. " Mark Added", "Marks")
+		Utils.info(config.icons.mark .. " Mark Added", "Marks")
 	end
 end
 
@@ -246,31 +249,11 @@ function M.refresh_deforce(force)
 		}
 	end
 
-	local separator = function()
-		return "/"
-	end
-
-	local function remove_trailing(path)
-		local p, _ = path:gsub(separator() .. "$", "")
-		return p
-	end
-
-	local function basename(path)
-		path = remove_trailing(path)
-		local i = path:match("^.*()" .. separator())
-		if not i then
-			return path
-		end
-		return path:sub(i + 1, #path)
-	end
-
 	if #buffer.mark.lists > 0 then
+		local bufnr = vim.api.nvim_get_current_buf()
 		for _, x in ipairs(buffer.mark.lists) do
-			local bufnr = vim.api.nvim_get_current_buf()
-			local winnr_fn = vim.api.nvim_buf_get_name(bufnr)
-
-			local basename_winnr_fn = basename(winnr_fn):gsub("([%-%^%$%(%)%.%[%]%+%-%?%*])", "%%%1")
-			if basename(x.filename):match(basename_winnr_fn) then
+			local filename = vim.api.nvim_buf_get_name(bufnr)
+			if filename == x.filename then
 				register_mark(tonumber(x.id), bufnr, x.line, x.col, x.text, force)
 			end
 		end
@@ -292,12 +275,29 @@ function M.add_sign(id, bufnr, line)
 	Visual.insert_signs(id, bufnr, line, text, config)
 end
 
-function M.refresh(force_reregister)
-	-- if M.excluded_fts[vim.bo.ft] or M.excluded_bts[vim.bo.bt] then
-	-- 	return
-	-- end
+function M.refresh(force_reregister, buf)
+	local is_float = vim.api.nvim_win_get_config(0).relative ~= ""
+	local is_buftype = vim.tbl_contains({ "help", "prompt", "nofile" }, vim.bo[buf].buftype)
+	local is_filetype = vim.tbl_contains({
+		"DiffviewFileHistory",
+		"DiffviewFiles",
+		"Outline",
+		"Trouble",
+		"dashboard",
+		"fugitive",
+		"fzf",
+		"gitcommit",
+		"packer",
+		"snacks_dashboard",
+		"toggleterm",
+		"org",
+		"orgagenda",
+	}, vim.bo[buf].filetype)
 
-	-- Utils.info("Yay force to refres them")
+	if is_float or is_buftype or is_filetype then
+		return
+	end
+
 	force_reregister = force_reregister or false
 	M.refresh_deforce(force_reregister)
 end
@@ -312,7 +312,6 @@ local function __save_marks()
 	local fn_name = Constant.defaults.base_path .. "/mark.lua"
 
 	if #buffer.lists > 0 then
-		vim.system({ "dunstify", "saving to >> " .. fn_name })
 		if not Utils.isDir(Constant.defaults.base_path) then
 			Utils.create_dir(Constant.defaults.base_path)
 		end
@@ -322,7 +321,6 @@ local function __save_marks()
 	end
 
 	if Utils.isFile(fn_name) then
-		vim.system({ "dunstify", "remove >> " .. fn_name })
 		vim.system({ "rm", fn_name })
 	end
 end
@@ -351,13 +349,12 @@ local function setup_commands()
 
 	vim.api.nvim_create_autocmd({ "BufWinEnter" }, {
 		group = augroup("RefreshMark"),
-		callback = function()
+		callback = function(ctx)
 			if is_unset_augroup then
 				unset_augroup("QFSiletLoadMark")
 				is_unset_augroup = false
 			end
-			-- Utils.info("Yay refresh them")
-			M.refresh(true)
+			M.refresh(true, ctx.buf)
 		end,
 	})
 
@@ -372,7 +369,6 @@ local function setup_commands()
 		group = augroup("LoadMark"),
 		once = true,
 		callback = function()
-			-- Utils.info("Yay load them")
 			__load_marks()
 			is_unset_augroup = true
 		end,
@@ -401,7 +397,7 @@ function M.setup(timer_setup)
 		0,
 		refresh_interval,
 		vim.schedule_wrap(function()
-			M.refresh(true)
+			M.refresh(true, vim.api.nvim_get_current_buf())
 		end)
 	)
 end
