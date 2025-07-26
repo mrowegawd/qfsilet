@@ -290,7 +290,6 @@ function M.refresh(force_reregister, buf)
 		"packer",
 		"snacks_dashboard",
 		"toggleterm",
-		"org",
 		"orgagenda",
 	}, vim.bo[buf].filetype)
 
