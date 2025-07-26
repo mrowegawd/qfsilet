@@ -393,13 +393,15 @@ function M.setup(timer_setup)
 	local refresh_interval = UtilsMark.option_nil(timer_setup, 150)
 
 	local timer = vim.loop.new_timer()
-	timer:start(
-		0,
-		refresh_interval,
-		vim.schedule_wrap(function()
-			M.refresh(true, vim.api.nvim_get_current_buf())
-		end)
-	)
+	if timer then
+		timer:start(
+			0,
+			refresh_interval,
+			vim.schedule_wrap(function()
+				M.refresh(true, vim.api.nvim_get_current_buf())
+			end)
+		)
+	end
 end
 
 function M.clear_all_marks()
