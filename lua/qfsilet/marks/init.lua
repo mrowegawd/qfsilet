@@ -31,10 +31,11 @@ local function exclude_buf(bufnr)
 	return true
 end
 
-local function register_mark(id, bufnr, line, col, is_force)
+local function register_mark(id, bufnr, line, col, text, is_force)
 	vim.validate({
 		id = { id, "number" },
 		bufnr = { bufnr, "number" },
+		text = { text, "string" },
 	})
 
 	if not exclude_buf(bufnr) then
@@ -54,7 +55,7 @@ local function register_mark(id, bufnr, line, col, is_force)
 
 	local line_count = vim.api.nvim_buf_line_count(bufnr)
 	if not is_force and (line_count + 1) > line then
-		table.insert(buffer.lists, { line = line, col = col, filename = filename, id = id })
+		table.insert(buffer.lists, { line = line, col = col, filename = filename, id = id, text = text })
 	end
 
 	if display_signs then
@@ -203,7 +204,7 @@ function M.fzf_marks()
 	require("qfsilet.fzf").grep_marks(buffer)
 end
 
-function M.place_next_mark(line, col)
+function M.place_next_mark(line, col, text)
 	local bufnr = vim.api.nvim_get_current_buf()
 	local root = Utils.root_path_basename()
 
@@ -215,11 +216,12 @@ function M.place_next_mark(line, col)
 	end
 
 	local id = tonumber(line .. bufnr)
-	register_mark(id, bufnr, line, col)
+	register_mark(id, bufnr, line, col, text)
 end
 
 function M.toggle_mark_cursor()
 	local pos = vim.api.nvim_win_get_cursor(0)
+	local text = vim.api.nvim_buf_get_lines(0, pos[1] - 1, pos[1], false)[1]
 
 	local config = Config.current_configs
 
@@ -227,7 +229,7 @@ function M.toggle_mark_cursor()
 		M.delete_line_marks()
 		Utils.info(config.extmarks.qf_crosssign .. " Mark Removed", "Marks")
 	else
-		M.place_next_mark(pos[1], pos[2])
+		M.place_next_mark(pos[1], pos[2], text)
 		Utils.info(config.extmarks.qf_sigil .. " Mark Added", "Marks")
 	end
 end
@@ -268,8 +270,8 @@ function M.refresh_deforce(force)
 			local winnr_fn = vim.api.nvim_buf_get_name(bufnr)
 
 			local basename_winnr_fn = basename(winnr_fn):gsub("([%-%^%$%(%)%.%[%]%+%-%?%*])", "%%%1")
-			if winnr_fn ~= "" and basename(x.filename):match(basename_winnr_fn) then
-				register_mark(tonumber(x.id), bufnr, x.line, x.col, force)
+			if basename(x.filename):match(basename_winnr_fn) then
+				register_mark(tonumber(x.id), bufnr, x.line, x.col, x.text, force)
 			end
 		end
 	end
@@ -310,15 +312,18 @@ local function __save_marks()
 	local fn_name = Constant.defaults.base_path .. "/mark.lua"
 
 	if #buffer.lists > 0 then
+		vim.system({ "dunstify", "saving to >> " .. fn_name })
 		if not Utils.isDir(Constant.defaults.base_path) then
 			Utils.create_dir(Constant.defaults.base_path)
 		end
 		Utils.create_file(fn_name)
 		Utils.save_table_to_file(buffer, fn_name)
-	else
-		if Utils.isFile(fn_name) then
-			Utils.rmdir(fn_name)
-		end
+		return
+	end
+
+	if Utils.isFile(fn_name) then
+		vim.system({ "dunstify", "remove >> " .. fn_name })
+		vim.system({ "rm", fn_name })
 	end
 end
 
@@ -375,7 +380,7 @@ local function setup_commands()
 end
 
 function M.show_config()
-	vim.print(vim.inspect(M.buffers))
+	Utils.info(vim.inspect(M.buffers))
 	-- vim.print("current bookmark idx: " .. current_bookmark_idx)
 	-- print("======================================")
 	-- print("======================================")

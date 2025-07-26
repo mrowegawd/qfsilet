@@ -150,7 +150,7 @@ function M.setup_keymaps_and_autocmds()
 	}
 	local marks_keymaps = {
 		{
-			desc = "Marks: toggle marks [QFsilet]",
+			desc = "Marks: toggle add marks [QFsilet]",
 			func = "toggle_mark_cursor",
 			keys = Config.keymap.marks.toggle_mark,
 			mode = "n",

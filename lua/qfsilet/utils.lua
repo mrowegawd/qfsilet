@@ -40,7 +40,7 @@ end
 function M.rmdir(path)
 	local p = Plenary_path.new(path)
 	if p:exists() then
-		vim.fn.delete(path, "rf")
+		vim.system({ "rm", "-rf", path })
 	end
 end
 
