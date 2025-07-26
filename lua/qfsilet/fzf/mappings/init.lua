@@ -243,6 +243,202 @@ function M.mark_defaults(buffer)
 			require("qfsilet.marks").clear_all_marks()
 			Utils.info("All marks cleared", "Marks")
 		end,
+
+		["alt-q"] = function(selected, _)
+			local items = {}
+			if #selected > 1 then
+				for _, item in pairs(selected) do
+					local sel_text = UtilsFzf.stripString(item)
+					if sel_text then
+						local text = sel_text:gsub(Visual.extmarks.qf_sigil .. " ", "")
+						local line = string.match(text, ":(%d+):")
+						local filename = string.match(sel_text, "([%w_%.%-]+)%:?")
+						for _, x in pairs(buffer.lists) do
+							local filename_trim = Utils.format_filename(x.filename)
+							if
+								filename
+								and string.match(filename_trim, filename)
+								and tonumber(x.line) == tonumber(line)
+							then
+								items[#items + 1] = {
+									bufnr = x.buf,
+									text = x.text,
+									lnum = x.line,
+									col = x.col,
+									filename = x.filename,
+								}
+							end
+						end
+					end
+				end
+			else
+				local sel_text = UtilsFzf.stripString(selected[1])
+				if sel_text then
+					local text = sel_text:gsub(Visual.extmarks.qf_sigil .. " ", "")
+					local line = string.match(text, ":(%d+):")
+					local filename = string.match(sel_text, "([%w_%.%-]+)%:?")
+					for _, x in pairs(buffer.lists) do
+						local filename_trim = Utils.format_filename(x.filename)
+						if
+							filename
+							and string.match(filename_trim, filename)
+							and tonumber(x.line) == tonumber(line)
+						then
+							items[#items + 1] = {
+								bufnr = x.buf,
+								text = x.text,
+								lnum = x.line,
+								col = x.col,
+								filename = x.filename,
+							}
+						end
+					end
+				end
+			end
+
+			if #items > 0 then
+				vim.fn.setqflist({}, "r", { title = "Marks-", items = items })
+				vim.cmd(Config.theme_list.quickfix.copen)
+			end
+		end,
+
+		["alt-Q"] = {
+			prefix = "select-all+accept",
+			fn = function(selected, _)
+				local items = {}
+				for _, item in pairs(selected) do
+					local sel_text = UtilsFzf.stripString(item)
+					if sel_text then
+						local text = sel_text:gsub(Visual.extmarks.qf_sigil .. " ", "")
+						local line = string.match(text, ":(%d+):")
+						local filename = string.match(sel_text, "([%w_%.%-]+)%:?")
+						for _, x in pairs(buffer.lists) do
+							local filename_trim = Utils.format_filename(x.filename)
+							if
+								filename
+								and string.match(filename_trim, filename)
+								and tonumber(x.line) == tonumber(line)
+							then
+								items[#items + 1] = {
+									bufnr = x.buf,
+									text = x.text,
+									lnum = x.line,
+									col = x.col,
+									filename = x.filename,
+								}
+							end
+						end
+					end
+				end
+
+				if #items > 0 then
+					vim.fn.setqflist({}, "r", { title = "Marks-", items = items })
+					vim.cmd(Config.theme_list.quickfix.copen)
+				end
+			end,
+		},
+
+		["alt-l"] = function(selected, _)
+			local items = {}
+			if #selected > 1 then
+				for _, item in pairs(selected) do
+					local sel_text = UtilsFzf.stripString(item)
+					if sel_text then
+						local text = sel_text:gsub(Visual.extmarks.qf_sigil .. " ", "")
+						local line = string.match(text, ":(%d+):")
+						local filename = string.match(sel_text, "([%w_%.%-]+)%:?")
+						for _, x in pairs(buffer.lists) do
+							local filename_trim = Utils.format_filename(x.filename)
+							if
+								filename
+								and string.match(filename_trim, filename)
+								and tonumber(x.line) == tonumber(line)
+							then
+								items[#items + 1] = {
+									bufnr = x.buf,
+									text = x.text,
+									lnum = x.line,
+									col = x.col,
+									filename = x.filename,
+								}
+							end
+						end
+					end
+				end
+			else
+				local sel_text = UtilsFzf.stripString(selected[1])
+				if sel_text then
+					local text = sel_text:gsub(Visual.extmarks.qf_sigil .. " ", "")
+					local line = string.match(text, ":(%d+):")
+					local filename = string.match(sel_text, "([%w_%.%-]+)%:?")
+					for _, x in pairs(buffer.lists) do
+						local filename_trim = Utils.format_filename(x.filename)
+						if
+							filename
+							and string.match(filename_trim, filename)
+							and tonumber(x.line) == tonumber(line)
+						then
+							items[#items + 1] = {
+								bufnr = x.buf,
+								text = x.text,
+								lnum = x.line,
+								col = x.col,
+								filename = x.filename,
+							}
+						end
+					end
+				end
+			end
+
+			if #items > 0 then
+				vim.fn.setloclist(0, {}, " ", {
+					nr = "$",
+					items = items,
+					title = "Marks-",
+				})
+				vim.cmd(Config.theme_list.quickfix.lopen)
+			end
+		end,
+
+		["alt-L"] = {
+			prefix = "select-all+accept",
+			fn = function(selected, _)
+				local items = {}
+				for _, item in pairs(selected) do
+					local sel_text = UtilsFzf.stripString(item)
+					if sel_text then
+						local text = sel_text:gsub(Visual.extmarks.qf_sigil .. " ", "")
+						local line = string.match(text, ":(%d+):")
+						local filename = string.match(sel_text, "([%w_%.%-]+)%:?")
+						for _, x in pairs(buffer.lists) do
+							local filename_trim = Utils.format_filename(x.filename)
+							if
+								filename
+								and string.match(filename_trim, filename)
+								and tonumber(x.line) == tonumber(line)
+							then
+								items[#items + 1] = {
+									bufnr = x.buf,
+									text = x.text,
+									lnum = x.line,
+									col = x.col,
+									filename = x.filename,
+								}
+							end
+						end
+					end
+				end
+
+				if #items > 0 then
+					vim.fn.setloclist(0, {}, " ", {
+						nr = "$",
+						items = items,
+						title = "Marks-",
+					})
+					vim.cmd(Config.theme_list.quickfix.lopen)
+				end
+			end,
+		},
 	}
 end
 
