@@ -239,20 +239,22 @@ function M.grep_marks(buffer)
 		prompt = "  ",
 		actions = FzfMappings.mark_defaults(buffer),
 		fzf_opts = { ["--header"] = [[^x:delete  A-x:delete-all]] },
-		winopts = function()
-			return {
-				width = 0.80,
-				height = 0.80,
-				row = 0.55,
-				col = 0.55,
-				title = formatTitle("QF-Marks", Visual.extmarks.qf_sigil),
-				fullscreen = false,
-				preview = {
-					vertical = "up:40%", -- up|down:size
-					horizontal = "right:60%", -- right|left:size
-				},
-			}
-		end,
+		winopts = {
+			width = 0.85,
+			height = 0.80,
+			row = 0.55,
+			col = 0.55,
+			title = formatTitle("QF-Marks", Visual.extmarks.qf_sigil),
+			fullscreen = false,
+			title_pos = "center",
+			---@diagnostic disable-next-line: missing-fields
+			preview = {
+				layout = "horizontal",
+				vertical = "up:55%", -- up|down:size
+				horizontal = "right:45%", -- right|left:size
+				border = "rounded",
+			},
+		},
 	})
 end
 
