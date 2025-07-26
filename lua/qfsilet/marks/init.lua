@@ -221,10 +221,14 @@ end
 function M.toggle_mark_cursor()
 	local pos = vim.api.nvim_win_get_cursor(0)
 
+	local config = Config.current_configs
+
 	if UtilsMark.is_current_line_got_mark(M.buffers, pos[1]) then
 		M.delete_line_marks()
+		Utils.info(config.extmarks.qf_crosssign .. " Mark Removed", "Marks")
 	else
 		M.place_next_mark(pos[1], pos[2])
+		Utils.info(config.extmarks.qf_sigil .. " Mark Added", "Marks")
 	end
 end
 

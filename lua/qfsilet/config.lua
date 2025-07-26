@@ -13,6 +13,7 @@ M.current_configs = {
 
 		priority = 10,
 
+		qf_crosssign = "",
 		qf_sigil = "", --"",
 		qf_sign_hl_group = "QFSiletQfSign",
 		qf_sign_hl = { fg = "#8a62c6" },
