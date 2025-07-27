@@ -8,6 +8,8 @@ local Note = require("qfsilet.note")
 local Config = require("qfsilet.config").current_configs
 local Ui = require("qfsilet.ui")
 
+local last_winid = 0
+
 local qf = {
 	base_path = "",
 	base_global_path = "",
@@ -70,6 +72,7 @@ local toggle_list = function(list_type, kill)
 	local is_open, qf_or_loclist = is_vim_list_open()
 
 	if is_open and (list_type == qf_or_loclist) then
+		vim.fn.win_gotoid(last_winid)
 		vim.cmd(cmd_[1])
 		return
 	end
@@ -85,13 +88,14 @@ local toggle_list = function(list_type, kill)
 		return
 	end
 
-	local winnr = fn.winnr()
+	-- local winnr = fn.winnr()
+	last_winid = vim.fn.win_getid()
 	vim.cmd(cmd_[2])
 
-	if fn.winnr() ~= winnr then
-		cmd.wincmd("p")
-	end
-	cmd.wincmd("p")
+	-- if fn.winnr() ~= winnr then
+	-- 	cmd.wincmd("p")
+	-- end
+	-- cmd.wincmd("p")
 end
 
 function qf.toggle_qf()
