@@ -228,10 +228,11 @@ local add_item_to_qf = function(list_type)
 		{
 			bufnr = vim.api.nvim_get_current_buf(),
 			lnum = vim.api.nvim_win_get_cursor(0)[1],
-			text = vim.api.nvim_get_current_line(),
+			text = Utils.strip_whitespace(vim.api.nvim_get_current_line()),
+			line = vim.api.nvim_get_current_line(),
 		},
 	}
-	--
+
 	if is_location_target then
 		fn.setloclist(0, {}, "a", { items = items, title = title })
 	else

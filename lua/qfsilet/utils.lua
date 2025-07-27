@@ -208,6 +208,31 @@ function M.find_win_ls(opts)
 	return found_ls
 end
 
+local rstrip_whitespace = function(str)
+	str = string.gsub(str, "%s+$", "")
+	return str
+end
+
+local lstrip_whitespace = function(str, limit)
+	if limit ~= nil then
+		local num_found = 0
+		while num_found < limit do
+			str = string.gsub(str, "^%s", "")
+			num_found = num_found + 1
+		end
+	else
+		str = string.gsub(str, "^%s+", "")
+	end
+	return str
+end
+
+function M.strip_whitespace(str)
+	if str then
+		return rstrip_whitespace(lstrip_whitespace(str))
+	end
+	return ""
+end
+
 -- ┌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┐
 -- ╎                           LIST                           ╎
 -- └╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘
