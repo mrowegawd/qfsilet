@@ -262,7 +262,7 @@ function M.mark_defaults(buffer)
 							then
 								items[#items + 1] = {
 									bufnr = x.buf,
-									text = x.text,
+									text = Utils.strip_whitespace(x.text),
 									lnum = x.line,
 									col = x.col,
 									filename = x.filename,
@@ -286,7 +286,7 @@ function M.mark_defaults(buffer)
 						then
 							items[#items + 1] = {
 								bufnr = x.buf,
-								text = x.text,
+								text = Utils.strip_whitespace(x.text),
 								lnum = x.line,
 								col = x.col,
 								filename = x.filename,
@@ -321,7 +321,7 @@ function M.mark_defaults(buffer)
 							then
 								items[#items + 1] = {
 									bufnr = x.buf,
-									text = x.text,
+									text = Utils.strip_whitespace(x.text),
 									lnum = x.line,
 									col = x.col,
 									filename = x.filename,
@@ -356,7 +356,7 @@ function M.mark_defaults(buffer)
 							then
 								items[#items + 1] = {
 									bufnr = x.buf,
-									text = x.text,
+									text = Utils.strip_whitespace(x.text),
 									lnum = x.line,
 									col = x.col,
 									filename = x.filename,
@@ -380,7 +380,7 @@ function M.mark_defaults(buffer)
 						then
 							items[#items + 1] = {
 								bufnr = x.buf,
-								text = x.text,
+								text = Utils.strip_whitespace(x.text),
 								lnum = x.line,
 								col = x.col,
 								filename = x.filename,
@@ -419,7 +419,7 @@ function M.mark_defaults(buffer)
 							then
 								items[#items + 1] = {
 									bufnr = x.buf,
-									text = x.text,
+									text = Utils.strip_whitespace(x.text),
 									lnum = x.line,
 									col = x.col,
 									filename = x.filename,

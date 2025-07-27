@@ -55,7 +55,13 @@ local function register_mark(id, bufnr, line, col, text, is_force)
 
 	local line_count = vim.api.nvim_buf_line_count(bufnr)
 	if not is_force and (line_count + 1) > line then
-		table.insert(buffer.lists, { line = line, col = col, filename = filename, id = id, text = text })
+		table.insert(buffer.lists, {
+			line = line,
+			col = col,
+			filename = filename,
+			id = id,
+			text = Utils.strip_whitespace(text),
+		})
 	end
 
 	if display_signs then
