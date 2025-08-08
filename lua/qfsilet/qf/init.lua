@@ -219,6 +219,10 @@ function qf.clear_notes()
 end
 
 local add_item_to_qf = function(list_type)
+	if vim.bo.filetype == "qf" then
+		return Utils.warn("Operation is not allowed inside the quickfix window", "QF")
+	end
+
 	local is_location_target = list_type == "location"
 	local cmd_ = is_location_target and { "lclose", Config.theme_list.quickfix.lopen, "loclist" }
 		or { "cclose", Config.theme_list.quickfix.copen, "qflist" }
@@ -243,7 +247,7 @@ local add_item_to_qf = function(list_type)
 		fn.setqflist({}, "a", { items = items, title = title })
 	end
 
-	Utils.info(string.format("Add %s -> %s", cmd_[3], vim.api.nvim_get_current_line()), "QF-" .. cmd_[3])
+	Utils.info(string.format("✅ Add %s -> %s", cmd_[3], vim.api.nvim_get_current_line()), "QF-" .. cmd_[3])
 
 	local is_open, _ = is_vim_list_open()
 	if not is_open then
