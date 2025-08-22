@@ -82,6 +82,9 @@ M.current_configs = {
 			load_local = "<Leader>qL",
 			add_item_to_qf = "<Leader>qy",
 			add_item_to_loc = "<Leader>qY",
+
+			move_to_above = "<a-k>",
+			move_to_bottom = "<a-j>",
 		},
 		todo = {
 			add_message = "mN",

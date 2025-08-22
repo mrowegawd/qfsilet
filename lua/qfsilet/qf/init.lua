@@ -304,4 +304,33 @@ function qf.rename_title()
 	rename_title("quickfix")
 end
 
+local move_win_to = function(direction)
+	if vim.bo.filetype ~= "qf" then
+		return Utils.warn("This operation is only allowed inside the quickfix window.", "QF")
+	end
+
+	local cmd_open
+	local list_type
+
+	if Utils.isLocList() then
+		cmd_open = direction == "above" and "aboveleft lopen" or "belowright lopen"
+		Config.theme_list.quickfix.lopen = cmd_open
+		list_type = "location"
+	else
+		cmd_open = direction == "above" and "aboveleft copen" or "belowright copen"
+		Config.theme_list.quickfix.copen = cmd_open
+		list_type = "quickfix"
+	end
+
+	toggle_list(list_type)
+	vim.cmd(cmd_open)
+end
+
+function qf.move_qf_to_above()
+	move_win_to("above")
+end
+function qf.move_qf_to_bottom()
+	move_win_to("below")
+end
+
 return qf

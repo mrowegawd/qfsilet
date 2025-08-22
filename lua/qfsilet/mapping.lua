@@ -78,6 +78,19 @@ function M.setup_keymaps_and_autocmds()
 	}
 	local qf_keymaps = {
 		{
+			desc = "Qf: move quickfix window to top [QFsilet]",
+			func = "move_qf_to_above",
+			keys = Config.keymap.quickfix.move_to_above,
+			mode = "n",
+		},
+		{
+			desc = "Qf: move quickfix window to bottom [QFsilet]",
+			func = "move_qf_to_bottom",
+			keys = Config.keymap.quickfix.move_to_bottom,
+			mode = "n",
+		},
+
+		{
 			desc = "Qf: toggle quickfix [QFsilet]",
 			func = "toggle_qf",
 			keys = Config.keymap.quickfix.toggle_open_qf,
