@@ -51,7 +51,7 @@ local is_vim_list_open = function()
 	for _, win in ipairs(api.nvim_list_wins()) do
 		local buf = api.nvim_win_get_buf(win)
 		if curbuf == buf then
-			if Utils.isLocList(win) then
+			if Utils.is_loclist(win) then
 				return true, "location"
 			end
 			if vim.bo[buf].filetype == "qf" then
@@ -111,7 +111,7 @@ function qf.del_itemqf()
 	local close_cmd = "close"
 	local open_cmd = Config.theme_list.quickfix.copen
 	local win_id = fn.win_getid()
-	local is_loc = Utils.isLocList()
+	local is_loc = Utils.is_loclist()
 	cur_list = Utils.getCurrentList({}, is_loc)
 	if is_loc then
 		close_cmd = "lclose"
@@ -186,7 +186,7 @@ local clear_loc_list = function()
 end
 
 function qf.clear_all_item_lists()
-	if Utils.isLocList() then
+	if Utils.is_loclist() then
 		clear_loc_list()
 		return
 	end
@@ -269,7 +269,7 @@ local rename_title = function(list_type, win_id)
 	local cmd_ = is_location_target and { "lclose", Config.theme_list.quickfix.lopen, "QF-loclist" }
 		or { "cclose", Config.theme_list.quickfix.copen, "QF-qflist" }
 
-	if Utils.isLocList() then
+	if Utils.is_loclist() then
 		Utils.warn(
 			"Sorry, this action is not supported.\nNo API available to edit the title.\nOnly supported for quickfix lists.",
 			cmd_[3]
@@ -297,7 +297,7 @@ local rename_title = function(list_type, win_id)
 end
 
 function qf.rename_title()
-	if Utils.isLocList() then
+	if Utils.is_loclist() then
 		rename_title("location")
 		return
 	end
@@ -312,7 +312,7 @@ local move_win_to = function(direction)
 	local cmd_open
 	local list_type
 
-	if Utils.isLocList() then
+	if Utils.is_loclist() then
 		cmd_open = direction == "above" and "aboveleft lopen" or "belowright lopen"
 		Config.theme_list.quickfix.lopen = cmd_open
 		list_type = "location"

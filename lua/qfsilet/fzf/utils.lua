@@ -1,6 +1,6 @@
 local nbsp = "\xe2\x80\x82" -- Non-breaking space unicode character "\u{2002}"
 
-local function lastIndexOf(haystack, needle)
+local function last_index_of(haystack, needle)
 	local i = haystack:match(".*" .. needle .. "()")
 	if i == nil then
 		return nil
@@ -9,12 +9,12 @@ local function lastIndexOf(haystack, needle)
 	end
 end
 
-local function stripBeforeLastOccurrenceOf(str, sep)
-	local idx = lastIndexOf(str, sep) or 0
+local function strip_before_last_occurence_of(str, sep)
+	local idx = last_index_of(str, sep) or 0
 	return str:sub(idx + 1), idx
 end
 
-local function stripAnsiColoring(str)
+local function strip_ansi_coloring(str)
 	if not str then
 		return str
 	end
@@ -25,12 +25,12 @@ local function stripAnsiColoring(str)
 	return str:gsub("%[[%d;]-m", "")
 end
 
-local function stripString(selected)
-	local pth = stripAnsiColoring(selected)
+local function strip_string(selected)
+	local pth = strip_ansi_coloring(selected)
 	if pth == nil then
 		return
 	end
-	return stripBeforeLastOccurrenceOf(pth, nbsp)
+	return strip_before_last_occurence_of(pth, nbsp)
 end
 
 -- function M.strip_ansi_coloring(str)
@@ -45,7 +45,7 @@ end
 -- end
 
 local function ansi_escseq_len(str)
-	local stripped = stripAnsiColoring(str)
+	local stripped = strip_ansi_coloring(str)
 	return #str - #stripped
 end
 
@@ -57,7 +57,7 @@ local function replace_refs(s)
 end
 
 return {
-	stripString = stripString,
+	strip_string = strip_string,
 	ansi_escseq_len = ansi_escseq_len,
 	replace_refs = replace_refs,
 }

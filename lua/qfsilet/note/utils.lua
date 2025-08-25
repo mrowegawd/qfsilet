@@ -56,35 +56,85 @@ function M.save_list_to_file(base_path, tbl, title)
 	local fname_path, fname = format_title_qf(base_path, title)
 	local success_msg = "Success saving"
 
-	if Utils.isFile(fname_path) then
+	if Utils.is_file(fname_path) then
 		Ui.input(function(input)
 			if input ~= nil and input == "y" or #input < 1 then
-				Utils.writeToFile(tbl, fname_path)
+				Utils.write_to_file(tbl, fname_path)
 			else
 				success_msg = "Cancel save"
 			end
 		end, fmt("File %s exists, rewrite it? [y/n]", title))
 	else
-		Utils.writeToFile(tbl, fname_path)
+		Utils.write_to_file(tbl, fname_path)
 	end
 
 	Utils.info(fmt("%s file '%s'", success_msg, fname))
 end
 
-function M.get_current_list(items, isGlobal)
-	local cur_list
+function M.get_current_list(items, is_local, winid)
+	items = items or {}
+	is_local = is_local or Utils.is_loclist()
+	winid = winid or vim.api.nvim_get_current_win()
 
-	if isGlobal then
-		cur_list = fn.getloclist(0)
+	local qf_items = {}
+
+	if is_local then
+		local data_list_loc = vim.fn.getloclist(winid)
+		if #data_list_loc > 0 then
+			qf_items = vim.tbl_map(function(item)
+				return {
+					filename = item.bufnr and vim.api.nvim_buf_get_name(item.bufnr),
+					module = item.module,
+					lnum = item.lnum,
+					end_lnum = item.end_lnum,
+					col = item.col,
+					end_col = item.end_col,
+					vcol = item.vcol,
+					nr = item.nr,
+					pattern = item.pattern,
+					text = item.text,
+					type = item.type,
+					valid = item.valid,
+				}
+			end, data_list_loc)
+		end
 	else
-		cur_list = fn.getqflist()
+		local data_list_qf = fn.getqflist()
+		if #data_list_qf > 0 then
+			qf_items = vim.tbl_map(function(item)
+				return {
+					filename = item.bufnr and vim.api.nvim_buf_get_name(item.bufnr),
+					module = item.module,
+					lnum = item.lnum,
+					end_lnum = item.end_lnum,
+					col = item.col,
+					end_col = item.end_col,
+					vcol = item.vcol,
+					nr = item.nr,
+					pattern = item.pattern,
+					text = item.text,
+					type = item.type,
+					valid = item.valid,
+				}
+			end, data_list_qf)
+		end
 	end
 
 	if items ~= nil and #items > 0 then
-		cur_list = vim.list_extend(cur_list, items)
+		qf_items = vim.list_extend(qf_items, items)
 	end
 
-	return cur_list
+	return qf_items
+end
+
+function M.get_current_list_title(is_loc)
+	is_loc = is_loc or Utils.is_loclist()
+
+	if not is_loc then
+		return vim.fn.getqflist({ title = 0 }).title
+	end
+
+	return vim.fn.getloclist(0, { title = 0 }).title
 end
 
 function M.capturelink()
@@ -133,6 +183,18 @@ function M.delete_buffer_by_name(filename)
 	if buf then
 		vim.api.nvim_buf_delete(buf, { force = true })
 	end
+end
+
+function M.save_to_qf(items, title, is_loc, winid)
+	is_loc = is_loc or false
+
+	if not is_loc then
+		vim.fn.setqflist({}, " ", { items = items, title = title })
+		return
+	end
+
+	winid = winid or vim.api.nvim_get_current_win()
+	vim.fn.setloclist(winid, {}, " ", { items = items, title = title })
 end
 
 return M

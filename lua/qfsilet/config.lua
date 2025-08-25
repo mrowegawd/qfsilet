@@ -224,7 +224,7 @@ function M.update_settings(opts)
 end
 
 function M.init()
-	if not Utils.isDir(M.current_configs.save_dir) then
+	if not Utils.is_dir(M.current_configs.save_dir) then
 		Utils.create_dir(M.current_configs.save_dir)
 	end
 end

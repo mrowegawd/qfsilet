@@ -75,28 +75,40 @@ function M.input(func, text_top_msg)
 		win_options = { winhighlight = Config.popup.winhighlight },
 	}
 
+	-- local done = false
 	local input = Input(input_opts, {
 		prompt = "  ",
-		default_value = "",
-		on_close = function() end,
 		on_submit = function(value)
 			func(value)
+			-- done = true
 		end,
 	})
 
-	-- mount/open the component
 	input:mount()
 
+	-- vim.wait(5, function() end)
+
 	-- unmount component when cursor leaves buffer
-	input:on(Event.BufLeave, function()
-		input:unmount()
-	end)
+	-- input:on(Event.BufLeave, function()
+	-- 	input:unmount()
+	-- end)
 	input:map("n", "<Esc>", function()
 		input:unmount()
 	end, { noremap = true })
 	input:map("n", "<c-c>", function()
 		input:unmount()
 	end, { noremap = true })
+
+	input:map("n", "<c-k>", function() end, { noremap = true })
+	input:map("n", "<c-j>", function() end, { noremap = true })
+	input:map("n", "<c-l>", function() end, { noremap = true })
+	input:map("n", "<c-h>", function() end, { noremap = true })
+	input:map("n", "<c-w>", function() end, { noremap = true })
+	input:map("i", "<c-w>", function() end, { noremap = true })
+
+	-- vim.fn.wait(1000, function()
+	-- 	return done
+	-- end)
 end
 
 function M.popup(fname_path, IsGlobal, base_path)

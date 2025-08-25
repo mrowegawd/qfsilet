@@ -62,7 +62,7 @@ function M.create_file(path)
 	end
 end
 
-function M.getFileRead(fname)
+function M.get_file_read(fname)
 	local file_read = fn.readfile(fname)
 	return file_read
 end
@@ -86,11 +86,11 @@ function M.exists(filename)
 	return stat and stat.type or false
 end
 
-function M.isDir(filename)
+function M.is_dir(filename)
 	return M.exists(filename) == "directory"
 end
 
-function M.isFile(filename)
+function M.is_file(filename)
 	return M.exists(filename) == "file"
 end
 
@@ -148,6 +148,164 @@ function M.save_table_to_file(table, filename)
 	else
 		print("Failed to save data table to file")
 	end
+end
+
+-- ┌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┐
+-- ╎                           LIST                           ╎
+-- └╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘
+
+function M.getCurrentList(items, is_loclist)
+	local cur_list
+	if is_loclist then
+		cur_list = fn.getloclist(0)
+	else
+		cur_list = fn.getqflist()
+	end
+
+	if items ~= nil and #items > 0 then
+		cur_list = vim.list_extend(cur_list, items)
+	end
+
+	return cur_list
+end
+
+function M.is_loclist(buf)
+	buf = buf or 0
+	return vim.fn.getloclist(buf, { filewinid = 1 }).filewinid ~= 0
+end
+
+function M.clean_up_items(items)
+	local items_qf
+
+	for _, x in pairs(items) do
+		items_qf[#items_qf + 1] = {
+			lnum = x.lnum,
+			text = x.text,
+			type = x.type,
+			col = x.col,
+		}
+	end
+
+	return items_qf
+end
+
+-- ┌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┐
+-- ╎                           JSON                           ╎
+-- └╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘
+
+function M.json_encode(tbl)
+	return vim.json.encode(tbl)
+end
+
+function M.json_decode(tbl)
+	return vim.json.decode(tbl)
+end
+
+function M.write_to_file(tbl, path_fname)
+	local tbl_json = M.json_encode(tbl)
+	fn.writefile({ tbl_json }, path_fname)
+end
+
+function M.is_json_path_exists(path)
+	local scripts = vim.api.nvim_exec2(string.format([[!find %s -type f -name "*.json"]], path), { output = true })
+	if scripts.output ~= nil then
+		local res = vim.split(scripts.output, "\n")
+		local found = false
+		for index = 2, #res do
+			local item = res[index]
+			if #item > 0 then
+				found = true
+			end
+		end
+
+		return found
+	end
+end
+
+-- ┌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┐
+-- ╎                           MISC                           ╎
+-- └╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘
+
+function M.feedkey(mode, motion, special)
+	local sequence = vim.api.nvim_replace_termcodes(motion, true, false, special or false)
+	vim.api.nvim_feedkeys(sequence, mode, true)
+end
+
+function M.info(msg, name)
+	vim.notify(msg, L.levels.INFO, { title = name or "Notify" })
+end
+
+function M.debug_info(msg)
+	M.info(msg, "DEBUG QFSILET")
+end
+
+function M.warn(msg, name)
+	vim.notify(msg, L.levels.WARN, { title = name or "Notify" })
+end
+
+function M.remove_duplicate_item_tbl(arr)
+	local new_tbl = {}
+	local dump_tbl = {}
+	for _, element in ipairs(arr) do
+		if not element.col or not element.filename then
+			M.error("Element doesn't have the requested element")
+			return
+		end
+
+		if not dump_tbl[element] then
+			dump_tbl[element.filename] = element.col
+			table.insert(new_tbl, element)
+		end
+	end
+	return new_tbl
+end
+
+function M.key_to_tbl(marks_opts)
+	local keyset = {}
+	local n = 0
+	for k, _ in pairs(marks_opts) do
+		n = n + 1
+		keyset[n] = k
+	end
+	return keyset
+end
+
+function M.check_wins(wins)
+	wins = wins or {}
+	vim.validate({ wins = { wins, "table" } })
+
+	local win_tbl = { found = false, winbufnr = 0, winnr = 0, winid = 0 }
+
+	local ft_wins = { "incline" }
+	if #wins > 0 then
+		for _, x in pairs(wins) do
+			ft_wins[#ft_wins + 1] = x
+		end
+	end
+
+	for _, winnr in ipairs(vim.fn.range(1, vim.fn.winnr("$"))) do
+		local winbufnr = vim.fn.winbufnr(winnr)
+		if
+			winbufnr > 0
+			and (
+				vim.tbl_contains(ft_wins, vim.api.nvim_get_option_value("filetype", { buf = winbufnr }))
+				or vim.tbl_contains(ft_wins, vim.api.nvim_get_option_value("buftype", { buf = winbufnr }))
+			)
+		then
+			local winid = vim.fn.win_findbuf(winbufnr)[1] -- example winid: 1004, 1005
+			win_tbl = { found = true, winbufnr = winbufnr, winnr = winnr, winid = winid }
+		end
+	end
+	return win_tbl
+end
+
+function M.get_lowercase(str)
+	return str:lower()
+end
+
+function M.get_uppercase_first_letter(str)
+	str = M.get_lowercase(str)
+	return (str:gsub("^%l", string.upper))
 end
 
 function M.win_is_valid(opts)
@@ -231,149 +389,6 @@ function M.strip_whitespace(str)
 		return rstrip_whitespace(lstrip_whitespace(str))
 	end
 	return ""
-end
-
--- ┌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┐
--- ╎                           LIST                           ╎
--- └╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘
-
-function M.getCurrentList(items, isLocationlist)
-	local cur_list
-	if isLocationlist then
-		cur_list = fn.getloclist(0)
-	else
-		cur_list = fn.getqflist()
-	end
-
-	if items ~= nil and #items > 0 then
-		cur_list = vim.list_extend(cur_list, items)
-	end
-
-	return cur_list
-end
-
-function M.isLocList(buf)
-	buf = buf or 0
-	return vim.fn.getloclist(buf, { filewinid = 1 }).filewinid ~= 0
-end
-
-function M.cleanupItems(items)
-	local _tbl = items.qf.items
-
-	local tbl_stay = {}
-	for i = 1, #_tbl do
-		table.insert(tbl_stay, _tbl[i])
-	end
-
-	items.qf.items = tbl_stay
-	local title = items.qf.title
-
-	return items, title
-end
-
--- ┌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┐
--- ╎                           JSON                           ╎
--- └╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘
-
-function M.json_encode(tbl)
-	return vim.json.encode(tbl)
-end
-
-function M.json_decode(tbl)
-	return vim.json.decode(tbl)
-end
-
-function M.writeToFile(tbl, path_fname)
-	local tbl_json = M.json_encode(tbl)
-	fn.writefile({ tbl_json }, path_fname)
-end
-
-function M.checkJSONPath(path)
-	local scripts = vim.api.nvim_exec2(string.format([[!find %s -type f -name "*.json"]], path), { output = true })
-	if scripts.output ~= nil then
-		local res = vim.split(scripts.output, "\n")
-		local found = false
-		for index = 2, #res do
-			local item = res[index]
-			if #item > 0 then
-				found = true
-			end
-		end
-
-		return found
-	end
-end
-
--- ┌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┐
--- ╎                           MISC                           ╎
--- └╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘
-
-function M.feedkey(mode, motion, special)
-	local sequence = vim.api.nvim_replace_termcodes(motion, true, false, special or false)
-	vim.api.nvim_feedkeys(sequence, mode, true)
-end
-
-function M.info(msg, name)
-	vim.notify(msg, L.levels.INFO, { title = name or "Notify" })
-end
-
-function M.debug_info(msg)
-	M.info(msg, "DEBUG QFSILET")
-end
-
-function M.warn(msg, name)
-	vim.notify(msg, L.levels.WARN, { title = name or "Notify" })
-end
-
-function M.removeDuplicates(arr)
-	local newArray = {}
-	local checkerTbl = {}
-	for _, element in ipairs(arr) do
-		if not checkerTbl[element] then
-			checkerTbl[element.filename] = element.col
-			table.insert(newArray, element)
-		end
-	end
-	return newArray
-end
-
-function M.key_to_tbl(marks_opts)
-	local keyset = {}
-	local n = 0
-	for k, _ in pairs(marks_opts) do
-		n = n + 1
-		keyset[n] = k
-	end
-	return keyset
-end
-
-function M.check_wins(wins)
-	wins = wins or {}
-	vim.validate({ wins = { wins, "table" } })
-
-	local win_tbl = { found = false, winbufnr = 0, winnr = 0, winid = 0 }
-
-	local ft_wins = { "incline" }
-	if #wins > 0 then
-		for _, x in pairs(wins) do
-			ft_wins[#ft_wins + 1] = x
-		end
-	end
-
-	for _, winnr in ipairs(vim.fn.range(1, vim.fn.winnr("$"))) do
-		local winbufnr = vim.fn.winbufnr(winnr)
-		if
-			winbufnr > 0
-			and (
-				vim.tbl_contains(ft_wins, vim.api.nvim_get_option_value("filetype", { buf = winbufnr }))
-				or vim.tbl_contains(ft_wins, vim.api.nvim_get_option_value("buftype", { buf = winbufnr }))
-			)
-		then
-			local winid = vim.fn.win_findbuf(winbufnr)[1] -- example winid: 1004, 1005
-			win_tbl = { found = true, winbufnr = winbufnr, winnr = winnr, winid = winid }
-		end
-	end
-	return win_tbl
 end
 
 return M

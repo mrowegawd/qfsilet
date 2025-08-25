@@ -109,8 +109,8 @@ function M.is_current_line_got_mark(bookmarks, line)
 	return false
 end
 
-function M.check_list_marks(marks, line)
-	return false
-end
+-- function M.check_list_marks(marks, line)
+-- 	return false
+-- end
 
 return M

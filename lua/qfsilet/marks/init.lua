@@ -317,7 +317,7 @@ local function __save_marks()
 	local fn_name = Constant.defaults.base_path .. "/mark.lua"
 
 	if #buffer.lists > 0 then
-		if not Utils.isDir(Constant.defaults.base_path) then
+		if not Utils.is_dir(Constant.defaults.base_path) then
 			Utils.create_dir(Constant.defaults.base_path)
 		end
 		Utils.create_file(fn_name)
@@ -325,7 +325,7 @@ local function __save_marks()
 		return
 	end
 
-	if Utils.isFile(fn_name) then
+	if Utils.is_file(fn_name) then
 		vim.system({ "rm", fn_name })
 	end
 end
@@ -334,8 +334,8 @@ local function __load_marks()
 	Path.setup_path()
 	local fn_name = Constant.defaults.base_path .. "/mark.lua"
 
-	if Utils.isDir(Constant.defaults.base_path) then
-		if Utils.isFile(fn_name) then
+	if Utils.is_dir(Constant.defaults.base_path) then
+		if Utils.is_file(fn_name) then
 			M.buffers.mark = dofile(fn_name)
 		end
 	end

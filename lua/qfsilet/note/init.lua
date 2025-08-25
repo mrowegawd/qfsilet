@@ -48,7 +48,7 @@ local __open_floating = function(isGlobal)
 
 	Ui.popup(note_path, isGlobal, Constant.defaults.global_note_dir)
 
-	if Utils.isFile(note_path) then
+	if Utils.is_file(note_path) then
 		cmd("0r! cat " .. note_path)
 		cmd("0") -- Go to top of document
 		-- cmd(":startinsert") -- Go to top of document
@@ -92,13 +92,6 @@ end
 
 local function saveqflist()
 	setup_base_path()
-
-	local lists_qf = UtilsNote.get_current_list()
-	if #lists_qf == 0 then
-		Utils.warn("QUICKFIX list is empty. Abort it..", "QF")
-		return
-	end
-
 	require("qfsilet.fzf").sel_qf(Config)
 end
 
@@ -109,7 +102,7 @@ end
 -- Get todos if any local todo exists
 -- function M.get_todo()
 -- 	Path.init_constant_path()
--- 	if Utils.isFile(Constant.defaults.note_path) then
+-- 	if Utils.is_file(Constant.defaults.note_path) then
 -- 		todo(false)
 -- 	end
 -- end

@@ -5,13 +5,13 @@ local Constant = require("qfsilet.constant")
 local M = {}
 
 function M.create_file(filename)
-	if not Utils.isFile(filename) then
+	if not Utils.is_file(filename) then
 		Utils.create_file(filename)
 	end
 end
 
 function M.create_dir(filedir)
-	if not Utils.isDir(filedir) then
+	if not Utils.is_dir(filedir) then
 		Utils.create_dir(filedir)
 	end
 end
