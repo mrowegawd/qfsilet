@@ -437,7 +437,7 @@ function M.mark_defaults(buffer)
 		end,
 
 		["alt-Q"] = {
-			prefix = "select-all+accept",
+			prefix = "toggle-all",
 			fn = function(selected, _)
 				if not selected then
 					return
@@ -543,7 +543,7 @@ function M.mark_defaults(buffer)
 		end,
 
 		["alt-L"] = {
-			prefix = "select-all+accept",
+			prefix = "toggle-all",
 			fn = function(selected, _)
 				if not selected then
 					return
