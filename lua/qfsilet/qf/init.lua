@@ -306,7 +306,7 @@ end
 
 local move_win_to = function(direction)
 	if vim.bo.filetype ~= "qf" then
-		return Utils.warn("This operation is only allowed inside the quickfix window.", "QF")
+		return
 	end
 
 	local cmd_open
