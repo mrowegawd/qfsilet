@@ -37,7 +37,7 @@ local opts_fzf = {
 		height = 0.50,
 		row = 0.50,
 		col = 0.50,
-		backdrop = 60,
+		backdrop = 100,
 		preview = { hidden = true },
 	},
 }

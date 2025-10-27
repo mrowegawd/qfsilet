@@ -232,7 +232,10 @@ function M.feedkey(mode, motion, special)
 end
 
 function M.info(msg, name)
-	vim.notify(msg, L.levels.INFO, { title = name or "Notify" })
+	if not name or (name == "") then
+		name = "QF"
+	end
+	vim.notify(msg, L.levels.INFO, { title = name })
 end
 
 function M.debug_info(msg)
@@ -240,7 +243,10 @@ function M.debug_info(msg)
 end
 
 function M.warn(msg, name)
-	vim.notify(msg, L.levels.WARN, { title = name or "Notify" })
+	if not name or (name == "") then
+		name = "QF"
+	end
+	vim.notify(msg, L.levels.WARN, { title = name })
 end
 
 function M.remove_duplicate_item_tbl(arr)
