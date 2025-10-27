@@ -1,18 +1,18 @@
 local M = {}
 
 local builtin_marks = {
-	["."] = true,
-	["^"] = true,
-	["`"] = true,
-	["'"] = true,
-	['"'] = true,
-	["<"] = true,
-	[">"] = true,
-	["["] = true,
-	["]"] = true,
+  ["."] = true,
+  ["^"] = true,
+  ["`"] = true,
+  ["'"] = true,
+  ['"'] = true,
+  ["<"] = true,
+  [">"] = true,
+  ["["] = true,
+  ["]"] = true,
 }
 for i = 0, 9 do
-	builtin_marks[tostring(i)] = true
+  builtin_marks[tostring(i)] = true
 end
 
 -- function M.remove_buf_signs(bufnr, group)
@@ -21,92 +21,92 @@ end
 -- end
 
 function M.search(marks, start_data, init_values, cmp, cyclic)
-	local min_next = init_values
-	local min_next_set = false
-	-- if we need to wrap around
-	local min = init_values
+  local min_next = init_values
+  local min_next_set = false
+  -- if we need to wrap around
+  local min = init_values
 
-	for mark, data in pairs(marks) do
-		if cmp(data, start_data, mark) and not cmp(data, min_next, mark) then
-			min_next = data
-			min_next_set = true
-		end
-		if cyclic and not cmp(data, min, mark) then
-			min = data
-		end
-	end
-	if not cyclic then
-		return min_next_set and min_next or nil
-	end
-	return min_next_set and min_next or min
+  for mark, data in pairs(marks) do
+    if cmp(data, start_data, mark) and not cmp(data, min_next, mark) then
+      min_next = data
+      min_next_set = true
+    end
+    if cyclic and not cmp(data, min, mark) then
+      min = data
+    end
+  end
+  if not cyclic then
+    return min_next_set and min_next or nil
+  end
+  return min_next_set and min_next or min
 end
 
 function M.is_valid_mark(char)
-	return M.is_letter(char) or builtin_marks[char]
+  return M.is_letter(char) or builtin_marks[char]
 end
 
 function M.is_special(char)
-	return builtin_marks[char] ~= nil
+  return builtin_marks[char] ~= nil
 end
 
 function M.is_letter(char)
-	return M.is_upper(char) or M.is_lower(char)
+  return M.is_upper(char) or M.is_lower(char)
 end
 
 function M.is_upper(char)
-	return (65 <= char:byte() and char:byte() <= 90)
+  return (65 <= char:byte() and char:byte() <= 90)
 end
 
 function M.is_lower(char)
-	return (97 <= char:byte() and char:byte() <= 122)
+  return (97 <= char:byte() and char:byte() <= 122)
 end
 
 function M.option_nil(option, default)
-	if option == nil then
-		return default
-	else
-		return option
-	end
+  if option == nil then
+    return default
+  else
+    return option
+  end
 end
 
 function M.choose_list(list_type)
-	local list_fn
-	if list_type == "loclist" then
-		list_fn = function(items, flags)
-			vim.fn.setloclist(0, items, flags)
-		end
-	elseif list_type == "quickfixlist" then
-		list_fn = vim.fn.setqflist
-	end
-	return list_fn
+  local list_fn
+  if list_type == "loclist" then
+    list_fn = function(items, flags)
+      vim.fn.setloclist(0, items, flags)
+    end
+  elseif list_type == "quickfixlist" then
+    list_fn = vim.fn.setqflist
+  end
+  return list_fn
 end
 
 function M.tablelength(T)
-	local count = 0
-	for _ in pairs(T) do
-		count = count + 1
-	end
-	return count
+  local count = 0
+  for _ in pairs(T) do
+    count = count + 1
+  end
+  return count
 end
 
 function M.is_current_line_got_mark(bookmarks, line)
-	vim.validate({
-		bookmarks = { bookmarks, "table" },
-		line = { line, "number" },
-	})
+  vim.validate {
+    bookmarks = { bookmarks, "table" },
+    line = { line, "number" },
+  }
 
-	if bookmarks.mark == nil then
-		return false
-	end
+  if bookmarks.mark == nil then
+    return false
+  end
 
-	local filename = vim.api.nvim_buf_get_name(0)
-	for _, x in pairs(bookmarks.mark.lists) do
-		if x.line == line and x.filename == filename then
-			return true
-		end
-	end
+  local filename = vim.api.nvim_buf_get_name(0)
+  for _, x in pairs(bookmarks.mark.lists) do
+    if x.line == line and x.filename == filename then
+      return true
+    end
+  end
 
-	return false
+  return false
 end
 
 -- function M.check_list_marks(marks, line)

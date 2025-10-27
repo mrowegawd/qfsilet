@@ -1,9 +1,10 @@
-local UtilsMark = require("qfsilet.marks.utils")
-local Utils = require("qfsilet.utils")
-local Config = require("qfsilet.config")
-local Visual = require("qfsilet.marks.visual")
-local Path = require("qfsilet.path")
-local Constant = require("qfsilet.constant")
+local UtilsMark = require "qfsilet.marks.utils"
+
+local Utils = require "qfsilet.utils"
+local Config = require "qfsilet.config"
+local Visual = require "qfsilet.marks.visual"
+local Path = require "qfsilet.path"
+local Constant = require "qfsilet.constant"
 local M = {}
 
 M.buffers = {}
@@ -12,416 +13,416 @@ local display_signs = true
 local current_bookmark_idx = 0
 
 local function exclude_buf(bufnr)
-	local config = Config.current_configs
+  local config = Config.current_configs
 
-	local buftype = vim.api.nvim_get_option_value("buftype", { buf = bufnr })
-	if buftype == "prompt" or buftype == "nofile" then
-		return false
-	end
+  local buftype = vim.api.nvim_get_option_value("buftype", { buf = bufnr })
+  if buftype == "prompt" or buftype == "nofile" then
+    return false
+  end
 
-	if buftype ~= "" and buftype ~= "quickfix" then
-		return false
-	end
+  if buftype ~= "" and buftype ~= "quickfix" then
+    return false
+  end
 
-	local filetype = vim.api.nvim_get_option_value("filetype", { buf = bufnr })
-	if vim.tbl_contains(config.marks.excluded.filetypes, filetype) then
-		return false
-	end
+  local filetype = vim.api.nvim_get_option_value("filetype", { buf = bufnr })
+  if vim.tbl_contains(config.marks.excluded.filetypes, filetype) then
+    return false
+  end
 
-	return true
+  return true
 end
 
 local function register_mark(id, bufnr, line, col, text, is_force)
-	vim.validate({
-		id = { id, "number" },
-		bufnr = { bufnr, "number" },
-		text = { text, "string" },
-	})
+  vim.validate {
+    id = { id, "number" },
+    bufnr = { bufnr, "number" },
+    text = { text, "string" },
+  }
 
-	if not exclude_buf(bufnr) then
-		return
-	end
+  if not exclude_buf(bufnr) then
+    return
+  end
 
-	is_force = is_force or false
-	col = col or 1
-	-- bufnr = bufnr or vim.api.nvim_get_current_buf()
+  is_force = is_force or false
+  col = col or 1
+  -- bufnr = bufnr or vim.api.nvim_get_current_buf()
 
-	local filename = vim.api.nvim_buf_get_name(0)
-	local buffer = M.buffers.mark
+  local filename = vim.api.nvim_buf_get_name(0)
+  local buffer = M.buffers.mark
 
-	if not buffer then
-		return
-	end
+  if not buffer then
+    return
+  end
 
-	local line_count = vim.api.nvim_buf_line_count(bufnr)
-	if not is_force and (line_count + 1) > line then
-		table.insert(buffer.lists, {
-			line = line,
-			col = col,
-			filename = filename,
-			id = id,
-			text = Utils.strip_whitespace(text),
-		})
-	end
+  local line_count = vim.api.nvim_buf_line_count(bufnr)
+  if not is_force and (line_count + 1) > line then
+    table.insert(buffer.lists, {
+      line = line,
+      col = col,
+      filename = filename,
+      id = id,
+      text = Utils.strip_whitespace(text),
+    })
+  end
 
-	if display_signs then
-		M.add_sign(id, bufnr, line)
-	end
+  if display_signs then
+    M.add_sign(id, bufnr, line)
+  end
 end
 
 function M.get_current_status_buf()
-	local buffer = M.buffers.mark
-	if buffer then
-		return #buffer.lists
-	end
-	return 0
+  local buffer = M.buffers.mark
+  if buffer then
+    return #buffer.lists
+  end
+  return 0
 end
 
 function M.delete_mark(bufnr, line, clear)
-	clear = clear or UtilsMark.option_nil(clear, true)
-	bufnr = bufnr or vim.api.nvim_get_current_buf()
-	local buffer = M.buffers.mark
+  clear = clear or UtilsMark.option_nil(clear, true)
+  bufnr = bufnr or vim.api.nvim_get_current_buf()
+  local buffer = M.buffers.mark
 
-	local filename = vim.api.nvim_buf_get_name(0)
-	for i, x in pairs(buffer.lists) do
-		if x.line == line and x.filename == filename then
-			buffer.lists[i] = nil
-			Visual.remove_sign(bufnr, x.id)
-		end
-	end
+  local filename = vim.api.nvim_buf_get_name(0)
+  for i, x in pairs(buffer.lists) do
+    if x.line == line and x.filename == filename then
+      buffer.lists[i] = nil
+      Visual.remove_sign(bufnr, x.id)
+    end
+  end
 end
 
 function M.delete_buf_marks(clear)
-	local config = Config.current_configs
-	local bufnr = vim.api.nvim_get_current_buf()
-	clear = UtilsMark.option_nil(clear, true)
-	local buffer = M.buffers.mark
+  local config = Config.current_configs
+  local bufnr = vim.api.nvim_get_current_buf()
+  clear = UtilsMark.option_nil(clear, true)
+  local buffer = M.buffers.mark
 
-	for _, x in pairs(buffer.lists) do
-		local bname = vim.api.nvim_buf_get_name(bufnr)
-		if string.match(x.filename, bname) then
-			M.delete_mark(bufnr, x.line, clear)
-		end
-	end
+  for _, x in pairs(buffer.lists) do
+    local bname = vim.api.nvim_buf_get_name(bufnr)
+    if string.match(x.filename, bname) then
+      M.delete_mark(bufnr, x.line, clear)
+    end
+  end
 
-	-- Visual.remove_buf_signs(bufnr)
-	if clear then
-		vim.cmd("delmarks!")
-	end
+  -- Visual.remove_buf_signs(bufnr)
+  if clear then
+    vim.cmd "delmarks!"
+  end
 
-	Utils.info(config.icons.done .. " Marks for the current buffer have been removed!", "Marks")
+  Utils.info(config.icons.done .. " Marks for the current buffer have been removed!", "Marks")
 end
 
 function M.delete_line_marks_builtin()
-	-- Delete current marks builtin
-	local marks = {}
-	for i = string.byte("a"), string.byte("z") do
-		local mark = string.char(i)
-		local mark_line = vim.fn.line("'" .. mark)
-		if mark_line == vim.fn.line(".") then
-			table.insert(marks, mark)
-		end
-	end
+  -- Delete current marks builtin
+  local marks = {}
+  for i = string.byte "a", string.byte "z" do
+    local mark = string.char(i)
+    local mark_line = vim.fn.line("'" .. mark)
+    if mark_line == vim.fn.line "." then
+      table.insert(marks, mark)
+    end
+  end
 
-	if #marks > 0 then
-		vim.cmd("delmarks " .. table.concat(marks, ""))
-	end
+  if #marks > 0 then
+    vim.cmd("delmarks " .. table.concat(marks, ""))
+  end
 end
 
 function M.delete_line_marks()
-	local bufnr = vim.api.nvim_get_current_buf()
-	local pos = vim.api.nvim_win_get_cursor(0)
-	M.delete_mark(bufnr, pos[1])
-	M.delete_line_marks_builtin()
+  local bufnr = vim.api.nvim_get_current_buf()
+  local pos = vim.api.nvim_win_get_cursor(0)
+  M.delete_mark(bufnr, pos[1])
+  M.delete_line_marks_builtin()
 end
 
 function M.delete()
-	M.delete_line_marks()
+  M.delete_line_marks()
 end
 
 local function jump_to(mark_lists, opts)
-	if not opts then
-		Utils.info("No marks available", "Marks")
-		return
-	end
+  if not opts then
+    Utils.info("No marks available", "Marks")
+    return
+  end
 
-	for _, x in pairs(mark_lists) do
-		if x.filename == opts.filename and x.line == opts.line then
-			local found_ls = Utils.find_win_ls({ filename = x.filename })
-			if found_ls.found then
-				vim.cmd("buffer " .. x.filename)
-			else
-				vim.cmd("e " .. x.filename)
-			end
-			vim.api.nvim_win_set_cursor(0, { x.line, x.col })
-			vim.cmd("norm! zvzz")
-		end
-	end
+  for _, x in pairs(mark_lists) do
+    if x.filename == opts.filename and x.line == opts.line then
+      local found_ls = Utils.find_win_ls { filename = x.filename }
+      if found_ls.found then
+        vim.cmd("buffer " .. x.filename)
+      else
+        vim.cmd("e " .. x.filename)
+      end
+      vim.api.nvim_win_set_cursor(0, { x.line, x.col })
+      vim.cmd "norm! zvzz"
+    end
+  end
 end
 
 function M.next_mark()
-	local buffer = M.buffers.mark
+  local buffer = M.buffers.mark
 
-	if not buffer then
-		return
-	end
+  if not buffer then
+    return
+  end
 
-	local next_idx = current_bookmark_idx + 1
+  local next_idx = current_bookmark_idx + 1
 
-	if next_idx > #buffer.lists then
-		next_idx = 1
-	end
+  if next_idx > #buffer.lists then
+    next_idx = 1
+  end
 
-	local next_elem = function()
-		return buffer.lists[next_idx]
-	end
+  local next_elem = function()
+    return buffer.lists[next_idx]
+  end
 
-	current_bookmark_idx = next_idx
+  current_bookmark_idx = next_idx
 
-	local mark_lists = buffer.lists
-	jump_to(mark_lists, next_elem())
+  local mark_lists = buffer.lists
+  jump_to(mark_lists, next_elem())
 end
 
 function M.prev_mark()
-	local buffer = M.buffers.mark
-	if not buffer then
-		return
-	end
+  local buffer = M.buffers.mark
+  if not buffer then
+    return
+  end
 
-	local prev_idx = current_bookmark_idx - 1
+  local prev_idx = current_bookmark_idx - 1
 
-	if prev_idx == 0 or prev_idx < 0 then
-		prev_idx = #buffer.lists
-	end
+  if prev_idx == 0 or prev_idx < 0 then
+    prev_idx = #buffer.lists
+  end
 
-	local prev_elem = function()
-		return buffer.lists[prev_idx]
-	end
+  local prev_elem = function()
+    return buffer.lists[prev_idx]
+  end
 
-	current_bookmark_idx = prev_idx
+  current_bookmark_idx = prev_idx
 
-	local mark_lists = buffer.lists
-	jump_to(mark_lists, prev_elem())
+  local mark_lists = buffer.lists
+  jump_to(mark_lists, prev_elem())
 end
 
 function M.fzf_marks()
-	local buffer = M.buffers.mark
-	if not buffer then
-		return
-	end
+  local buffer = M.buffers.mark
+  if not buffer then
+    return
+  end
 
-	require("qfsilet.fzf").grep_marks(buffer)
+  require("qfsilet.fzf").grep_marks(buffer)
 end
 
 function M.place_next_mark(line, col, text)
-	local bufnr = vim.api.nvim_get_current_buf()
-	local root = Utils.root_path_basename()
+  local bufnr = vim.api.nvim_get_current_buf()
+  local root = Utils.root_path_basename()
 
-	if M.buffers.root == nil then
-		M.buffers.root = root
-		M.buffers.mark = {
-			lists = {},
-		}
-	end
+  if M.buffers.root == nil then
+    M.buffers.root = root
+    M.buffers.mark = {
+      lists = {},
+    }
+  end
 
-	local id = tonumber(line .. bufnr)
-	register_mark(id, bufnr, line, col, text)
+  local id = tonumber(line .. bufnr)
+  register_mark(id, bufnr, line, col, text)
 end
 
 function M.toggle_mark_cursor()
-	local pos = vim.api.nvim_win_get_cursor(0)
-	local text = vim.api.nvim_buf_get_lines(0, pos[1] - 1, pos[1], false)[1]
+  local pos = vim.api.nvim_win_get_cursor(0)
+  local text = vim.api.nvim_buf_get_lines(0, pos[1] - 1, pos[1], false)[1]
 
-	local config = Config.current_configs
+  local config = Config.current_configs
 
-	if UtilsMark.is_current_line_got_mark(M.buffers, pos[1]) then
-		M.delete_line_marks()
-		Utils.info(config.icons.done .. " Mark Removed", "Marks")
-	else
-		M.place_next_mark(pos[1], pos[2], text)
-		Utils.info(config.icons.mark .. " Mark Added", "Marks")
-	end
+  if UtilsMark.is_current_line_got_mark(M.buffers, pos[1]) then
+    M.delete_line_marks()
+    Utils.info(config.icons.done .. " Mark Removed", "Marks")
+  else
+    M.place_next_mark(pos[1], pos[2], text)
+    Utils.info(config.icons.mark .. " Mark Added", "Marks")
+  end
 end
 
 function M.refresh_deforce(force)
-	force = force or false
-	local root = Utils.root_path_basename()
-	local buffer = M.buffers
+  force = force or false
+  local root = Utils.root_path_basename()
+  local buffer = M.buffers
 
-	if buffer.root == nil then
-		M.buffers.root = root
-		M.buffers.mark = {
-			lists = {},
-		}
-	end
+  if buffer.root == nil then
+    M.buffers.root = root
+    M.buffers.mark = {
+      lists = {},
+    }
+  end
 
-	if #buffer.mark.lists > 0 then
-		local bufnr = vim.api.nvim_get_current_buf()
-		for _, x in ipairs(buffer.mark.lists) do
-			local filename = vim.api.nvim_buf_get_name(bufnr)
-			if filename == x.filename then
-				register_mark(tonumber(x.id), bufnr, x.line, x.col, x.text, force)
-			end
-		end
-	end
+  if #buffer.mark.lists > 0 then
+    local bufnr = vim.api.nvim_get_current_buf()
+    for _, x in ipairs(buffer.mark.lists) do
+      local filename = vim.api.nvim_buf_get_name(bufnr)
+      if filename == x.filename then
+        register_mark(tonumber(x.id), bufnr, x.line, x.col, x.text, force)
+      end
+    end
+  end
 end
 
 function M.add_sign(id, bufnr, line)
-	local buffer = M.buffers.mark
-	if not buffer then
-		return
-	end
+  local buffer = M.buffers.mark
+  if not buffer then
+    return
+  end
 
-	if not exclude_buf(bufnr) then
-		return
-	end
+  if not exclude_buf(bufnr) then
+    return
+  end
 
-	local text = "abc"
-	local config = Config.current_configs
-	Visual.insert_signs(id, bufnr, line, text, config)
+  local text = "abc"
+  local config = Config.current_configs
+  Visual.insert_signs(id, bufnr, line, text, config)
 end
 
 function M.refresh(force_reregister, buf)
-	local is_float = vim.api.nvim_win_get_config(0).relative ~= ""
-	local is_buftype = vim.tbl_contains({ "help", "prompt", "nofile" }, vim.bo[buf].buftype)
-	local is_filetype = vim.tbl_contains({
-		"DiffviewFileHistory",
-		"DiffviewFiles",
-		"Outline",
-		"Trouble",
-		"dashboard",
-		"fugitive",
-		"fzf",
-		"gitcommit",
-		"packer",
-		"snacks_dashboard",
-		"toggleterm",
-		"orgagenda",
-	}, vim.bo[buf].filetype)
+  local is_float = vim.api.nvim_win_get_config(0).relative ~= ""
+  local is_buftype = vim.tbl_contains({ "help", "prompt", "nofile" }, vim.bo[buf].buftype)
+  local is_filetype = vim.tbl_contains({
+    "DiffviewFileHistory",
+    "DiffviewFiles",
+    "Outline",
+    "Trouble",
+    "dashboard",
+    "fugitive",
+    "fzf",
+    "gitcommit",
+    "packer",
+    "snacks_dashboard",
+    "toggleterm",
+    "orgagenda",
+  }, vim.bo[buf].filetype)
 
-	if is_float or is_buftype or is_filetype then
-		return
-	end
+  if is_float or is_buftype or is_filetype then
+    return
+  end
 
-	force_reregister = force_reregister or false
-	M.refresh_deforce(force_reregister)
+  force_reregister = force_reregister or false
+  M.refresh_deforce(force_reregister)
 end
 
 local function __save_marks()
-	local buffer = M.buffers.mark
-	if not buffer then
-		return
-	end
+  local buffer = M.buffers.mark
+  if not buffer then
+    return
+  end
 
-	Path.setup_path()
-	local fn_name = Constant.defaults.base_path .. "/mark.lua"
+  Path.setup_path()
+  local fn_name = Constant.defaults.base_path .. "/mark.lua"
 
-	if #buffer.lists > 0 then
-		if not Utils.is_dir(Constant.defaults.base_path) then
-			Utils.create_dir(Constant.defaults.base_path)
-		end
-		Utils.create_file(fn_name)
-		Utils.save_table_to_file(buffer, fn_name)
-		return
-	end
+  if #buffer.lists > 0 then
+    if not Utils.is_dir(Constant.defaults.base_path) then
+      Utils.create_dir(Constant.defaults.base_path)
+    end
+    Utils.create_file(fn_name)
+    Utils.save_table_to_file(buffer, fn_name)
+    return
+  end
 
-	if Utils.is_file(fn_name) then
-		vim.system({ "rm", fn_name })
-	end
+  if Utils.is_file(fn_name) then
+    vim.system { "rm", fn_name }
+  end
 end
 
 local function __load_marks()
-	Path.setup_path()
-	local fn_name = Constant.defaults.base_path .. "/mark.lua"
+  Path.setup_path()
+  local fn_name = Constant.defaults.base_path .. "/mark.lua"
 
-	if Utils.is_dir(Constant.defaults.base_path) then
-		if Utils.is_file(fn_name) then
-			M.buffers.mark = dofile(fn_name)
-		end
-	end
+  if Utils.is_dir(Constant.defaults.base_path) then
+    if Utils.is_file(fn_name) then
+      M.buffers.mark = dofile(fn_name)
+    end
+  end
 end
 
 local is_unset_augroup = false
 local function unset_augroup(name)
-	vim.validate({ name = { name, "string" } })
-	pcall(vim.api.nvim_del_augroup_by_name, name)
+  vim.validate { name = { name, "string" } }
+  pcall(vim.api.nvim_del_augroup_by_name, name)
 end
 
 local function setup_commands()
-	local function augroup(name)
-		return vim.api.nvim_create_augroup("QFSilet" .. name, { clear = true })
-	end
+  local function augroup(name)
+    return vim.api.nvim_create_augroup("QFSilet" .. name, { clear = true })
+  end
 
-	vim.api.nvim_create_autocmd({ "BufWinEnter" }, {
-		group = augroup("RefreshMark"),
-		callback = function(ctx)
-			if is_unset_augroup then
-				unset_augroup("QFSiletLoadMark")
-				is_unset_augroup = false
-			end
-			M.refresh(true, ctx.buf)
-		end,
-	})
+  vim.api.nvim_create_autocmd({ "BufWinEnter" }, {
+    group = augroup "RefreshMark",
+    callback = function(ctx)
+      if is_unset_augroup then
+        unset_augroup "QFSiletLoadMark"
+        is_unset_augroup = false
+      end
+      M.refresh(true, ctx.buf)
+    end,
+  })
 
-	vim.api.nvim_create_autocmd({ "ExitPre", "BufWritePost" }, {
-		group = augroup("SaveMark"),
-		callback = function()
-			__save_marks()
-		end,
-	})
+  vim.api.nvim_create_autocmd({ "ExitPre", "BufWritePost" }, {
+    group = augroup "SaveMark",
+    callback = function()
+      __save_marks()
+    end,
+  })
 
-	vim.api.nvim_create_autocmd({ "BufWinEnter" }, {
-		group = augroup("LoadMark"),
-		once = true,
-		callback = function()
-			__load_marks()
-			is_unset_augroup = true
-		end,
-	})
+  vim.api.nvim_create_autocmd({ "BufWinEnter" }, {
+    group = augroup "LoadMark",
+    once = true,
+    callback = function()
+      __load_marks()
+      is_unset_augroup = true
+    end,
+  })
 end
 
 function M.show_config()
-	Utils.info(vim.inspect(M.buffers))
-	-- vim.print("current bookmark idx: " .. current_bookmark_idx)
-	-- print("======================================")
-	-- print("======================================")
-	-- print("======================================")
-	-- print("======================================")
+  Utils.info(vim.inspect(M.buffers))
+  -- vim.print("current bookmark idx: " .. current_bookmark_idx)
+  -- print("======================================")
+  -- print("======================================")
+  -- print("======================================")
+  -- print("======================================")
 end
 
 function M.setup(timer_setup)
-	setup_commands()
+  setup_commands()
 
-	-- how often (in ms) to redraw signs/recompute mark positions.
-	-- higher values will have better performance but may cause visual lag,
-	-- while lower values may cause performance penalties. default 150.
-	local refresh_interval = UtilsMark.option_nil(timer_setup, 150)
+  -- how often (in ms) to redraw signs/recompute mark positions.
+  -- higher values will have better performance but may cause visual lag,
+  -- while lower values may cause performance penalties. default 150.
+  local refresh_interval = UtilsMark.option_nil(timer_setup, 150)
 
-	local timer = vim.loop.new_timer()
-	if timer then
-		timer:start(
-			0,
-			refresh_interval,
-			vim.schedule_wrap(function()
-				M.refresh(true, vim.api.nvim_get_current_buf())
-			end)
-		)
-	end
+  local timer = vim.loop.new_timer()
+  if timer then
+    timer:start(
+      0,
+      refresh_interval,
+      vim.schedule_wrap(function()
+        M.refresh(true, vim.api.nvim_get_current_buf())
+      end)
+    )
+  end
 end
 
 function M.clear_all_marks()
-	local buffer = M.buffers.mark
+  local buffer = M.buffers.mark
 
-	for _, x in pairs(buffer.lists) do
-		for _, b in pairs(vim.api.nvim_list_bufs()) do
-			local bname = vim.api.nvim_buf_get_name(b)
-			if string.match(x.filename, bname) then
-				Visual.remove_sign(b, x.id)
-			end
-		end
-	end
+  for _, x in pairs(buffer.lists) do
+    for _, b in pairs(vim.api.nvim_list_bufs()) do
+      local bname = vim.api.nvim_buf_get_name(b)
+      if string.match(x.filename, bname) then
+        Visual.remove_sign(b, x.id)
+      end
+    end
+  end
 
-	M.buffers = {}
+  M.buffers = {}
 end
 
 return M

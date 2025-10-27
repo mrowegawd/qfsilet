@@ -1,16 +1,16 @@
-local config = require("qfsilet.config")
+local config = require "qfsilet.config"
 
 local function setup(opts)
-	config.current_configs = config.update_settings(opts)
+  config.current_configs = config.update_settings(opts)
 
-	if (config.current_configs.loaded == nil) or not config.current_configs.loaded then
-		config.current_configs.loaded = true
+  if (config.current_configs.loaded == nil) or not config.current_configs.loaded then
+    config.current_configs.loaded = true
 
-		config.init()
-		require("qfsilet.mapping").setup_keymaps_and_autocmds()
-	end
+    config.init()
+    require("qfsilet.mapping").setup_keymaps_and_autocmds()
+  end
 end
 
 return {
-	setup = setup,
+  setup = setup,
 }
